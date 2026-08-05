@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/aiplugin_nav/db" VERSION="20251218" COMMENT="XMLDB file for block_aiplugin_nav">
+  <TABLES>
+    <TABLE NAME="block_aiplugin_nav_purge" COMMENT="Cache purge history and schedule settings">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="purge_type" TYPE="char" LENGTH="20" NOTNULL="true" COMMENT="manual, scheduled"/>
+        <FIELD NAME="purged_at" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Unix timestamp of purge"/>
+        <FIELD NAME="purged_by" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="User ID who triggered manual purge"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="purge_type_idx" UNIQUE="false" FIELDS="purge_type"/>
+        <INDEX NAME="purged_at_idx" UNIQUE="false" FIELDS="purged_at"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
