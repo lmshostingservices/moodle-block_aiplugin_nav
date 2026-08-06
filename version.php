@@ -148,8 +148,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_aiplugin_nav';
-$plugin->version   = 2026080500201;   // YYYYMMDDNNN — 5 Aug 2026, sequence 3.
-$plugin->release   = '2.4.42';        // ADD-RPLKIT: local_rplkit added to master + complete registries and docs URL map. ADD-LMSHOMEPAGE: local_lmshomepage added to complete plugin registry.
+$plugin->version   = 2026080600202;   // YYYYMMDDNNN — 6 Aug 2026, sequence 2.
+$plugin->release   = '2.4.43';        // ADD-LMSHOMEPAGE-DOCS: local_lmshomepage added to get_plugin_docs_url() so the Docs button on the LMS Home Page card in the Plugin Manager links correctly.
 $plugin->release_prev = '2.4.41';     // Previous release.
 $plugin->requires  = 2022041900;
 $plugin->supported  = [400, 500];  // Moodle 4.0 to 5.x

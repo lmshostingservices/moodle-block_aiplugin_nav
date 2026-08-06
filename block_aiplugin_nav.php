@@ -3208,6 +3208,7 @@ class block_aiplugin_nav extends block_base {
             'auth_studentemail' => 'https://lms-labs.com/docs/student-email-imap-auth',
             'local_beacon' => 'https://lms-labs.com/docs/beacon',
             'local_rplkit' => 'https://lms-labs.com/docs/rpl-kit',
+            'local_lmshomepage' => 'https://lms-labs.com/docs/lms-home-page',
         );
         
         return isset($docs_urls[$component]) ? $docs_urls[$component] : '';
