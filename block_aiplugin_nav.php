@@ -4069,11 +4069,63 @@ class block_aiplugin_nav extends block_base {
                 var latestVersions = null;
                 var pluginsNeedingUpdate = [];
                 
-                function compareVersions(installedNumeric, latestNumeric) {
+                /**
+                 * Compare installed vs latest plugin versions.
+                 *
+                 * PRIMARY path — semantic release strings (e.g. "v2.4.47" vs "v2.4.38").
+                 * This is immune to numeric digit-count differences: a 10-digit numeric
+                 * (e.g. 2026080746 from v2.4.46) is numerically SMALLER than a 13-digit
+                 * install (2026080600204 from v2.4.45), so integer comparison alone would
+                 * silently report "up to date" forever. Semantic comparison is always correct.
+                 *
+                 * FALLBACK — zero-pad both numerics to equal length before comparing as
+                 * strings, so "2026080746" (10d) vs "2026080600204" (13d) becomes
+                 * "0002026080746" vs "2026080600204" — the shorter one can never win.
+                 *
+                 * Returns  1 = server has a newer release (update available)
+                 *          0 = same release
+                 *         -1 = installed is newer (dev/rollback scenario)
+                 */
+                function compareVersions( installedNumeric, latestNumeric, installedRelease, latestRelease ) {
+                    // ── PRIMARY: semantic release string comparison ──────────────────────
+                    function parseSemVer( s ) {
+                        var parts = String(s || '').replace(/^v/i, '').split(/[\.\-]/);
+                        var out = [];
+                        for (var pi = 0; pi < parts.length; pi++) {
+                            var n = parseInt(parts[pi], 10);
+                            out.push(isNaN(n) ? parts[pi] : n);
+                        }
+                        return out;
+                    }
+                    if (installedRelease && latestRelease &&
+                        installedRelease !== '?' && latestRelease !== '?') {
+                        var a = parseSemVer(installedRelease);
+                        var b = parseSemVer(latestRelease);
+                        var len = Math.max(a.length, b.length);
+                        for (var i = 0; i < len; i++) {
+                            var av = (a[i] !== undefined) ? a[i] : 0;
+                            var bv = (b[i] !== undefined) ? b[i] : 0;
+                            if (typeof av === 'number' && typeof bv === 'number') {
+                                if (bv > av) return 1;
+                                if (av > bv) return -1;
+                            } else {
+                                var as2 = String(av), bs2 = String(bv);
+                                if (bs2 > as2) return 1;
+                                if (as2 > bs2) return -1;
+                            }
+                        }
+                        return 0; // semantically equal
+                    }
+                    // ── FALLBACK: zero-padded numeric comparison ─────────────────────────
                     if (!installedNumeric || !latestNumeric) return 0;
-                    var a = parseInt(installedNumeric, 10) || 0;
-                    var b = parseInt(latestNumeric, 10) || 0;
-                    if (b > a) return 1;
+                    var sA = String(installedNumeric).trim();
+                    var sB = String(latestNumeric).trim();
+                    if (!sA || !sB || sA === '0' || sB === '0') return 0;
+                    var maxLen = Math.max(sA.length, sB.length);
+                    sA = sA.padStart(maxLen, '0');
+                    sB = sB.padStart(maxLen, '0');
+                    if (sB > sA) return 1;
+                    if (sA > sB) return -1;
                     return 0;
                 }
                 
@@ -4087,7 +4139,7 @@ class block_aiplugin_nav extends block_base {
                     // Try each endpoint in order — move to next on any failure
                     function doVersionCheck(attempt) {
                         if (attempt > ainav_endpoints.length) {
-                            Notification.alert('Error', 'Could not reach the AI Grader update server. Please try again later.');
+                            Notification.alert('Error', 'Could not reach the LMS Labs update server. Please try again later.');
                             btn.html(originalHtml);
                             btn.prop('disabled', false);
                             return;
@@ -4161,7 +4213,12 @@ class block_aiplugin_nav extends block_base {
                         
                         statusLabel.removeClass('status-testing status-ready status-update status-purchase').attr('title', '');
                         
-                        var comparison = compareVersions(installedNumeric, latest.numericVersion || '0');
+                        var comparison = compareVersions(
+                            installedNumeric,
+                            latest.numericVersion || '0',
+                            plugin.installedVersion || '',
+                            latest.version || ''
+                        );
                         
                         if (comparison === 1) {
                             // Update available — only proceed if the server gave us a download URL.
