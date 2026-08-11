@@ -1,6 +1,6 @@
 /**
  * AI Plugin Navigation Block Styles
- * Matches lms-labs.com design with solid blue (#3b82f6)
+ * Uses --mdl-primary CSS variable (injected by PHP from Moodle theme); falls back to #3b82f6
  * Mobile-first design with min 16px font sizes
  * 
  * @package    block_aiplugin_nav
@@ -23,7 +23,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 10px 16px;
-    background-color: var(--primary, #3b82f6);
+    background-color: var(--mdl-primary, #3b82f6);
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     flex-wrap: nowrap;
@@ -112,7 +112,7 @@
     background-color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
     font-size: 16px;
     font-weight: 500;
     text-decoration: none;
@@ -121,20 +121,20 @@
 }
 
 .block_aiplugin_nav .ainav-support-btn:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .block_aiplugin_nav .ainav-support-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--primary, #3b82f6), 0 0 0 4px color-mix(in srgb, var(--primary, #3b82f6) 30%, transparent);
+    box-shadow: 0 0 0 2px var(--mdl-primary, #3b82f6), 0 0 0 4px color-mix(in srgb, var(--mdl-primary, #3b82f6) 30%, transparent);
 }
 
 .block_aiplugin_nav .ainav-support-btn .ainav-icon {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     flex-shrink: 0;
 }
 
@@ -238,14 +238,14 @@
 }
 
 .block_aiplugin_nav .ainav-dropdown-item:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
-    color: var(--primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-dropdown-item:focus {
     outline: none;
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
-    color: var(--primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-dropdown-item .ainav-icon {
@@ -257,7 +257,7 @@
 }
 
 .block_aiplugin_nav .ainav-dropdown-item:hover .ainav-icon {
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 /* External links section */
@@ -277,7 +277,7 @@
     background-color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
     font-size: 16px;
     font-weight: 500;
     text-decoration: none;
@@ -286,20 +286,20 @@
 }
 
 .block_aiplugin_nav .ainav-link:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .block_aiplugin_nav .ainav-link:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--primary, #3b82f6), 0 0 0 4px color-mix(in srgb, var(--primary, #3b82f6) 30%, transparent);
+    box-shadow: 0 0 0 2px var(--mdl-primary, #3b82f6), 0 0 0 4px color-mix(in srgb, var(--mdl-primary, #3b82f6) 30%, transparent);
 }
 
 .block_aiplugin_nav .ainav-link .ainav-icon {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     flex-shrink: 0;
 }
 
@@ -407,7 +407,7 @@
 .block_aiplugin_nav .ainav-tools-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -430,8 +430,8 @@
 }
 
 .block_aiplugin_nav .ainav-tool-card:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 5%, white);
-    border-color: color-mix(in srgb, var(--primary, #3b82f6) 30%, #e5e7eb);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 5%, white);
+    border-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 30%, #e5e7eb);
 }
 
 .block_aiplugin_nav .ainav-tool-icon {
@@ -441,14 +441,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
     border-radius: 6px;
 }
 
 .block_aiplugin_nav .ainav-tool-icon svg {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -489,7 +489,7 @@
 .block_aiplugin_nav .ainav-site-links-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -516,9 +516,9 @@
 }
 
 .block_aiplugin_nav .ainav-site-link-card:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 5%, white);
-    border-color: color-mix(in srgb, var(--primary, #3b82f6) 30%, #e5e7eb);
-    color: var(--primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 5%, white);
+    border-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 30%, #e5e7eb);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-site-link-icon {
@@ -542,7 +542,7 @@
 }
 
 .block_aiplugin_nav .ainav-site-link-card:hover .ainav-site-link-icon svg {
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-site-link-name {
@@ -553,7 +553,7 @@
 }
 
 .block_aiplugin_nav .ainav-site-link-card:hover .ainav-site-link-name {
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 /* Responsive adjustments */
@@ -722,9 +722,9 @@
 }
 
 .block_aiplugin_nav .ainav-create-link-btn:hover {
-    border-color: var(--primary, #3b82f6);
-    color: var(--primary, #3b82f6);
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 5%, transparent);
+    border-color: var(--mdl-primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 5%, transparent);
 }
 
 .block_aiplugin_nav .ainav-create-link-icon {
@@ -740,7 +740,7 @@
 }
 
 .block_aiplugin_nav .ainav-create-link-btn:hover .ainav-create-link-icon {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
 }
 
 .block_aiplugin_nav .ainav-create-link-icon svg {
@@ -753,7 +753,7 @@
 }
 
 .block_aiplugin_nav .ainav-create-link-btn:hover .ainav-create-link-icon svg {
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-create-link-text {
@@ -944,8 +944,8 @@
 
 .block_aiplugin_nav .ainav-form-input:focus {
     outline: none;
-    border-color: var(--primary, #3b82f6);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #3b82f6) 20%, transparent);
+    border-color: var(--mdl-primary, #3b82f6);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--mdl-primary, #3b82f6) 20%, transparent);
 }
 
 .block_aiplugin_nav .ainav-form-input::placeholder {
@@ -974,13 +974,13 @@
 }
 
 .block_aiplugin_nav .ainav-icon-option:hover {
-    border-color: var(--primary, #3b82f6);
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 5%, white);
+    border-color: var(--mdl-primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 5%, white);
 }
 
 .block_aiplugin_nav .ainav-icon-option.is-selected {
-    border-color: var(--primary, #3b82f6);
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    border-color: var(--mdl-primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
 }
 
 .block_aiplugin_nav .ainav-icon-option svg {
@@ -994,7 +994,7 @@
 
 .block_aiplugin_nav .ainav-icon-option:hover svg,
 .block_aiplugin_nav .ainav-icon-option.is-selected svg {
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 /* Buttons */
@@ -1009,12 +1009,12 @@
 }
 
 .block_aiplugin_nav .ainav-btn-primary {
-    background-color: var(--primary, #3b82f6);
+    background-color: var(--mdl-primary, #3b82f6);
     color: #ffffff;
 }
 
 .block_aiplugin_nav .ainav-btn-primary:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 85%, black);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 85%, black);
 }
 
 .block_aiplugin_nav .ainav-btn-secondary {
@@ -1164,7 +1164,7 @@
 }
 
 .block_aiplugin_nav .ainav-custom-report-link:hover {
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-delete-report {
@@ -1224,12 +1224,12 @@
 }
 
 .block_aiplugin_nav .ainav-create-report-btn:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 5%, white);
-    color: var(--primary, #3b82f6);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 5%, white);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-create-report-btn:hover .ainav-icon {
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 /* Dark mode for custom reports */
@@ -1311,14 +1311,14 @@
 }
 
 .block_aiplugin_nav .ainav-btn-update-all {
-    background-color: #3b82f6;
+    background-color: var(--mdl-primary, #3b82f6);
     color: #ffffff;
-    border-color: #3b82f6;
+    border-color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-btn-update-all:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
+    background-color: var(--mdl-primary-dark, #2563eb);
+    border-color: var(--mdl-primary-dark, #2563eb);
 }
 
 /* ========================================
@@ -1381,7 +1381,7 @@
 }
 
 .block_aiplugin_nav .ainav-pm-icon-block {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--mdl-primary, #3b82f6) 0%, var(--mdl-primary-dark, #2563eb) 100%);
 }
 
 .block_aiplugin_nav .ainav-pm-icon-block svg {
@@ -1421,7 +1421,7 @@
 }
 
 .block_aiplugin_nav .ainav-pm-badge-block {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--mdl-primary, #3b82f6) 0%, var(--mdl-primary-dark, #2563eb) 100%);
     color: #ffffff;
 }
 
@@ -1558,8 +1558,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eff6ff;
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 10%, white);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
     border-radius: 8px;
     flex-shrink: 0;
 }
@@ -1567,8 +1566,8 @@
 .block_aiplugin_nav .ainav-pm-icon svg {
     width: 20px;
     height: 20px;
-    stroke: #3b82f6;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 /* Compact icon variant - same as base but explicit */
@@ -1586,7 +1585,7 @@
 .block_aiplugin_nav .ainav-pm-icon-compact svg {
     width: 20px;
     height: 20px;
-    stroke: #3b82f6;
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-pm-info {
@@ -1660,7 +1659,7 @@
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    background-color: #3b82f6;
+    background-color: var(--mdl-primary, #3b82f6);
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -1672,7 +1671,7 @@
 }
 
 .block_aiplugin_nav .ainav-pm-update-btn:hover {
-    background-color: #2563eb;
+    background-color: var(--mdl-primary-dark, #2563eb);
 }
 
 .block_aiplugin_nav .ainav-pm-update-btn .ainav-btn-icon {
@@ -1784,7 +1783,7 @@
 
 /* Install button - Blue (auto-install via AJAX) */
 .block_aiplugin_nav .ainav-pm-action-install {
-    background-color: #3b82f6;
+    background-color: var(--mdl-primary, #3b82f6);
     color: #ffffff;
     border: none;
     padding: 0;
@@ -1796,7 +1795,7 @@
 }
 
 .block_aiplugin_nav .ainav-pm-action-install:hover {
-    background-color: #2563eb;
+    background-color: var(--mdl-primary-dark, #2563eb);
 }
 
 .block_aiplugin_nav .ainav-pm-action-install:disabled {
@@ -1851,17 +1850,17 @@
 
 /* Go to plugin button - Blue */
 .block_aiplugin_nav .ainav-pm-action-goto {
-    background-color: color-mix(in srgb, #3b82f6 10%, white);
-    color: #3b82f6;
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 10%, white);
+    color: var(--mdl-primary, #3b82f6);
     margin-right: 4px;
 }
 
 .block_aiplugin_nav .ainav-pm-action-goto svg {
-    stroke: #3b82f6;
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-pm-action-goto:hover {
-    background-color: #3b82f6;
+    background-color: var(--mdl-primary, #3b82f6);
     text-decoration: none;
 }
 
@@ -1942,17 +1941,17 @@
 
 /* Download button - Blue for uninstalled plugins */
 .block_aiplugin_nav .ainav-pm-action-download {
-    background-color: color-mix(in srgb, #3b82f6 15%, white);
-    color: #3b82f6;
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, white);
+    color: var(--mdl-primary, #3b82f6);
     cursor: pointer;
 }
 
 .block_aiplugin_nav .ainav-pm-action-download svg {
-    stroke: #3b82f6;
+    stroke: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-pm-action-download:hover {
-    background-color: #3b82f6;
+    background-color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-pm-action-download:hover svg {
@@ -2018,7 +2017,7 @@
     margin: 12px 0 0;
     padding: 10px 12px 10px 14px;
     background: #fff;
-    border: 1px solid color-mix(in srgb, var(--primary, #3b82f6) 25%, #e5e7eb);
+    border: 1px solid color-mix(in srgb, var(--mdl-primary, #3b82f6) 25%, #e5e7eb);
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     font-size: 13px;
@@ -2034,7 +2033,7 @@
     left: 0;
     bottom: 0;
     width: 3px;
-    background: var(--primary, #3b82f6);
+    background: var(--mdl-primary, #3b82f6);
     border-radius: 6px 0 0 6px;
 }
 
@@ -2046,13 +2045,13 @@
     flex-shrink: 0;
     width: 18px;
     height: 18px;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-uptodate-toast-icon svg {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     display: block;
 }
 
@@ -2437,7 +2436,7 @@
     align-items: center;
     justify-content: center;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--mdl-primary, #3b82f6) 0%, var(--mdl-primary-dark, #2563eb) 100%);
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -2449,7 +2448,7 @@
 }
 
 .block_aiplugin_nav .ainav-btn-primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--mdl-primary-dark, #2563eb) 0%, #1d4ed8 100%);
 }
 
 .block_aiplugin_nav .ainav-btn-secondary {
@@ -2641,7 +2640,7 @@
 
 .block_aiplugin_nav .ainav-pm-card-row:hover {
     background: var(--ainav-card-hover, #f9fafb);
-    border-color: var(--primary, #3b82f6);
+    border-color: var(--mdl-primary, #3b82f6);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -2662,14 +2661,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--primary, #3b82f6) 15%, white) 0%, color-mix(in srgb, var(--primary, #3b82f6) 25%, white) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, white) 0%, color-mix(in srgb, var(--mdl-primary, #3b82f6) 25%, white) 100%);
     border-radius: 10px;
 }
 
 .block_aiplugin_nav .ainav-pm-icon-row svg {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -2701,9 +2700,9 @@
     padding: 6px 12px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--primary, #3b82f6);
-    background: color-mix(in srgb, var(--primary, #3b82f6) 8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--primary, #3b82f6) 20%, transparent);
+    color: var(--mdl-primary, #3b82f6);
+    background: color-mix(in srgb, var(--mdl-primary, #3b82f6) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mdl-primary, #3b82f6) 20%, transparent);
     border-radius: 6px;
     text-decoration: none;
     transition: all 0.15s ease;
@@ -2711,8 +2710,8 @@
 }
 
 .block_aiplugin_nav .ainav-pm-docs-link:hover {
-    background: color-mix(in srgb, var(--primary, #3b82f6) 15%, transparent);
-    border-color: var(--primary, #3b82f6);
+    background: color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, transparent);
+    border-color: var(--mdl-primary, #3b82f6);
     text-decoration: none;
 }
 
@@ -2730,9 +2729,9 @@
     padding: 3px 8px;
     font-size: 11px;
     font-weight: 500;
-    color: var(--primary, #3b82f6);
-    background: color-mix(in srgb, var(--primary, #3b82f6) 8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--primary, #3b82f6) 15%, transparent);
+    color: var(--mdl-primary, #3b82f6);
+    background: color-mix(in srgb, var(--mdl-primary, #3b82f6) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, transparent);
     border-radius: 4px;
     text-decoration: none;
     transition: all 0.15s ease;
@@ -2741,8 +2740,8 @@
 }
 
 .block_aiplugin_nav .ainav-pm-docs-link-compact:hover {
-    background: color-mix(in srgb, var(--primary, #3b82f6) 15%, transparent);
-    border-color: var(--primary, #3b82f6);
+    background: color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, transparent);
+    border-color: var(--mdl-primary, #3b82f6);
     text-decoration: none;
 }
 
@@ -2860,7 +2859,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--primary, #3b82f6) 15%, white) 0%, color-mix(in srgb, var(--primary, #3b82f6) 25%, white) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mdl-primary, #3b82f6) 15%, white) 0%, color-mix(in srgb, var(--mdl-primary, #3b82f6) 25%, white) 100%);
     border-radius: 10px;
     flex-shrink: 0;
 }
@@ -2868,7 +2867,7 @@
 .block_aiplugin_nav .ainav-tooltip-icon svg {
     width: 18px;
     height: 18px;
-    stroke: var(--primary, #3b82f6);
+    stroke: var(--mdl-primary, #3b82f6);
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -3023,7 +3022,7 @@
 .block_aiplugin_nav .ainav-cache-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -3046,7 +3045,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background-color: var(--primary, #3b82f6);
+    background-color: var(--mdl-primary, #3b82f6);
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -3058,7 +3057,7 @@
 }
 
 .block_aiplugin_nav .ainav-purge-btn:hover {
-    background-color: color-mix(in srgb, var(--primary, #3b82f6) 85%, black);
+    background-color: color-mix(in srgb, var(--mdl-primary, #3b82f6) 85%, black);
 }
 
 .block_aiplugin_nav .ainav-purge-btn.ainav-btn-success {
@@ -3115,7 +3114,7 @@
 }
 
 .block_aiplugin_nav .ainav-schedule-link:hover {
-    color: var(--primary, #3b82f6);
+    color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-schedule-link svg {
@@ -3169,7 +3168,7 @@
 }
 
 .block_aiplugin_nav .ainav-toggle input:checked + .ainav-toggle-slider {
-    background-color: var(--primary, #3b82f6);
+    background-color: var(--mdl-primary, #3b82f6);
 }
 
 .block_aiplugin_nav .ainav-toggle input:checked + .ainav-toggle-slider:before {
@@ -3191,8 +3190,8 @@
 
 .block_aiplugin_nav .ainav-form-select:focus {
     outline: none;
-    border-color: var(--primary, #3b82f6);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary, #3b82f6) 20%, transparent);
+    border-color: var(--mdl-primary, #3b82f6);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--mdl-primary, #3b82f6) 20%, transparent);
 }
 
 /* Modal footer */
@@ -3316,7 +3315,7 @@
 .block_aiplugin_nav .ainav-toggle-arrow {
     width: 18px;
     height: 18px;
-    stroke: #3b82f6;
+    stroke: var(--mdl-primary, #3b82f6);
     transition: transform 0.3s ease;
 }
 

@@ -1149,7 +1149,46 @@ class block_aiplugin_nav extends block_base {
         // JS will detect the primary color from existing themed elements.
         return '__DETECT_FROM_DOM__';
     }
-    
+
+    /**
+     * Compute dark and tint variants of a hex colour.
+     *
+     * Dark  = 85 % brightness (darken by ~15 %).
+     * Tint  = 10 % colour + 90 % white (very light wash).
+     *
+     * @param string $hex Hex colour string, e.g. '#3b82f6' or '3b82f6'.
+     * @return array{primary: string, dark: string, tint: string}
+     */
+    private function compute_color_variants(string $hex): array {
+        $hex = ltrim($hex, '#');
+        // Expand 3-character shorthand.
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+            return ['primary' => '#3b82f6', 'dark' => '#2563eb', 'tint' => '#dbeafe'];
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        // Dark: multiply each channel by 0.85.
+        $dr = (int) round(max(0, min(255, $r * 0.85)));
+        $dg = (int) round(max(0, min(255, $g * 0.85)));
+        $db = (int) round(max(0, min(255, $b * 0.85)));
+
+        // Tint: 10 % colour + 90 % white.
+        $tr = (int) round($r * 0.10 + 255 * 0.90);
+        $tg = (int) round($g * 0.10 + 255 * 0.90);
+        $tb = (int) round($b * 0.10 + 255 * 0.90);
+
+        return [
+            'primary' => '#' . $hex,
+            'dark'    => sprintf('#%02x%02x%02x', $dr, $dg, $db),
+            'tint'    => sprintf('#%02x%02x%02x', $tr, $tg, $tb),
+        ];
+    }
+
     /**
      * Get JavaScript for detecting primary color from DOM.
      * This is more reliable in Moodle 5 where themes use CSS variables.
@@ -1228,13 +1267,35 @@ class block_aiplugin_nav extends block_base {
                     }
                 }
                 
+                // Helpers to compute dark and tint variants from an rgb/hex colour.
+                function aiNavDarken(c) {
+                    var m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (m) {
+                        return 'rgb(' + [1,2,3].map(function(i){return Math.max(0,Math.min(255,Math.round(parseInt(m[i])*0.85)));}).join(',') + ')';
+                    }
+                    return c;
+                }
+                function aiNavTint(c) {
+                    var m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (m) {
+                        return 'rgb(' + [1,2,3].map(function(i){return Math.round(parseInt(m[i])*0.10+255*0.90);}).join(',') + ')';
+                    }
+                    return c;
+                }
+
                 // Apply detected color.
                 if (detectedColor) {
                     container.style.setProperty('--primary', detectedColor);
+                    container.style.setProperty('--mdl-primary', detectedColor);
+                    container.style.setProperty('--mdl-primary-dark', aiNavDarken(detectedColor));
+                    container.style.setProperty('--mdl-primary-tint', aiNavTint(detectedColor));
                     console.log('AI Quick Links: Detected primary color:', detectedColor);
                 } else {
                     // Fallback to a nice blue.
                     container.style.setProperty('--primary', '#3b82f6');
+                    container.style.setProperty('--mdl-primary', '#3b82f6');
+                    container.style.setProperty('--mdl-primary-dark', '#2563eb');
+                    container.style.setProperty('--mdl-primary-tint', '#dbeafe');
                     console.log('AI Quick Links: Using fallback color');
                 }
             })();
@@ -1256,12 +1317,27 @@ class block_aiplugin_nav extends block_base {
         
         // Get the theme primary color for inline styling.
         $primarycolor = $this->get_theme_primary_color();
-        
+
+        // Compute colour variants (dark = 85 % brightness, tint = 10 % colour + 90 % white).
+        $isdetect = ($primarycolor === '__DETECT_FROM_DOM__');
+        if ($isdetect) {
+            // Fallback values; JS will override --mdl-* when it detects the real colour.
+            $variants = ['primary' => '#3b82f6', 'dark' => '#2563eb', 'tint' => '#dbeafe'];
+        } else {
+            $variants = $this->compute_color_variants($primarycolor);
+        }
+
         // Get links registry
         $registry = $this->get_links_registry();
-        
-        // Start building HTML with inline CSS variable for primary color.
-        $html = '<div class="ainav-container" style="--primary: ' . htmlspecialchars($primarycolor) . ';">';
+
+        // Start building HTML with inline CSS variables.
+        // --primary is kept for backward compatibility with existing var(--primary, …) fallbacks.
+        // --mdl-primary / --mdl-primary-dark / --mdl-primary-tint are the canonical named variables.
+        $inlinestyle = '--primary: ' . htmlspecialchars($isdetect ? '__DETECT_FROM_DOM__' : $variants['primary']) . ';'
+            . ' --mdl-primary: ' . htmlspecialchars($variants['primary']) . ';'
+            . ' --mdl-primary-dark: ' . htmlspecialchars($variants['dark']) . ';'
+            . ' --mdl-primary-tint: ' . htmlspecialchars($variants['tint']) . ';';
+        $html = '<div class="ainav-container" style="' . $inlinestyle . '">';
         $html .= '<div class="ainav-bar">';
         
         // Logo/Brand
@@ -5027,13 +5103,35 @@ class block_aiplugin_nav extends block_base {
                         }
                     }
                     
+                    // Helpers to compute dark and tint variants from an rgb/hex colour.
+                    function aiNavDarken2(c) {
+                        var m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                        if (m) {
+                            return 'rgb(' + [1,2,3].map(function(i){return Math.max(0,Math.min(255,Math.round(parseInt(m[i])*0.85)));}).join(',') + ')';
+                        }
+                        return c;
+                    }
+                    function aiNavTint2(c) {
+                        var m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                        if (m) {
+                            return 'rgb(' + [1,2,3].map(function(i){return Math.round(parseInt(m[i])*0.10+255*0.90);}).join(',') + ')';
+                        }
+                        return c;
+                    }
+
                     // Apply detected color.
                     if (detectedColor) {
                         container.style.setProperty('--primary', detectedColor);
+                        container.style.setProperty('--mdl-primary', detectedColor);
+                        container.style.setProperty('--mdl-primary-dark', aiNavDarken2(detectedColor));
+                        container.style.setProperty('--mdl-primary-tint', aiNavTint2(detectedColor));
                         console.log('AI Quick Links: Detected primary color from DOM:', detectedColor);
                     } else {
                         // Fallback to a nice blue.
                         container.style.setProperty('--primary', '#3b82f6');
+                        container.style.setProperty('--mdl-primary', '#3b82f6');
+                        container.style.setProperty('--mdl-primary-dark', '#2563eb');
+                        container.style.setProperty('--mdl-primary-tint', '#dbeafe');
                         console.log('AI Quick Links: Using fallback color');
                     }
                 })();
