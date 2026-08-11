@@ -1090,47 +1090,76 @@ class block_aiplugin_nav extends block_base {
      */
     private function get_theme_primary_color() {
         global $PAGE, $CFG;
-        
-        $defaultcolor = '#3b82f6';
-        
+
+        // Ordered list of setting keys used by popular Moodle community themes.
+        // Checked in priority order so the most semantically correct key wins first.
+        //
+        // Key → themes that use it:
+        //   brandcolor   — Boost (core), Boost Union, Lambda, Klass, Classic, and most
+        //                  Boost-derived themes.
+        //   primarycolor — Moove, Shoemaker, Edumodo, many commercial themes.
+        //   primary      — Adaptable (Moodle 4.x+), some Bootstrap-based themes.
+        //   colorprimary — Adaptable (older releases), Fordson (some versions).
+        //   themecolor   — Snap (Moodle official commercial theme).
+        //   accentcolor  — Fordson (main accent key).
+        //   navbarColor  — Adaptable navbar / header colour fallback.
+        //   headerbg     — Adaptable older header background setting.
+        //   themecolour  — British-English spelling used by a few AU/UK themes.
+        //   accent       — Moodle Workplace and some enterprise themes.
+        $colorkeys = [
+            'brandcolor',
+            'primarycolor',
+            'primary',
+            'colorprimary',
+            'themecolor',
+            'accentcolor',
+            'navbarColor',
+            'headerbg',
+            'themecolour',
+            'accent',
+        ];
+
         // Method 1: Try using theme_config::load() for Moodle 4.x/5.x.
+        // This loads the merged settings object which already walks the parent chain.
         try {
             $themeconfig = \theme_config::load($PAGE->theme->name);
-            if (!empty($themeconfig->settings->brandcolor)) {
-                return $themeconfig->settings->brandcolor;
-            }
-            if (!empty($themeconfig->settings->primarycolor)) {
-                return $themeconfig->settings->primarycolor;
-            }
-            if (!empty($themeconfig->settings->primary)) {
-                return $themeconfig->settings->primary;
+            foreach ($colorkeys as $key) {
+                if (!empty($themeconfig->settings->$key)) {
+                    return $themeconfig->settings->$key;
+                }
             }
         } catch (Exception $e) {
             // Fall through.
         }
-        
-        // Method 2: Try get_config for current theme.
+
+        // Method 2: Try get_config for the active theme directly.
+        // get_config reads the mdl_config_plugins table which is always authoritative
+        // even when theme_config::load() fails or returns a partial object.
         $themename = !empty($PAGE->theme->name) ? $PAGE->theme->name : '';
         if (!empty($themename)) {
-            $brandcolor = get_config('theme_' . $themename, 'brandcolor');
-            if (!empty($brandcolor)) {
-                return $brandcolor;
-            }
-            $primarycolor = get_config('theme_' . $themename, 'primarycolor');
-            if (!empty($primarycolor)) {
-                return $primarycolor;
+            foreach ($colorkeys as $key) {
+                $val = get_config('theme_' . $themename, $key);
+                if (!empty($val)) {
+                    return $val;
+                }
             }
         }
-        
-        // Method 3: Check parent themes.
+
+        // Method 3: Walk the full parent chain and check every known colour key.
+        // The current theme may be a child/grandchild of a non-Boost theme that
+        // stores its colour under a non-standard key (e.g. Adaptable child →
+        // Adaptable parent → 'primary'; Fordson child → 'accentcolor').
         if (!empty($themename)) {
             try {
                 $themeconfig = \theme_config::load($themename);
                 if (!empty($themeconfig->parents)) {
                     foreach ($themeconfig->parents as $parent) {
-                        $parentcolor = get_config('theme_' . $parent, 'brandcolor');
-                        if (!empty($parentcolor)) {
-                            return $parentcolor;
+                        // Skip Boost here — handled in Method 4 below.
+                        foreach ($colorkeys as $key) {
+                            $val = get_config('theme_' . $parent, $key);
+                            if (!empty($val)) {
+                                return $val;
+                            }
                         }
                     }
                 }
@@ -1138,13 +1167,15 @@ class block_aiplugin_nav extends block_base {
                 // Fall through.
             }
         }
-        
-        // Method 4: Boost theme.
+
+        // Method 4: Boost theme fallback (most common parent).
+        // Checked after the full parent walk so a configured non-Boost parent
+        // colour is preferred over a default Boost brandcolor.
         $boostcolor = get_config('theme_boost', 'brandcolor');
         if (!empty($boostcolor)) {
             return $boostcolor;
         }
-        
+
         // Return special marker for JavaScript detection.
         // JS will detect the primary color from existing themed elements.
         return '__DETECT_FROM_DOM__';
