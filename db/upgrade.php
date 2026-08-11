@@ -936,6 +936,14 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026080100133, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026081100216) {
+        // ADD-MOD-SLIDES (v2.4.49): Added mod_slides (Slides) to get_complete_plugin_registry()
+        // so it appears in the Plugin Manager panel and can trigger update notifications.
+        // Also added mod_slides to get_plugin_docs_url() map pointing to /docs/slides.
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026081100216, 'aiplugin_nav');
+    }
+
     if ($oldversion < 2026072400118) {
         // CLEANUP-DEAD-CODE-ENDPOINTS (v2.4.18): Two unused private methods in
         // block_aiplugin_nav.php (debug_credits_check, get_credits_balance) still had
