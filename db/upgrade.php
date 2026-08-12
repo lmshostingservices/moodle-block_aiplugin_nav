@@ -43,5 +43,23 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026081201, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026081202) {
+        // v2.4.53: registry (tiny_aipagetemplates), check_versions capability, coding-style
+        // and packaging bump for Moodle upload. No DB schema changes.
+        upgrade_block_savepoint(true, 2026081202, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026081203) {
+        // v2.4.54: version bump for pipeline promotion (strictly > promoted 2026081202).
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026081203, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026081204) {
+        // v2.4.55: version bump for pipeline promotion (strictly > promoted 2026081203).
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026081204, 'aiplugin_nav');
+    }
+
     return true;
 }

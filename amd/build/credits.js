@@ -6,7 +6,7 @@
  * @copyright  2025 Essay Grader AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax'], function(Ajax) {
+define(['core/ajax'], function (Ajax) {
 
     /**
      * Return CSS color class for a given credit amount.
@@ -73,16 +73,16 @@ define(['core/ajax'], function(Ajax) {
         /**
          * Initialise: fetch credits from the server asynchronously.
          */
-        init: function() {
+        init: function () {
             Ajax.call([{
                 methodname: 'block_aiplugin_nav_get_credits',
                 args: {},
-                done: function(response) {
+                done: function (response) {
                     if (response.success && response.credits !== '') {
                         updateDOM(response.credits);
                     }
                 },
-                fail: function() {
+                fail: function () {
                     // Silent fail  -  credits display simply stays hidden.
                 }
             }]);

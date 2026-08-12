@@ -1594,6 +1594,16 @@ class block_aiplugin_nav extends block_base {
                 'goto_url' => '/local/rtocompliance/index.php',
             ),
             array(
+                'name' => 'AI Page Templates',
+                'component' => 'tiny_aipagetemplates',
+                'plugin_type' => 'tiny',
+                'plugin_name' => 'aipagetemplates',
+                'icon' => 'layout',
+                'category' => 'ai_content',
+                'description' => 'TinyMCE editor plugin that inserts AI-generated, ASQA-aligned page templates directly into course content.',
+                'access' => 'Site admin > Plugins > Text editors > TinyMCE > AI Page Templates',
+            ),
+            array(
                 'name' => 'RPL Kit',
                 'component' => 'local_rplkit',
                 'plugin_type' => 'local',
@@ -3274,6 +3284,7 @@ class block_aiplugin_nav extends block_base {
             'local_beacon' => 'https://lms-labs.com/docs/beacon',
             'local_rplkit' => 'https://lms-labs.com/docs/rpl-kit',
             'local_lmshomepage' => 'https://lms-labs.com/docs/lms-home-page',
+            'tiny_aipagetemplates' => 'https://lms-labs.com/docs/ai-page-templates',
             'local_downalert' => 'https://lms-labs.com/docs/site-down-alert',
             'block_rtocompliance' => 'https://lms-labs.com/docs/rto-compliance',
         );
@@ -4249,7 +4260,7 @@ class block_aiplugin_nav extends block_base {
                     try {
                         installed = JSON.parse(installedData.text());
                     } catch (parseErr) {
-                        // btn/originalHtml belong to the click handler's scope; the caller
+                        // The btn/originalHtml vars belong to the click handler's scope; the caller
                         // resets the button after updateStatusLabels() returns.
                         Notification.alert('Error', 'Failed to read installed plugin data. Please reload the page and try again.');
                         return;

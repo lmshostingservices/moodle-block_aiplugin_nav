@@ -2,7 +2,7 @@
 
 All notable changes to this plugin will be documented in this file.
 
-## [2.4.52] - 2026-08-12
+## [2.4.55] - 2026-08-12
 
 ### Fixed
 - **Category headings showed literal `&amp;`**: Every super-group category title containing an
@@ -52,7 +52,14 @@ NOTE: `$plugin->version` = `2026081201` (10-digit, matching the release pipeline
 Caveat: any site still on a 13-digit build (e.g. 2026081100221) will not auto-upgrade to a 10-digit
 numeric; verify installed numerics on target sites before relying on auto-update.
 
-No DB schema changes. Savepoint 2026081201.
+- **Cross-plugin registry**: added `tiny_aipagetemplates` (AI Page Templates) to
+  `get_complete_plugin_registry()` (+ docs URL) so the pipeline registry check passes.
+- **`check_versions.php` capability**: added `require_capability('moodle/site:config')` — the
+  version-check proxy is only used by the admin Check-for-Updates flow.
+- **Coding style**: AMD `function(` → `function (`; expanded single-line conditionals; capitalised
+  introduced inline comments.
+
+No DB schema changes. Savepoint 2026081204.
 
 
 ## [2.3.48] - 2026-04-23
