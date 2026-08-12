@@ -50,6 +50,7 @@ class custom_links extends external_api {
      */
     public static function save_custom_link($name, $url, $icon) {
         global $USER;
+        self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::save_custom_link_parameters(), array(
             'name' => $name,
@@ -115,6 +116,7 @@ class custom_links extends external_api {
      */
     public static function delete_custom_link($index) {
         global $USER;
+        self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::delete_custom_link_parameters(), array(
             'index' => $index,
@@ -161,6 +163,7 @@ class custom_links extends external_api {
      */
     public static function save_custom_report($name, $url, $icon) {
         global $USER;
+        self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::save_custom_report_parameters(), array(
             'name' => $name,
@@ -226,6 +229,7 @@ class custom_links extends external_api {
      */
     public static function delete_custom_report($index) {
         global $USER;
+        self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::delete_custom_report_parameters(), array(
             'index' => $index,

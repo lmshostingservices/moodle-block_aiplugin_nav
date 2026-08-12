@@ -37,18 +37,13 @@ require_once(__DIR__ . '/../../config.php');
 require_login(null, false);
 
 header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
-header('Expires: 0');
 
-// Append a timestamp so any intermediate HTTP cache (CDN, Moodle reverse-proxy,
-// browser cache of this PHP script's URL) cannot serve a stale response.
-$cache_bust = time();
 $endpoints = [
-    'https://ai-grader-site-nct185.replit.app/api/plugins/versions?_t=' . $cache_bust,
-    'https://lms-labs.com/api/plugins/versions?_t=' . $cache_bust,
+    'https://ai-grader-site-nct185.replit.app/api/plugins/versions',
+    'https://lms-labs.com/api/plugins/versions',
 ];
 
+require_once($CFG->libdir . '/filelib.php'); // curl class is not autoloaded.
 $curl = new \curl();
 $curl->setopt([
     'CURLOPT_TIMEOUT'        => 5,

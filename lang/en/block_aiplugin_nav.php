@@ -208,3 +208,11 @@ $string['aitools_collapsed_default_desc'] = 'If enabled, the AI Tools Quick Acce
 $string['expand_section'] = 'Expand section';
 $string['collapse_section'] = 'Collapse section';
 $string['my_email'] = 'My Email';
+
+// Privacy (GDPR) metadata strings.
+$string['privacy:metadata:block_aiplugin_nav_purge'] = 'Records of cache-purge actions performed from the AI Dashboard Quick Links block.';
+$string['privacy:metadata:block_aiplugin_nav_purge:purged_by'] = 'The ID of the user who performed the cache purge.';
+$string['privacy:metadata:block_aiplugin_nav_purge:purge_type'] = 'Whether the purge was manual or scheduled.';
+$string['privacy:metadata:block_aiplugin_nav_purge:purged_at'] = 'The time the cache purge was performed.';
+$string['privacy:metadata:preference:block_aiplugin_nav_custom_links'] = 'Custom quick links the user has added to the block.';
+$string['privacy:metadata:preference:block_aiplugin_nav_custom_reports'] = 'Custom report links the user has added to the block.';

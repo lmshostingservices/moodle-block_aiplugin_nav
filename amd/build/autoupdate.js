@@ -123,7 +123,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 var html = '<div style="max-height:320px;overflow-y:auto;font-size:13px;line-height:1.5;">';
                 data.entries.slice(0, 15).forEach(function(entry) {
                     // Highlight the version tag at the start
-                    var formatted = entry.replace(/^(v[\d.]+(?:[:\s-]+))/i, '<strong>$1</strong>');
+                    var safe = String(entry).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+                    var formatted = safe.replace(/^(v[\d.]+(?:[:\s-]+))/i, '<strong>$1</strong>');
                     html += '<div style="padding:5px 0;border-bottom:1px solid #e5e7eb;">' + formatted + '</div>';
                 });
                 if (data.entries.length > 15) {
@@ -131,7 +132,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 }
                 html += '</div>';
                 if (data.version) {
-                    html += '<p style="margin-top:8px;font-size:11px;opacity:0.6;">Latest: v' + data.version + '</p>';
+                    html += '<p style="margin-top:8px;font-size:11px;opacity:0.6;">Latest: v' + String(data.version).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }) + '</p>';
                 }
 
                 Notification.alert(title, html);

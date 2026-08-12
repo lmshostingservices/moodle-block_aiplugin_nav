@@ -146,7 +146,7 @@ class plugin_unlock extends external_api {
                 'creditsconsumed'  => 0,
                 'remainingcredits' => '',
                 'message'          => '',
-                'error'            => (string) $data['message'] ?: (string) $data['error'],
+                'error'            => (string)($data['message'] ?? '') ?: (string)($data['error'] ?? ''),
             ];
         }
 

@@ -2,6 +2,59 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.52] - 2026-08-12
+
+### Fixed
+- **Category headings showed literal `&amp;`**: Every super-group category title containing an
+  ampersand (e.g. "AI Grading &amp; Assessment", "Administration &amp; Operations" columns) rendered
+  the raw entity because the titles were passed to `render_cat_col()` already HTML-encoded and then
+  encoded a second time by `htmlspecialchars()`. Titles are now plain text (`&`) and encoded once.
+- **Administration & Operations grid collapsed**: the admin category grid used
+  `minmax(160px, 1fr)` (and `140px` on medium screens), squeezing 10 columns so tightly that
+  plugin names truncated to single letters and "Not Installed" wrapped. Widened to
+  `minmax(210px, 1fr)` (190px on medium) so columns wrap cleanly and card content stays legible.
+  The AI grid changed from a forced 5-column layout to `auto-fit minmax(230px, 1fr)` for the same reason.
+- **Duplicate "Slides" card**: `mod_slides` was listed twice in `get_complete_plugin_registry()`
+  (a second stub entry with icon `box` and description "Slides."). The stub duplicate was removed.
+- **Version shown as "v?"**: installed plugins whose `version.php` has no `release` string showed
+  "v?". A new `format_version_label()` helper falls back to the numeric version and strips a leading
+  "v" (also prevents "vv2.4.51"). Applied to both the compact card and row card.
+
+### Fixed (full audit pass — 12 Aug 2026)
+- **Missing `global $USER` in `get_content()`**: caused an undefined-variable warning and a null
+  read on every page render for non-admin staff (editing teachers etc.), silently hiding the credits
+  badge from the very roles it targets. Added `$USER` to the global declaration.
+- **`check_versions.php` fatal `Class "curl" not found`**: the position-#1 version-check proxy called
+  `new \curl()` without `require_once($CFG->libdir.'/filelib.php')`, so every check failed through to
+  slow cross-origin fallbacks. Added the require.
+- **Check-for-Updates button could freeze**: `updateStatusLabels()`'s JSON-parse catch referenced
+  `btn`/`originalHtml` from an outer scope, throwing a ReferenceError that left the button stuck.
+  Removed the out-of-scope reset (the caller already resets the button).
+- **Robust version comparison**: client `compareVersions()` did a naive `parseInt` magnitude compare
+  that mis-handles 10-digit vs 13-digit Moodle numerics. Rewritten to compare the YYYYMMDD date prefix
+  then the sequence, so mixed-width numerics compare correctly.
+- **Changelog modal DOM XSS**: `autoupdate.js` built the "What's Changed" modal from unescaped server
+  strings. Now HTML-escapes changelog entries and the version before insertion. Minified build synced.
+- **Blank plugin icons**: `box`, `archive`, `file-check-2`, and `bell` icon keys were used but absent
+  from `get_icon_svg()`, rendering empty SVGs (RPL Kit, SCORM Compress, RTO Compliance Dashboard, etc.).
+  Added all four SVGs.
+- **Missing Docs buttons**: added docs URLs for `local_downalert` and `block_rtocompliance`.
+- **Privacy (GDPR) declaration was false**: provider declared `null_provider` while the plugin stores
+  `block_aiplugin_nav_purge.purged_by` and two user preferences. Replaced with a full metadata +
+  request + userlist privacy provider (export/delete) and added the metadata lang strings.
+- **DB portability**: removed non-portable `LIMIT 1` from `get_purge_status` queries (now
+  `IGNORE_MULTIPLE`); validated `save_purge_schedule` time to 00:00–23:59; guarded `plugin_unlock`
+  error coalescing against an undefined index.
+- **External API hygiene**: `custom_links` functions now call `validate_context()`.
+- **Moodle support range**: `$plugin->supported` raised to `[400, 501]` (through Moodle 5.1).
+
+NOTE: `$plugin->version` = `2026081201` (10-digit, matching the release pipeline's required scheme).
+Caveat: any site still on a 13-digit build (e.g. 2026081100221) will not auto-upgrade to a 10-digit
+numeric; verify installed numerics on target sites before relying on auto-update.
+
+No DB schema changes. Savepoint 2026081201.
+
+
 ## [2.3.48] - 2026-04-23
 
 ### Fixed
