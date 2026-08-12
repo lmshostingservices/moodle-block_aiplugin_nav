@@ -2,6 +2,15 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.56] - 2026-08-12
+
+### Added
+- **World-class plugin finder**: the Plugin Manager now renders a premium search / sort / filter
+  experience — live search (press `/`), sort (A–Z, recently added, most popular, installed first),
+  category filter chips with live counts, and Sections / Grid / List views. Install action is now a
+  green download icon; installed plugins show version + tick. Namespaced CSS (`.ainav-fdr`) to coexist
+  with Moodle themes. No DB schema changes. Savepoint 2026081205.
+
 ## [2.4.55] - 2026-08-12
 
 ### Fixed

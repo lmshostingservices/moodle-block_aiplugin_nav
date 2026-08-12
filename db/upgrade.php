@@ -61,5 +61,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026081204, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026081205) {
+        // v2.4.56: world-class plugin finder (search / sort / filter / Sections-Grid-List views)
+        // integrated into the Plugin Manager. No DB schema changes.
+        upgrade_block_savepoint(true, 2026081205, 'aiplugin_nav');
+    }
+
     return true;
 }

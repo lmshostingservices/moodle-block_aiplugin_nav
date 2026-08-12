@@ -2798,64 +2798,214 @@ class block_aiplugin_nav extends block_base {
         };
 
         // ── Outer wrapper ──────────────────────────────────────────────────
-        $html .= '<div class="ainav-pm-supergroups">';
-
-        // ── AI & Learning Intelligence super-group ─────────────────────────
-        $html .= '<div class="ainav-pm-supergroup-header ainav-pm-sg-ai">';
-        $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-        $html .= '<span>AI &amp; Learning Intelligence</span>';
-        $html .= '<span class="ainav-pm-sg-line"></span>';
-        $html .= '</div>';
-
-        // Foundation plugin bar (Central Config) — shown at top of AI group
-        if (!empty($foundation_plugins)) {
-            $html .= '<div class="ainav-pm-foundation-bar">';
-            $html .= '<div class="ainav-pm-group-header ainav-pm-group-foundation">';
-            $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;vertical-align:middle;margin-right:4px;">';
-            $html .= $this->get_icon_svg('settings');
-            $html .= '</svg>';
-            $html .= get_string('foundation_plugin', 'block_aiplugin_nav');
-            $html .= '</div>';
-            foreach ($foundation_plugins as $plugin) {
-                $html .= $this->render_plugin_card($plugin);
+        // ===== World-class plugin finder (search / sort / filter / views) =====
+        $fdr_cats = [
+            'config' => ['label' => 'Central Config', 'group' => 'ai', 'icon' => 'settings'],
+            'ai_grading' => ['label' => 'AI Grading & Assessment', 'group' => 'ai', 'icon' => 'clipboard-check'],
+            'ai_content' => ['label' => 'AI Content & Courses', 'group' => 'ai', 'icon' => 'book-open'],
+            'ai_media' => ['label' => 'AI Voice & Media', 'group' => 'ai', 'icon' => 'music'],
+            'ai_rto' => ['label' => 'RTO & Compliance', 'group' => 'ai', 'icon' => 'shield'],
+            'ai_ux' => ['label' => 'AI Personalisation', 'group' => 'ai', 'icon' => 'user-check'],
+            'block' => ['label' => 'Blocks & Dashboards', 'group' => 'admin', 'icon' => 'layout-dashboard'],
+            'training' => ['label' => 'Training & Scheduling', 'group' => 'admin', 'icon' => 'calendar-clock'],
+            'enrolment' => ['label' => 'Enrolment & Access', 'group' => 'admin', 'icon' => 'user-check'],
+            'integrity' => ['label' => 'Academic Integrity', 'group' => 'admin', 'icon' => 'shield'],
+            'comms' => ['label' => 'Communications', 'group' => 'admin', 'icon' => 'mail'],
+            'branding' => ['label' => 'Branding & Appearance', 'group' => 'admin', 'icon' => 'palette'],
+            'media_storage' => ['label' => 'Media & Storage', 'group' => 'admin', 'icon' => 'hard-drive'],
+            'security' => ['label' => 'Security & Auth', 'group' => 'admin', 'icon' => 'lock'],
+            'reporting' => ['label' => 'Reporting & Analytics', 'group' => 'admin', 'icon' => 'bar-chart-2'],
+            'payments' => ['label' => 'Payments', 'group' => 'admin', 'icon' => 'credit-card'],
+        ];
+        $fdr_data = [];
+        $fdr_iconkeys = ['star', 'settings'];
+        foreach ($all_plugins as $p) {
+            $cat = isset($p['category']) ? $p['category'] : '';
+            if (!isset($fdr_cats[$cat])) {
+                continue;
             }
-            $html .= '</div>';
+            $vlabel = $this->format_version_label($p);
+            $fdr_data[] = [
+                'name'       => $p['name'],
+                'component'  => $p['component'],
+                'cat'        => $cat,
+                'catLabel'   => $fdr_cats[$cat]['label'],
+                'group'      => $fdr_cats[$cat]['group'],
+                'icon'       => isset($p['icon']) ? $p['icon'] : 'star',
+                'desc'       => isset($p['description']) ? $p['description'] : '',
+                'credits'    => (int)(isset($p['credits_required']) ? $p['credits_required'] : 0),
+                'installed'  => !empty($p['is_installed']),
+                'version'    => ($vlabel === '?' ? '' : $vlabel),
+                'foundation' => !empty($p['install_first']),
+                'added'      => count($fdr_data),
+                'popularity' => (!empty($p['is_installed']) ? 1000000 : 0) - count($fdr_data),
+                'docs'       => $this->get_plugin_docs_url($p['component']),
+            ];
+            $fdr_iconkeys[] = isset($p['icon']) ? $p['icon'] : 'star';
+        }
+        foreach ($fdr_cats as $c) {
+            $fdr_iconkeys[] = $c['icon'];
+        }
+        $fdr_icons = [];
+        foreach (array_unique($fdr_iconkeys) as $ik) {
+            $fdr_icons[$ik] = $this->get_icon_svg($ik);
         }
 
-        $html .= '<div class="ainav-pm-grid-ai">';
-        $render_cat_col('AI Grading & Assessment', $cat_ai_grading, true);
-        $render_cat_col('AI Content & Courses',    $cat_ai_content,  true);
-        $render_cat_col('AI Voice & Media',        $cat_ai_media,    true);
-        $render_cat_col('RTO & Compliance',        $cat_ai_rto,      true);
-        $render_cat_col('AI Personalisation',          $cat_ai_ux,       true);
+        $html .= '<div class="ainav-fdr">';
+        $html .= <<<'FDR_TOOLBAR'
+<div class="finder">
+ <div class="finder-top">
+  <div class="f-title"><span class="dot"></span>AI Tools Quick Access</div>
+  <span class="f-count" id="count"></span>
+  <div class="grow"></div>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="q" type="text" placeholder="Search plugins…  (press / )" autocomplete="off">
+    <button class="clr" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+ </div>
+ <div class="f-controls">
+  <span class="lbl">Sort</span>
+  <div class="selectwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 20V4"/></svg><select class="sortsel" id="sort">
+    <option value="section">Grouped by section</option>
+    <option value="az">Name A–Z</option>
+    <option value="za">Name Z–A</option>
+    <option value="new">Recently added</option>
+    <option value="popular">Most popular</option>
+    <option value="installed">Installed first</option>
+  </select></div>
+  <div class="grow"></div>
+  <span class="lbl">View</span>
+  <div class="seg" data-seg="view">
+   <button class="on" data-v="section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Sections</button>
+   <button data-v="grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Grid</button>
+   <button data-v="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>List</button>
+  </div>
+ </div>
+ <div class="chips" id="chips"></div>
+</div>
+<div class="results" id="results"></div>
+FDR_TOOLBAR;
         $html .= '</div>';
+        $html .= '<script type="application/json" id="ainav-fdr-data">' . json_encode($fdr_data) . '</script>';
+        $html .= '<script type="application/json" id="ainav-fdr-cats">' . json_encode($fdr_cats) . '</script>';
+        $html .= '<script type="application/json" id="ainav-fdr-icons">' . json_encode($fdr_icons) . '</script>';
+        $html .= '<script>';
+        $html .= <<<'FDR_JS'
 
-        // ── Administration & Operations super-group ────────────────────────
-        $html .= '<div class="ainav-pm-supergroup-header ainav-pm-sg-admin">';
-        $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
-        $html .= '<span>Administration &amp; Operations</span>';
-        $html .= '<span class="ainav-pm-sg-line ainav-pm-sg-line-admin"></span>';
-        $html .= '</div>';
 
-        $html .= '<div class="ainav-pm-grid-admin">';
-        $render_cat_col('Blocks & Dashboards',  $cat_block,         false);
-        $render_cat_col('Training & Scheduling', $cat_training,     false);
-        $render_cat_col('Enrolment & Access',    $cat_enrolment,    false);
-        $render_cat_col('Academic Integrity',        $cat_integrity,    false);
-        $render_cat_col('Communications',            $cat_comms,        false);
-        $render_cat_col('Branding & Appearance', $cat_branding,     false);
-        $render_cat_col('Media & Storage',       $cat_media_storage, false);
-        $render_cat_col('Security & Auth',       $cat_security,     false);
-        $render_cat_col('Reporting & Analytics', $cat_reporting,    false);
-        // Payments column — rendered only when a payment gateway plugin (e.g. paygw_paddle)
-        // is present in the registry, keeping the Plugin Manager consistent with the
-        // Settings dropdown which also shows the Payments group conditionally.
-        if (!empty($cat_payments)) {
-            $render_cat_col('Payments', $cat_payments, false);
-        }
-        $html .= '</div>';
+const DATA=JSON.parse(document.getElementById('ainav-fdr-data').textContent);
+const CATS=JSON.parse(document.getElementById('ainav-fdr-cats').textContent);
+const ICONS=JSON.parse(document.getElementById('ainav-fdr-icons').textContent);
+const state={q:'',cat:'all',status:'all',sort:'section',view:'section'};
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function hl(text){const q=state.q.trim();if(!q)return esc(text);
+  const i=text.toLowerCase().indexOf(q.toLowerCase());if(i<0)return esc(text);
+  return esc(text.slice(0,i))+'<span class="mark">'+esc(text.slice(i,i+q.length))+'</span>'+esc(text.slice(i+q.length));}
+function match(p){
+  const q=state.q.trim().toLowerCase();
+  if(q){const hay=(p.name+' '+p.desc+' '+p.catLabel).toLowerCase();if(!hay.includes(q))return false;}
+  if(state.cat!=='all'&&p.cat!==state.cat)return false;
+  if(state.status==='installed'&&!p.installed)return false;
+  if(state.status==='available'&&p.installed)return false;
+  return true;
+}
+function ic(n){return ICONS[n]||ICONS.star||'';}
+const TICK='<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11.5 14.5 16 9"/></svg></span>';
+const DOCSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
+function card(p){
+  const off=p.installed?'':' off';
+  const DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  const ver=p.installed?`<span class="vbadge on">v${p.version}</span>${TICK}`:`<button class="dlbtn" title="Install ${esc(p.name)}">${DL}</button>`;
+  const credit=p.foundation?'<span class="tag founder"><span class="d"></span>Foundation</span>'
+    :(p.credits>0?`<span class="credit">${p.credits.toLocaleString()} credits</span>`:'<span class="credit free">Free</span>');
+  const g=CATS[p.cat].group;
+  const tag=p.foundation?'':`<span class="tag ${g}"><span class="d"></span>${esc(p.catLabel)}</span>`;
+  return `<div class="pc${off}" data-c="${p.component}">
+    <div class="pc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ic(p.icon)}</svg></div>
+    <div class="pc-main">
+      <div class="pc-top"><span class="pc-name">${hl(p.name)}</span><span class="pc-badges">${ver}</span></div>
+      <div class="pc-desc">${hl(p.desc)}</div>
+      <div class="pc-foot">${tag}${credit}<a class="docs" href="#" onclick="return false">${DOCSVG}Docs</a></div>
+    </div></div>`;
+}
+function foundationBanner(p){
+  return `<div class="foundation">
+    <div class="f-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ic(p.icon)}</svg></div>
+    <div class="f-body"><div class="f-kicker">Foundation Plugin — Install First</div>
+      <div class="f-name">${hl(p.name)} ${p.installed?TICK:''}</div>
+      <div class="f-desc">${hl(p.desc)}</div></div>
+    <div class="f-badges">${p.installed?`<span class="vbadge on">v${p.version}</span>`:'<span class="vbadge">Not installed</span>'}
+      <a class="docs" href="#" onclick="return false">${DOCSVG}Docs</a></div></div>`;
+}
+function sortArr(a){
+  const s=state.sort;const c=[...a];
+  if(s==='az')c.sort((x,y)=>x.name.localeCompare(y.name));
+  else if(s==='za')c.sort((x,y)=>y.name.localeCompare(x.name));
+  else if(s==='new')c.sort((x,y)=>y.added-x.added);
+  else if(s==='popular')c.sort((x,y)=>y.popularity-x.popularity);
+  else if(s==='installed')c.sort((x,y)=>(y.installed-x.installed)||x.name.localeCompare(y.name));
+  return c;
+}
+const CATORDER=Object.keys(CATS);
+function render(){
+  const list=DATA.filter(match);
+  document.getElementById('count').textContent=list.length+(list.length===1?' plugin':' plugins');
+  const res=document.getElementById('results');
+  if(!list.length){res.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>No plugins match</h3><div>Try a different search or clear the filters.</div><button onclick="clearAll()">Clear all filters</button></div>`;return;}
+  if(state.view==='section'&&state.sort==='section'){
+    let html='';const groups=[['ai','AI & Learning Intelligence','star'],['admin','Administration & Operations','settings']];
+    for(const [g,gl,gi] of groups){
+      const cin=CATORDER.filter(k=>CATS[k].group===g);
+      let sec='';let secCount=0;let banner='';
+      for(const k of cin){
+        const items=list.filter(p=>p.cat===k);if(!items.length)continue;secCount+=items.length;
+        if(k==='config'){banner=items.map(foundationBanner).join('');continue;}
+        const inst=items.filter(p=>p.installed).length;
+        sec+=`<div class="section"><div class="sec-head"><div class="sec-ic ${g}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ic(CATS[k].icon)}</svg></div><span class="sec-title">${esc(CATS[k].label)}</span><span class="sec-badge">${inst}/${items.length}</span><span class="sec-line"></span></div><div class="grid">${items.map(card).join('')}</div></div>`;
+      }
+      if(sec||banner){html+=`<div class="supergroup sg-${g}"><div class="sg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ic(gi)}</svg></div><span class="sg-t">${gl}</span><span class="sg-badge">${secCount}</span><span class="sg-line"></span></div>`+banner+sec;}
+    }
+    res.innerHTML=html;return;
+  }
+  const arr=sortArr(list);
+  res.innerHTML=`<div class="grid ${state.view==='list'?'list':''}">${arr.map(card).join('')}</div>`;
+}
+function clearAll(){state.q='';state.cat='all';state.status='all';const q=document.getElementById('q');q.value='';q.parentElement.classList.remove('has');syncChips();render();}
+function syncChips(){document.querySelectorAll('.chip[data-cat]').forEach(c=>c.classList.toggle('on',c.dataset.cat===state.cat));
+  document.querySelectorAll('.chip[data-status]').forEach(c=>c.classList.toggle('on',c.dataset.status===state.status));}
+function buildChips(){
+  const box=document.getElementById('chips');let h='';
+  h+=`<button class="chip ${state.cat==='all'?'on':''}" data-cat="all">All<span class="n">${DATA.length}</span></button>`;
+  h+=`<button class="chip" data-status="installed">Installed<span class="n">${DATA.filter(p=>p.installed).length}</span></button>`;
+  h+=`<button class="chip" data-status="available">Available<span class="n">${DATA.filter(p=>!p.installed).length}</span></button>`;
+  h+=`<span class="chip grp">AI</span>`;
+  Object.keys(CATS).filter(k=>CATS[k].group==='ai').forEach(k=>{const n=DATA.filter(p=>p.cat===k).length;if(!n)return;h+=`<button class="chip" data-cat="${k}">${esc(CATS[k].label)}<span class="n">${n}</span></button>`;});
+  h+=`<span class="chip grp">Admin</span>`;
+  Object.keys(CATS).filter(k=>CATS[k].group==='admin').forEach(k=>{const n=DATA.filter(p=>p.cat===k).length;if(!n)return;h+=`<button class="chip" data-cat="${k}">${esc(CATS[k].label)}<span class="n">${n}</span></button>`;});
+  box.innerHTML=h;
+  box.querySelectorAll('.chip[data-cat]').forEach(c=>c.onclick=()=>{state.cat=c.dataset.cat;state.status='all';syncChips();render();});
+  box.querySelectorAll('.chip[data-status]').forEach(c=>c.onclick=()=>{state.status=state.status===c.dataset.status?'all':c.dataset.status;state.cat='all';syncChips();render();});
+}
+function init(){
+  buildChips();
+  const q=document.getElementById('q');
+  q.addEventListener('input',()=>{state.q=q.value;q.parentElement.classList.toggle('has',!!q.value);render();});
+  document.querySelector('.clr').onclick=()=>{state.q='';q.value='';q.parentElement.classList.remove('has');render();q.focus();};
+  document.querySelectorAll('.seg[data-seg="view"] button').forEach(b=>b.onclick=()=>{
+    state.view=b.dataset.v;document.querySelectorAll('.seg[data-seg="view"] button').forEach(x=>x.classList.toggle('on',x===b));
+    if(state.view!=='section'&&state.sort==='section'){state.sort='popular';document.getElementById('sort').value='popular';}
+    render();});
+  document.getElementById('sort').onchange=e=>{state.sort=e.target.value;
+    if(state.sort==='section'){state.view='section';document.querySelectorAll('.seg[data-seg="view"] button').forEach(x=>x.classList.toggle('on',x.dataset.v==='section'));}
+    render();};
+  document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+    if(e.key==='Escape'&&document.activeElement===q){clearAll();q.blur();}});
+  render();
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 
-        $html .= '</div>'; // .ainav-pm-supergroups
+
+FDR_JS;
+        $html .= '</script>';
         $html .= '</div>'; // End .ainav-section-content
         
         // Hidden data for JavaScript
