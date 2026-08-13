@@ -89,12 +89,8 @@ class save_purge_schedule extends external_api {
             $parts = explode(':', $params['schedule_time']);
             $hour = isset($parts[0]) ? (int)$parts[0] : 3;
             $minute = isset($parts[1]) ? (int)$parts[1] : 0;
-            if ($hour < 0 || $hour > 23) {
-                $hour = 3;
-            }
-            if ($minute < 0 || $minute > 59) {
-                $minute = 0;
-            }
+            if ($hour < 0 || $hour > 23) { $hour = 3; }
+            if ($minute < 0 || $minute > 59) { $minute = 0; }
 
             // Set schedule based on type.
             if ($params['schedule_type'] === 'weekly') {

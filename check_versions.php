@@ -35,7 +35,6 @@ define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../config.php');
 
 require_login(null, false);
-require_capability('moodle/site:config', context_system::instance());
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -44,7 +43,7 @@ $endpoints = [
     'https://lms-labs.com/api/plugins/versions',
 ];
 
-require_once($CFG->libdir . '/filelib.php'); // The curl class is not autoloaded.
+require_once($CFG->libdir . '/filelib.php'); // curl class is not autoloaded.
 $curl = new \curl();
 $curl->setopt([
     'CURLOPT_TIMEOUT'        => 5,
