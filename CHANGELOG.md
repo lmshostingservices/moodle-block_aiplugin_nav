@@ -2,6 +2,11 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.60] - 2026-08-13
+
+### Changed
+- Version bump for pipeline promotion (strictly > promoted 2026081208). No functional change. Savepoint 2026081209.
+
 ## [2.4.59] - 2026-08-12
 
 ### Fixed

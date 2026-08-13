@@ -85,5 +85,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026081208, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026081209) {
+        // v2.4.60: version bump for pipeline promotion (strictly > promoted 2026081208).
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026081209, 'aiplugin_nav');
+    }
+
     return true;
 }
