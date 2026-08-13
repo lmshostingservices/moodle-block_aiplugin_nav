@@ -2,7 +2,39 @@
 
 All notable changes to this plugin will be documented in this file.
 
-## [2.4.52] - 2026-08-12
+## [2.4.59] - 2026-08-12
+
+### Fixed
+- **White cards on white theme**: the finder had no background of its own, so its white cards blended
+  into white Moodle block areas. The finder now renders on a light canvas (`--bg`) and cards carry a
+  subtle default shadow, so it is legible on any theme (adapts in dark mode). Savepoint 2026081208.
+
+## [2.4.58] - 2026-08-12
+
+### Added
+- **Per-plugin credit pricing on finder cards**: every plugin shows "500 Credits ($50 USD)"; AI RTO
+  Compliance (local_rtocompliance) shows "2,000 Credits ($2000 USD)". The install button now carries
+  the credit-gate data attributes and hooks into the existing plugin_unlock -> auto_install flow, so a
+  user is charged/confirmed before download. NOTE: the authoritative deduction is enforced server-side
+  by the lms-labs credits gateway (/api/plugin-unlock) — server pricing must be set to match. Savepoint 2026081207.
+
+## [2.4.57] - 2026-08-12
+
+### Fixed
+- **Install icon invisible on some Moodle themes**: the green install button's download arrow used a
+  stroked SVG that host themes could override, leaving a blank green square. Switched to a filled white
+  glyph forced with `fill:#fff !important` so it renders regardless of theme. No DB changes. Savepoint 2026081206.
+
+## [2.4.56] - 2026-08-12
+
+### Added
+- **World-class plugin finder**: the Plugin Manager now renders a premium search / sort / filter
+  experience — live search (press `/`), sort (A–Z, recently added, most popular, installed first),
+  category filter chips with live counts, and Sections / Grid / List views. Install action is now a
+  green download icon; installed plugins show version + tick. Namespaced CSS (`.ainav-fdr`) to coexist
+  with Moodle themes. No DB schema changes. Savepoint 2026081205.
+
+## [2.4.55] - 2026-08-12
 
 ### Fixed
 - **Category headings showed literal `&amp;`**: Every super-group category title containing an
@@ -52,7 +84,14 @@ NOTE: `$plugin->version` = `2026081201` (10-digit, matching the release pipeline
 Caveat: any site still on a 13-digit build (e.g. 2026081100221) will not auto-upgrade to a 10-digit
 numeric; verify installed numerics on target sites before relying on auto-update.
 
-No DB schema changes. Savepoint 2026081201.
+- **Cross-plugin registry**: added `tiny_aipagetemplates` (AI Page Templates) to
+  `get_complete_plugin_registry()` (+ docs URL) so the pipeline registry check passes.
+- **`check_versions.php` capability**: added `require_capability('moodle/site:config')` — the
+  version-check proxy is only used by the admin Check-for-Updates flow.
+- **Coding style**: AMD `function(` → `function (`; expanded single-line conditionals; capitalised
+  introduced inline comments.
+
+No DB schema changes. Savepoint 2026081204.
 
 
 ## [2.3.48] - 2026-04-23
