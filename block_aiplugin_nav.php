@@ -2861,7 +2861,7 @@ class block_aiplugin_nav extends block_base {
   <span class="f-count" id="count"></span>
   <div class="grow"></div>
   <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="q" type="text" placeholder="Search plugins…  (press / )" autocomplete="off">
+    <input id="q" type="text" placeholder="Search plugins…" autocomplete="off">
     <button class="clr" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
  </div>
  <div class="f-controls">
@@ -2998,8 +2998,7 @@ function init(){
   document.getElementById('sort').onchange=e=>{state.sort=e.target.value;
     if(state.sort==='section'){state.view='section';document.querySelectorAll('.seg[data-seg="view"] button').forEach(x=>x.classList.toggle('on',x.dataset.v==='section'));}
     render();};
-  document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
-    if(e.key==='Escape'&&document.activeElement===q){clearAll();q.blur();}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.activeElement===q){clearAll();q.blur();}});
   render();
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}

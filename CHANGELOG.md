@@ -2,6 +2,11 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.61] - 2026-08-14
+
+### Changed
+- Removed the "(press / )" keyboard-shortcut hint from the AI Tools Quick Access search box placeholder, and removed the "/" keydown focus handler. Placeholder is now just "Search plugins…". Escape-to-clear behaviour unchanged. Savepoint 2026081400.
+
 ## [2.4.60] - 2026-08-13
 
 ### Changed
