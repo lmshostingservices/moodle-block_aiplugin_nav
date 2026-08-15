@@ -15,7 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * AI Dashboard Quick Links v2.4.61 - Version information
+ * AI Dashboard Quick Links v2.4.62 - Version information
+ *
+ * v2.4.62: REMOVE-AIPAGETEMPLATES-FINAL (15 Aug 2026) — tiny_aipagetemplates (AI Page
+ *          Templates) removed from the master plugin registry AND the docs URL map. It was
+ *          removed in v2.4.39 after crashing customer sites but accidentally re-added in
+ *          v2.4.53 with the new category layout, so the card reappeared on every site. The
+ *          plugin is now also deprecated server-side (excluded from the lms-labs.com
+ *          manifest), making this removal permanent at both ends. A tombstone comment in
+ *          get_master_plugin_registry() forbids re-adding it. No DB changes.
+ *          Savepoint 2026081500.
  *
  * v2.4.61: REMOVE-SLASH-HINT (14 Aug 2026) — Removed the "(press / )" keyboard-shortcut hint
  *          from the AI Tools Quick Access search placeholder and the matching "/" keydown
@@ -197,8 +206,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_aiplugin_nav';
 // 10-DIGIT MARKETPLACE SCHEME: $plugin->version is YYYYMMDDXX (10 digits).
-$plugin->version = 2026081400;  // YYYYMMDDXX (10-digit, matches release pipeline) — 14 Aug 2026. v2.4.61.
-$plugin->release = 'v2.4.61';
+$plugin->version = 2026081500;  // YYYYMMDDXX (10-digit, matches release pipeline) — 15 Aug 2026. v2.4.62.
+$plugin->release = 'v2.4.62';
 $plugin->release_prev = '2.4.60';
 $plugin->requires  = 2022041900;
 $plugin->supported  = [400, 501];  // Moodle 4.0 to 5.1

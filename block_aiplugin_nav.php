@@ -1593,16 +1593,11 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Site admin > Plugins > Local plugins > RTO Compliance',
                 'goto_url' => '/local/rtocompliance/index.php',
             ),
-            array(
-                'name' => 'AI Page Templates',
-                'component' => 'tiny_aipagetemplates',
-                'plugin_type' => 'tiny',
-                'plugin_name' => 'aipagetemplates',
-                'icon' => 'layout',
-                'category' => 'ai_content',
-                'description' => 'TinyMCE editor plugin that inserts AI-generated, ASQA-aligned page templates directly into course content.',
-                'access' => 'Site admin > Plugins > Text editors > TinyMCE > AI Page Templates',
-            ),
+            // v2.4.62 REMOVE-AIPAGETEMPLATES-FINAL: tiny_aipagetemplates deliberately
+            // ABSENT from this registry. It crashed customer sites, was removed in
+            // v2.4.39, and was accidentally re-added in v2.4.53. It is also
+            // deprecated server-side (excluded from the lms-labs.com manifest), so
+            // it must NEVER be re-added here.
             array(
                 'name' => 'RPL Kit',
                 'component' => 'local_rplkit',
@@ -3434,7 +3429,6 @@ FDR_JS;
             'local_beacon' => 'https://lms-labs.com/docs/beacon',
             'local_rplkit' => 'https://lms-labs.com/docs/rpl-kit',
             'local_lmshomepage' => 'https://lms-labs.com/docs/lms-home-page',
-            'tiny_aipagetemplates' => 'https://lms-labs.com/docs/ai-page-templates',
             'local_downalert' => 'https://lms-labs.com/docs/site-down-alert',
             'block_rtocompliance' => 'https://lms-labs.com/docs/rto-compliance',
         );
