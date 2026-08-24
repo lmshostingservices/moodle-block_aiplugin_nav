@@ -15,7 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * AI Dashboard Quick Links v2.4.65 - Version information
+ * AI Dashboard Quick Links v2.4.66 - Version information
+ *
+ * v2.4.66: CODING-STYLE-PASS (24 Aug 2026) — Moodle coding-style cleanup on top
+ *          of v2.4.64 only: capitalised inline comments outside GPL headers,
+ *          split two multi-statement lines, and expanded one single-line closure.
+ *          No registry, URL, string, capability or behaviour changes.
+ *          Savepoint 2026082403.
  *
  * v2.4.65: RETAG-ONLY (24 Aug 2026) — No functional change from v2.4.64. Version bumped solely
  *          because earlier git tags were already claimed by release commits and immutable tags
@@ -226,8 +232,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_aiplugin_nav';
 // 10-DIGIT MARKETPLACE SCHEME: $plugin->version is YYYYMMDDXX (10 digits).
-$plugin->version = 2026082402;  // YYYYMMDDXX (10-digit, matches release pipeline) — 24 Aug 2026. v2.4.65.
-$plugin->release = 'v2.4.65';
+$plugin->version = 2026082403;  // YYYYMMDDXX (10-digit, matches release pipeline) — 24 Aug 2026. v2.4.66.
+$plugin->release = 'v2.4.66';
 $plugin->release_prev = '2.4.64';
 $plugin->requires  = 2022041900;
 $plugin->supported  = [400, 501];  // Moodle 4.0 to 5.1

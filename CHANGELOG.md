@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.66] - 2026-08-24
+
+### Changed
+- Moodle coding-style pass on top of 2.4.64 only: capitalised inline comments outside GPL
+  headers, split two multi-statement lines, and expanded one single-line closure.
+  No registry, URL, string, capability or behaviour changes. Savepoint 2026082403.
+
 ## [2.4.65] - 2026-08-24
 
 ### Changed

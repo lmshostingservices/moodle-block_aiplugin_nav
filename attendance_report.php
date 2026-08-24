@@ -57,7 +57,7 @@ if ($filter_to_str && preg_match('/^\d{4}-\d{2}-\d{2}$/', $filter_to_str)) {
 
 // ── Session-level WHERE clause (date only — applied to LEFT JOINs on sessions) ─
 // Kept separate from the course filter because sessions use LEFT JOIN; putting
-// the course filter here would accidentally exclude activities with no sessions.
+// The course filter here would accidentally exclude activities with no sessions.
 $session_join_cond = '';
 $session_params    = [];
 if ($filter_from > 0) {
@@ -88,7 +88,7 @@ if ($filter_courseid > 0) {
 
 // ── Activity-level WHERE clause (course filter for the activities breakdown) ──
 $activity_where  = '';
-$activity_params = $session_params; // date filter applied to session LEFT JOIN
+$activity_params = $session_params; // Date filter applied to session LEFT JOIN
 if ($filter_courseid > 0) {
     $activity_where                   = ' AND a.course = :act_courseid';
     $activity_params['act_courseid']  = $filter_courseid;
@@ -121,7 +121,7 @@ $total_students = (int)$DB->count_records_sql(
 );
 
 // Overall attendance rate — uses AVG(grade) which matches the attendance plugin's
-// own percentage calculation (grade is a 0–1 decimal set per status).
+// Own percentage calculation (grade is a 0–1 decimal set per status).
 // Count(grade > 0) / Count(*) was wrong — it misclassified "Late" and "Excused" statuses.
 $rate_row = $DB->get_record_sql(
     "SELECT COUNT(al.id) AS total_logs, AVG(ast.grade) AS avg_grade
@@ -199,8 +199,8 @@ $atrisk_students = $DB->get_records_sql(
      HAVING AVG(ast.grade) * 100 < :threshold
      ORDER BY AVG(ast.grade) ASC",
     $atrisk_params,
-    0,   // limitfrom — Moodle-compliant cross-DB row limiting
-    100  // limitnum
+    0,   // Limitfrom — Moodle-compliant cross-DB row limiting
+    100  // Limitnum
 );
 
 // ── Recent sessions (last 20) ────────────────────────────────────────────────
@@ -228,8 +228,8 @@ $recent_sessions = $DB->get_records_sql(
      GROUP BY s.id, s.sessdate, a.name, c.fullname, c.id
      ORDER BY s.sessdate DESC",
     $recent_params,
-    0,   // limitfrom
-    20   // limitnum
+    0,   // Limitfrom
+    20   // Limitnum
 );
 
 // ── CSV export ───────────────────────────────────────────────────────────────
@@ -287,7 +287,7 @@ function attendance_pct_badge($pct_raw) {
         return '<span class="atnrpt-badge atnrpt-badge-neutral">N/A</span>';
     }
     // Clamp to 100 — older attendance plugin versions may store grade as 0-100 integer
-    // instead of 0-1 decimal; without clamping, AVG(grade)*100 would return 10000%.
+    // Instead of 0-1 decimal; without clamping, AVG(grade)*100 would return 10000%.
     $pct = min(100.0, round((float)$pct_raw, 1));
     $cls = $pct >= 80 ? 'atnrpt-badge-good' : ($pct >= 60 ? 'atnrpt-badge-warn' : 'atnrpt-badge-poor');
     return '<span class="atnrpt-badge ' . $cls . '">' . number_format($pct, 1) . '%</span>';

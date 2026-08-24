@@ -60,10 +60,10 @@ class get_credits extends external_api {
 
         // Soft role check — return empty success:false instead of throwing an exception.
         // The block PHP already restricts the credits UI to admins/teachers; the web service must
-        // not throw here because any PHP exception causes the AJAX call to fail and
-        // silently hides the credits display for everyone.
+        // Not throw here because any PHP exception causes the AJAX call to fail and
+        // Silently hides the credits display for everyone.
         // Allowed: site admins, editing teachers, non-editing teachers, lmshsadmin, and any
-        // user who has moodle/site:configview (covers custom admin roles that aren't full siteadmins).
+        // User who has moodle/site:configview (covers custom admin roles that aren't full siteadmins).
         $is_allowed = is_siteadmin()
             || has_capability('moodle/site:configview', $context, $USER->id, false);
         if (!$is_allowed) {
@@ -121,7 +121,7 @@ class get_credits extends external_api {
         // Make API request — try endpoints in order (Replit first: always reachable from
         // Vultr/datacenter IPs; lms-labs.com second: may be blocked by datacenter firewall).
         // FIX-ENDPOINT-ORDER (v2.4.17): same root cause as check_versions.php — lms-labs.com
-        // is unreachable from Vultr-hosted Moodle servers so credits never loaded.
+        // Is unreachable from Vultr-hosted Moodle servers so credits never loaded.
         $query    = '?siteId=' . rawurlencode($siteid) . '&apiKey=' . rawurlencode($apikey);
         $endpoints = [
             'https://ai-grader-site-nct185.replit.app/api/credits' . $query,

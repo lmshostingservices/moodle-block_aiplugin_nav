@@ -27,9 +27,9 @@
 // Called by block_aiplugin_nav.php JS as fallback attempt #2 (after direct browser call fails).
 //
 // FIX-ENDPOINT-ORDER (v2.4.16): Replit URL moved to position #1 because lms-labs.com is
-// unreachable from Vultr-hosted Moodle servers (datacenter IP blocking). essaygraderai.app
+// Unreachable from Vultr-hosted Moodle servers (datacenter IP blocking). essaygraderai.app
 // (old legacy domain) removed — no longer operational. Timeout reduced from 10s to 5s per
-// endpoint so total worst-case wait drops from 30s to 10s.
+// Endpoint so total worst-case wait drops from 30s to 10s.
 
 define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../config.php');
