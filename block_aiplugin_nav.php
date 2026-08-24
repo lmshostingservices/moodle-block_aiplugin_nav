@@ -1858,6 +1858,16 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Assignment > Grading method > Benchmarks',
             ),
             array(
+                'name' => 'Certificate Pro',
+                'component' => 'mod_certificatepro',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'certificatepro',
+                'icon' => 'award',
+                'category' => 'other',
+                'description' => 'Testing-stage certificate activity tracked by the LMS Labs release pipeline.',
+                'access' => 'Course > Add an activity or resource > Certificate Pro',
+            ),
+            array(
                 'name' => 'Simple 2FA & SSO',
                 'component' => 'auth_simple2fa',
                 'plugin_type' => 'auth',
@@ -3431,6 +3441,15 @@ FDR_JS;
             'local_lmshomepage' => 'https://lms-labs.com/docs/lms-home-page',
             'local_downalert' => 'https://lms-labs.com/docs/site-down-alert',
             'block_rtocompliance' => 'https://lms-labs.com/docs/rto-compliance',
+            'block_trainingpathways' => 'https://lms-labs.com/docs/training-pathways',
+            'enrol_prereq2' => 'https://lms-labs.com/docs/prereq2-enrolment',
+            'local_campion' => 'https://lms-labs.com/docs/campion-integration',
+            'local_completionsuspend' => 'https://lms-labs.com/docs/completion-auto-suspend',
+            'local_custompage' => 'https://lms-labs.com/docs/custom-pages',
+            'local_recertify' => 'https://lms-labs.com/docs/course-recertification',
+            'block_studentactivity' => 'https://lms-labs.com/docs/student-activity',
+            'mod_aitrainingsim' => 'https://lms-labs.com/docs/ai-training-simulation',
+            'mod_workplacetask' => 'https://lms-labs.com/docs/workplace-task',
         );
         
         return isset($docs_urls[$component]) ? $docs_urls[$component] : '';

@@ -2,6 +2,23 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.63] - 2026-08-24
+
+### Added
+- Added documentation links for Training Pathways Block, Prerequisite 2 Enrolment, Campion Education,
+  Completion Auto-Suspend, Custom Pages, Course Recertification, Student Activity Evidence,
+  AI Training Simulation, and Workplace Task.
+- Added the testing-stage Certificate Pro component to the complete release registry so the
+  cross-registry release check remains fail-closed.
+
+### Documentation
+- Replaced the placeholder README with installation, compatibility, ecosystem, credit and support guidance.
+
+## [2.4.62] - 2026-08-15
+
+### Changed
+- Permanently removed AI Page Templates from the active registry and documentation map.
+
 ## [2.4.61] - 2026-08-14
 
 ### Changed
