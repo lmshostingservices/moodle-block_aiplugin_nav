@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.65] - 2026-08-24
+
+### Changed
+- Version bump only, with no functional change from 2.4.64. The release was re-cut because earlier
+  git tags were already claimed by release commits and immutable tags cannot be re-pointed.
+  Savepoint 2026082402.
+
 ## [2.4.64] - 2026-08-24
 
 ### Changed
