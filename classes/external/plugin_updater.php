@@ -42,8 +42,55 @@ class plugin_updater extends external_api {
         return new external_function_parameters(array(
             'component' => new external_value(PARAM_COMPONENT, 'Plugin component name'),
             'downloadurl' => new external_value(PARAM_URL, 'Download URL for plugin ZIP'),
-            'expectedsha256' => new external_value(PARAM_ALPHANUM, 'Expected SHA-256 of the ZIP for integrity verification', VALUE_DEFAULT, ''),
+            'expectedsha256' => new external_value(PARAM_ALPHANUM, 'Required SHA-256 published in the update manifest'),
+            'expectedversion' => new external_value(PARAM_TEXT, 'Version explicitly reviewed by the administrator'),
+            'reviewconfirmed' => new external_value(PARAM_BOOL, 'Administrator explicitly confirmed this selected update'),
         ));
+    }
+
+    /**
+     * Verify that the reviewed artifact is still the artifact in the publisher manifest.
+     *
+     * @return string|null Error message, or null when the manifest matches.
+     */
+    private static function verify_published_update($component, $downloadurl, $expectedsha256, $expectedversion) {
+        if (!preg_match('/^[a-f0-9]{64}$/i', $expectedsha256)) {
+            return 'A valid non-empty SHA-256 is required. Refusing to install an unverifiable update.';
+        }
+        if (trim($expectedversion) === '') {
+            return 'The reviewed target version is required.';
+        }
+
+        $parts = parse_url($downloadurl);
+        $origin = (isset($parts['scheme']) ? $parts['scheme'] : 'https') . '://' . $parts['host'];
+        $curl = new \curl();
+        $curl->setopt(array(
+            'CURLOPT_FOLLOWLOCATION' => false,
+            'CURLOPT_SSL_VERIFYPEER' => true,
+            'CURLOPT_TIMEOUT' => 20,
+        ));
+        $raw = $curl->get($origin . '/api/plugins/versions');
+        $info = $curl->get_info();
+        $manifest = json_decode($raw, true);
+        if (($info['http_code'] ?? 0) !== 200 || !is_array($manifest)
+                || empty($manifest['success']) || empty($manifest['plugins'][$component])) {
+            return 'Could not verify this update against the published manifest. Nothing was installed.';
+        }
+
+        $published = $manifest['plugins'][$component];
+        $publishedsha = strtolower((string)($published['sha256'] ?? ''));
+        $publishedversion = (string)($published['version'] ?? '');
+        $publishedurl = (string)($published['downloadUrl'] ?? '');
+        if (!hash_equals($publishedsha, strtolower($expectedsha256))) {
+            return 'The reviewed SHA-256 no longer matches the published manifest. Check for updates again.';
+        }
+        if (!hash_equals($publishedversion, (string)$expectedversion)) {
+            return 'The reviewed version is no longer current in the published manifest. Check for updates again.';
+        }
+        if (!hash_equals($publishedurl, $downloadurl)) {
+            return 'The reviewed download URL no longer matches the published manifest. Check for updates again.';
+        }
+        return null;
     }
 
     /**
@@ -116,16 +163,19 @@ class plugin_updater extends external_api {
     /**
      * Auto-update a plugin by downloading and installing it.
      */
-    public static function auto_update_plugin($component, $downloadurl, $expectedsha256 = null) {
+    public static function auto_update_plugin($component, $downloadurl, $expectedsha256, $expectedversion, $reviewconfirmed) {
         global $CFG;
 
         require_once($CFG->libdir . '/filelib.php');
         require_once($CFG->libdir . '/upgradelib.php');
+        require_once($CFG->libdir . '/adminlib.php');
 
         $params = self::validate_parameters(self::auto_update_plugin_parameters(), array(
             'component'      => $component,
             'downloadurl'    => $downloadurl,
             'expectedsha256' => $expectedsha256,
+            'expectedversion' => $expectedversion,
+            'reviewconfirmed' => $reviewconfirmed,
         ));
 
         $context = context_system::instance();
@@ -140,18 +190,58 @@ class plugin_updater extends external_api {
         $component      = clean_param($params['component'], PARAM_COMPONENT);
         $downloadurl    = clean_param($params['downloadurl'], PARAM_URL);
         $expectedsha256 = $params['expectedsha256'];
+        $expectedversion = trim($params['expectedversion']);
+
+        if (empty($params['reviewconfirmed'])) {
+            return array(
+                'success' => false,
+                'message' => 'Update blocked: an administrator must explicitly review and confirm this selected plugin.',
+            );
+        }
+
+        $auditstart = $component . ':' . $expectedversion . ':staging-started';
+        add_to_config_log(
+            'plugin_update_reviewed',
+            '',
+            $auditstart,
+            'block_aiplugin_nav'
+        );
 
         // Allowlist: only accept downloads from our own servers.
         // This prevents SSRF and supply-chain attacks where a compromised admin
         // account or tampered DOM element could supply an attacker-controlled URL.
         $parsed_url = parse_url($downloadurl);
+        $url_scheme = strtolower(isset($parsed_url['scheme']) ? $parsed_url['scheme'] : '');
         $url_host = strtolower(isset($parsed_url['host']) ? $parsed_url['host'] : '');
         $allowed_hosts = ['lms-labs.com', 'ai-grader-site-nct185.replit.app'];
-        if (!in_array($url_host, $allowed_hosts, true)) {
+        if ($url_scheme !== 'https' || isset($parsed_url['user']) || isset($parsed_url['pass'])
+                || isset($parsed_url['port']) || !in_array($url_host, $allowed_hosts, true)) {
+            add_to_config_log(
+                'plugin_update_reviewed',
+                $auditstart,
+                $component . ':' . $expectedversion . ':url-policy-rejected',
+                'block_aiplugin_nav'
+            );
             return array(
                 'success' => false,
-                'message' => "Download URL host '{$url_host}' is not allowed. Only lms-labs.com and ai-grader-site-nct185.replit.app are permitted.",
+                'message' => 'Only credential-free HTTPS URLs on approved LMS Labs update hosts are permitted.',
             );
+        }
+
+        $manifesterror = self::verify_published_update(
+            $component,
+            $downloadurl,
+            $expectedsha256,
+            $expectedversion
+        );
+        if ($manifesterror !== null) {
+            add_to_config_log(
+                'plugin_update_reviewed',
+                $auditstart,
+                $component . ':' . $expectedversion . ':manifest-verification-rejected',
+                'block_aiplugin_nav'
+            );
+            return array('success' => false, 'message' => $manifesterror);
         }
 
         // Validate component exists.
@@ -159,12 +249,20 @@ class plugin_updater extends external_api {
         $plugininfo = $pluginman->get_plugin_info($component);
 
         if (!$plugininfo) {
+            add_to_config_log(
+                'plugin_update_reviewed',
+                $auditstart,
+                $component . ':' . $expectedversion . ':plugin-discovery-rejected',
+                'block_aiplugin_nav'
+            );
             return array(
                 'success' => false,
                 'message' => 'Plugin not found: ' . $component,
             );
         }
 
+        $auditcompleted = false;
+        $auditphase = 'download';
         try {
             // Create temp directory for download.
             $tempdir = make_temp_directory('aiplugin_nav_update');
@@ -204,17 +302,16 @@ class plugin_updater extends external_api {
                 );
             }
 
-            // SHA-256 integrity check — if the server published a hash, verify the download matches.
+            // SHA-256 integrity check is mandatory and was already matched to the live manifest.
             // hash_equals() is constant-time, preventing timing side-channels.
-            if ($expectedsha256 !== null && $expectedsha256 !== '') {
-                $actual = hash('sha256', $content);
-                if (!hash_equals($expectedsha256, $actual)) {
-                    @unlink($zipfile);
-                    return ['success' => false, 'message' => "SHA-256 mismatch: expected {$expectedsha256} but got {$actual}. Refusing to install."];
-                }
+            $actual = hash('sha256', $content);
+            if (!hash_equals(strtolower($expectedsha256), $actual)) {
+                @unlink($zipfile);
+                return ['success' => false, 'message' => "SHA-256 mismatch: expected {$expectedsha256} but got {$actual}. Refusing to install."];
             }
 
             // Verify it's a valid ZIP.
+            $auditphase = 'zip-validation';
             $zip = new \ZipArchive();
             $zipResult = $zip->open($zipfile);
             if ($zipResult !== true) {
@@ -246,6 +343,7 @@ class plugin_updater extends external_api {
             }
 
             // Determine plugin type and directory.
+            $auditphase = 'filesystem-preflight';
             list($type, $name) = \core_component::normalize_component($component);
             $plugintypes = \core_component::get_plugin_types();
 
@@ -279,6 +377,7 @@ class plugin_updater extends external_api {
             }
 
             // Extract ZIP to temp location.
+            $auditphase = 'filesystem-stage';
             $extractdir = $tempdir . '/extract_' . time();
             $zip = new \ZipArchive();
             if ($zip->open($zipfile) !== true) {
@@ -372,6 +471,7 @@ class plugin_updater extends external_api {
             }
 
             // Verify the new version.php exists.
+            $auditphase = 'staged-plugin-validation';
             if (!file_exists($plugindir . '/version.php')) {
                 // Restore from backup.
                 self::delete_directory($plugindir);
@@ -419,9 +519,17 @@ class plugin_updater extends external_api {
             // Invalidate the block's plugin status cache so next page load re-reads all version files.
             unset_config('plugin_status_cache_time', 'block_aiplugin_nav');
 
+            add_to_config_log(
+                'plugin_update_reviewed',
+                $auditstart,
+                $component . ':' . $expectedversion . ':files-staged-moodle-upgrade-required',
+                'block_aiplugin_nav'
+            );
+            $auditcompleted = true;
+
             return array(
                 'success' => true,
-                'message' => 'Plugin files updated. Click "Run Database Upgrade" to complete.',
+                'message' => 'Plugin files staged and verified. Moodle database upgrade is still required.',
                 'needsupgrade' => true,
             );
 
@@ -437,6 +545,15 @@ class plugin_updater extends external_api {
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
             );
+        } finally {
+            if (!$auditcompleted) {
+                add_to_config_log(
+                    'plugin_update_reviewed',
+                    $auditstart,
+                    $component . ':' . $expectedversion . ':' . $auditphase . '-failed',
+                    'block_aiplugin_nav'
+                );
+            }
         }
     }
 

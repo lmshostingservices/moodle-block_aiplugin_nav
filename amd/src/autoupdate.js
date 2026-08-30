@@ -142,117 +142,17 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function ($, Aj
         },
         
         autoUpdatePlugin: function ($btn, component, downloadUrl, pluginName) {
-            var self = this;
-            var originalText = $btn.text();
-            
-            // Disable button and show loading.
-            $btn.prop('disabled', true);
-            $btn.html('<span class="ainav-spinner"></span> Updating...');
-            
-            Ajax.call([{
-                methodname: 'block_aiplugin_nav_auto_update_plugin',
-                args: {
-                    component: component,
-                    downloadurl: downloadUrl,
-                    expectedsha256: $btn.data('sha256') || ''
-                }
-            }])[0].done(function (response) {
-                if (response.success) {
-                    // Show brief success message.
-                    $btn.removeClass('ainav-btn-autoupdate').addClass('ainav-btn-success');
-                    $btn.html('<span class="ainav-spinner"></span> Redirecting...');
-                    
-                    // Auto-redirect to admin upgrade page after brief delay.
-                    // This triggers Moodle's standard plugin upgrade process.
-                    setTimeout(function () {
-                        try {
-                            var upgradeUrl = M.cfg.wwwroot + '/admin/index.php';
-                            window.location.href = upgradeUrl;
-                            // Fallback: if redirect doesn't work after 2 seconds, force reload
-                            setTimeout(function () {
-                                window.location.reload(true);
-                            }, 2000);
-                        } catch (e) {
-                            // Fallback to page reload if redirect fails
-                            window.location.reload(true);
-                        }
-                    }, 800);
-                } else {
-                    $btn.prop('disabled', false);
-                    $btn.text(originalText);
-                    Notification.alert('Update Failed', response.message);
-                }
-            }).fail(function (error) {
-                $btn.prop('disabled', false);
-                $btn.text(originalText);
-                Notification.alert('Update Failed', error.message || 'An error occurred during update.');
-            });
+            Notification.alert(
+                'Review Required',
+                'For safety, updates can only be started from the Plugin Manager review queue after checking versions, release notes, compatibility, and SHA-256.'
+            );
         },
         
         autoUpdateAll: function () {
-            var self = this;
-            var $buttons = $('.ainav-btn-autoupdate:visible');
-            var total = $buttons.length;
-            var completed = 0;
-            
-            if (total === 0) {
-                Notification.alert('No Updates', 'No plugins to update.');
-                return;
-            }
-            
-            // Update each plugin sequentially to avoid conflicts.
-            var updateNext = function (index) {
-                if (index >= $buttons.length) {
-                    // All done, auto-redirect to upgrade page.
-                    setTimeout(function () {
-                        try {
-                            var upgradeUrl = M.cfg.wwwroot + '/admin/index.php';
-                            window.location.href = upgradeUrl;
-                            // Fallback: if redirect doesn't work after 2 seconds, force reload
-                            setTimeout(function () {
-                                window.location.reload(true);
-                            }, 2000);
-                        } catch (e) {
-                            // Fallback to page reload if redirect fails
-                            window.location.reload(true);
-                        }
-                    }, 800);
-                    return;
-                }
-                
-                var $btn = $($buttons[index]);
-                var component = $btn.data('component');
-                var downloadUrl = $btn.data('downloadurl');
-                var pluginName = $btn.data('pluginname');
-                
-                $btn.prop('disabled', true);
-                $btn.html('<span class="ainav-spinner"></span> Updating...');
-                
-                Ajax.call([{
-                    methodname: 'block_aiplugin_nav_auto_update_plugin',
-                    args: {
-                        component: component,
-                        downloadurl: downloadUrl,
-                        expectedsha256: $btn.data('sha256') || ''
-                    }
-                }])[0].done(function (response) {
-                    completed++;
-                    if (response.success) {
-                        $btn.removeClass('ainav-btn-autoupdate').addClass('ainav-btn-success');
-                        $btn.text('Updated ✓');
-                    } else {
-                        $btn.prop('disabled', false);
-                        $btn.text('Failed');
-                    }
-                    updateNext(index + 1);
-                }).fail(function () {
-                    $btn.prop('disabled', false);
-                    $btn.text('Failed');
-                    updateNext(index + 1);
-                });
-            };
-            
-            updateNext(0);
+            Notification.alert(
+                'Review Required',
+                'Bulk updates never start from a broad queue. Open the Plugin Manager, check for updates, select the exact plugins to stage, and confirm the itemized review.'
+            );
         },
 
         // Show a modal or notification prompting user to run database upgrade.
@@ -260,8 +160,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function ($, Aj
             var $overlay = $('<div class="ainav-upgrade-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;"></div>');
             var $modal = $(
                 '<div class="ainav-upgrade-modal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:24px;border-radius:8px;z-index:9999;max-width:400px;text-align:center;">' +
-                '<h3 style="margin:0 0 12px;">Plugin Updated</h3>' +
-                '<p>The plugin has been updated. Please run the database upgrade to complete the process.</p>' +
+                '<h3 style="margin:0 0 12px;">Plugin files staged</h3>' +
+                '<p>Moodle has not completed the update. Please run the database upgrade to continue.</p>' +
                 '<button class="ainav-upgrade-close btn btn-primary">Run Upgrade Now</button>' +
                 '</div>'
             );

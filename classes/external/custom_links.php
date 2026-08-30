@@ -64,7 +64,9 @@ class custom_links extends external_api {
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
 
         // Validate URL
-        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+        $scheme = core_text::strtolower((string)parse_url($url, PHP_URL_SCHEME));
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL) ||
+                !in_array($scheme, array('http', 'https'), true)) {
             throw new \moodle_exception('invalidurl', 'error');
         }
 
@@ -177,7 +179,9 @@ class custom_links extends external_api {
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
 
         // Validate URL
-        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+        $scheme = core_text::strtolower((string)parse_url($url, PHP_URL_SCHEME));
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL) ||
+                !in_array($scheme, array('http', 'https'), true)) {
             throw new \moodle_exception('invalidurl', 'error');
         }
 

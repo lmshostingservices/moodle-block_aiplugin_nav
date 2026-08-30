@@ -56,7 +56,7 @@ class block_aiplugin_nav extends block_base {
      * Check if plugin is installed.
      * Static cache prevents repeated get_plugin_list() calls for the same type.
      */
-    private function is_plugin_installed($plugintype, $pluginname) {
+    public function is_plugin_installed($plugintype, $pluginname) {
         static $plugin_lists = array();
         if (!isset($plugin_lists[$plugintype])) {
             $plugin_lists[$plugintype] = core_component::get_plugin_list($plugintype);
@@ -261,7 +261,7 @@ class block_aiplugin_nav extends block_base {
      *
      * @return array Complete plugin registry with detection and URL patterns.
      */
-    private function get_master_plugin_registry() {
+    public function get_master_plugin_registry() {
         return array(
             // ===== AI PLUGINS (Credit-Based) =====
             // Note: Plugins with only Site ID/API Key don't have settings_url
@@ -418,6 +418,7 @@ class block_aiplugin_nav extends block_base {
                 'settings_url' => '/admin/settings.php?section=local_chirpvoice',
                 'icon' => 'headset',
                 'category' => 'ai_media',
+                'aliases' => 'AI Voiceover Chirp HD voice narration',
             ),
             'local_moodlesupport' => array(
                 'name' => 'AI Moodle Support',
@@ -437,6 +438,7 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/local/rtocompliance/ai_usage_report.php',
                 'icon' => 'briefcase',
                 'category' => 'ai_rto',
+                'aliases' => 'RTO AVETMISS VET compliance',
             ),
             'block_rtocompliance' => array(
                 'name' => 'RTO Compliance Dashboard',
@@ -670,15 +672,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'clock',
                 'category' => 'training',
             ),
-            'local_trainingpathways' => array(
-                'name' => 'Training Pathways',
-                'plugin_type' => 'local',
-                'plugin_name' => 'trainingpathways',
-                'settings_url' => '/admin/settings.php?section=local_trainingpathways',
-                'page_url' => '/local/trainingpathways/manage.php',
-                'icon' => 'map',
-                'category' => 'training',
-            ),
             'local_recertify' => array(
                 'name' => 'Course Recertification',
                 'plugin_type' => 'local',
@@ -688,6 +681,7 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/local/recertify/index.php',
                 'icon' => 'refresh-cw',
                 'category' => 'training',
+                'aliases' => 'recertify recertification renew certification',
             ),
             'local_completionsuspend' => array(
                 'name' => 'Completion Auto-Suspend',
@@ -698,26 +692,7 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/local/completionsuspend/index.php?tab=activity',
                 'icon' => 'user-check',
                 'category' => 'training',
-            ),
-            'block_trainingplan' => array(
-                'name' => 'Training Plan',
-                'plugin_type' => 'block',
-                'plugin_name' => 'trainingplan',
-                'settings_url' => '/admin/settings.php?section=blocksettingtrainingplan',
-                'page_url' => '/admin/settings.php?section=blocksettingtrainingplan',
-                'icon' => 'calendar-clock',
-                'category' => 'training',
-            ),
-            // Separate notifications entry so "Training Plan Notifications" is explicitly
-            // Searchable in the Settings dropdown — resolves to the same settings page
-            // Which contains the master kill switch, test recipients, cutoff, and exclusion list.
-            'block_trainingplan_notifications' => array(
-                'name' => 'Training Plan — Notifications',
-                'plugin_type' => 'block',
-                'plugin_name' => 'trainingplan',
-                'settings_url' => '/admin/settings.php?section=blocksettingtrainingplan',
-                'icon' => 'bell',
-                'category' => 'training',
+                'aliases' => 'completion suspend auto suspend users',
             ),
             'local_workshops' => array(
                 'name' => 'Workshop Scheduler',
@@ -859,7 +834,7 @@ class block_aiplugin_nav extends block_base {
      * Get the navigation links registry - dynamically built from installed plugins.
      * Automatically detects installed AI Grader ecosystem plugins.
      */
-    private function get_links_registry() {
+    public function get_links_registry() {
         global $CFG;
         
         $registry = $this->get_master_plugin_registry();
@@ -884,6 +859,7 @@ class block_aiplugin_nav extends block_base {
                     'plugin_name' => $plugin['plugin_name'],
                     'capability' => 'moodle/site:config',
                     'category' => $plugin['category'],
+                    'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
                 );
             }
             
@@ -896,6 +872,8 @@ class block_aiplugin_nav extends block_base {
                     'plugin_type' => $plugin['plugin_type'],
                     'plugin_name' => $plugin['plugin_name'],
                     'capability' => 'moodle/site:config',
+                    'category' => $plugin['category'],
+                    'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
                 );
             }
             
@@ -908,6 +886,8 @@ class block_aiplugin_nav extends block_base {
                     'plugin_type' => $plugin['plugin_type'],
                     'plugin_name' => $plugin['plugin_name'],
                     'capability' => 'moodle/site:config',
+                    'category' => $plugin['category'],
+                    'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
                 );
             }
         }
@@ -1056,6 +1036,7 @@ class block_aiplugin_nav extends block_base {
      */
     private function get_icon_svg($icon) {
         $icons = array(
+            'search' => '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
             'headset' => '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
             'file-text' => '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
             'video' => '<path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2" ry="2"/>',
@@ -1294,7 +1275,7 @@ class block_aiplugin_nav extends block_base {
      * Build the block content.
      */
     public function get_content() {
-        global $CFG, $OUTPUT, $PAGE, $USER;
+        global $CFG, $PAGE, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -1302,101 +1283,63 @@ class block_aiplugin_nav extends block_base {
 
         $this->content = new stdClass();
         $this->content->footer = '';
-        
-        // Get the theme primary color for inline styling.
+
         $primarycolor = $this->get_theme_primary_color();
-        
-        // Get links registry
         $registry = $this->get_links_registry();
-        
-        // Start building HTML with inline CSS variable for primary color.
+        $categories = $this->get_installed_plugins_by_category();
+        $installedcount = 0;
+        foreach ($categories as $plugins) {
+            $installedcount += count($plugins);
+        }
+
+        $hubbase = $CFG->wwwroot . '/blocks/aiplugin_nav/management_hub.php';
         $html = '<div class="ainav-container" style="--primary: ' . htmlspecialchars($primarycolor) . ';">';
-        $html .= '<div class="ainav-bar">';
-        
-        // Logo/Brand
-        $html .= '<div class="ainav-brand">';
+        $html .= '<div class="ainav-operations" aria-label="' .
+            s(get_string('managementhub', 'block_aiplugin_nav')) . '">';
+        $html .= '<a class="ainav-operations-brand" href="' . $hubbase . '?view=plugins">';
         $html .= '<svg class="ainav-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $html .= '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>';
         $html .= '</svg>';
-        $html .= '<span class="ainav-brand-text">AI Dashboard Quick Links</span>';
-        $html .= '</div>';
-        
-        // Navigation sections
-        $html .= '<div class="ainav-sections">';
-        
-        // Tools dropdown
-        if (!empty($registry['tools']['items'])) {
-            $html .= $this->render_dropdown('tools', $registry['tools']);
-        }
-        
-        // Settings dropdown
-        if (!empty($registry['settings']['items']) && has_capability('moodle/site:config', context_system::instance())) {
-            $html .= $this->render_dropdown('settings', $registry['settings']);
-        }
-        
-        // Manage dropdown (management pages like Cohort Branding, Groups, etc.)
-        if (!empty($registry['manage']['items']) && has_capability('moodle/site:config', context_system::instance())) {
-            $html .= $this->render_dropdown('manage', $registry['manage']);
-        }
-        
-        $html .= '</div>';
-        
-        // Credits are loaded asynchronously via AMD JS after page render.
-        // This prevents the block from blocking page load with a synchronous HTTP call.
-        // REMOVE-DUPE-CREDITS (v2.3.78): Standalone credits display removed — the credit
-        // Count badge next to the Buy Credits link is sufficient. No need for two displays.
-        $isadmin = has_capability('moodle/site:config', context_system::instance());
+        $html .= '<span><strong>' . s(get_string('managementhub', 'block_aiplugin_nav')) . '</strong>';
+        $html .= '<span class="ainav-operations-count">' .
+            s(get_string('installedplugincount', 'block_aiplugin_nav', $installedcount)) . '</span></span></a>';
 
-        // SHOW-CREDITS-TEACHERS (v2.3.88): Also show credit balance to editing teachers and
-        // Non-editing teachers so all staff using AI tools can see remaining credits.
-        // SHOW-CREDITS-LMSHSADMIN (v2.3.89): Also show to lmshsadmin (LMS Hosting Admin) role
-        // So client site admins who can't access Moodle admin menus can still see credit balance.
+        $html .= '<nav class="ainav-operations-links" aria-label="' .
+            s(get_string('hubviews', 'block_aiplugin_nav')) . '">';
+        $html .= '<button type="button" class="ainav-launcher-trigger" id="ainav-launcher-trigger" ' .
+            'aria-haspopup="dialog" aria-controls="ainav-action-launcher">';
+        $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $html .= $this->get_icon_svg('search');
+        $html .= '</svg><span>' . s(get_string('findanaction', 'block_aiplugin_nav')) . '</span></button>';
+        foreach (array('plugins', 'reports', 'updates', 'customlinks', 'help') as $view) {
+            if ($view === 'updates' && !has_capability('moodle/site:config', context_system::instance())) {
+                continue;
+            }
+            $html .= '<a href="' . $hubbase . '?view=' . $view . '">' .
+                s(get_string('hubview' . $view, 'block_aiplugin_nav')) . '</a>';
+        }
+        $html .= '</nav>';
+
+        $isadmin = has_capability('moodle/site:config', context_system::instance());
         $can_see_credits = $isadmin
             || $this->user_has_role_shortname($USER->id, 'editingteacher')
             || $this->user_has_role_shortname($USER->id, 'teacher')
             || $this->user_has_role_shortname($USER->id, 'lmshsadmin');
-        
-        // External links
-        $html .= '<div class="ainav-external">';
-        foreach ($registry['external']['items'] as $link) {
-            $html .= '<a href="' . $link['url'] . '" class="ainav-link ainav-link-external" target="_blank" rel="noopener">';
-            $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-            $html .= $this->get_icon_svg($link['icon']);
-            $html .= '</svg>';
-            // Hidden badge placeholder next to Buy Credits link — populated by credits.js.
-            if ($link['url'] === 'https://lms-labs.com/pricing' && $can_see_credits) {
-                $html .= '<span class="ainav-credits-badge" id="ainav-credits-badge" style="display:none;"></span>';
-            }
-            $html .= '<span>' . $link['name'] . '</span>';
-            
-            $html .= '</a>';
+        if ($can_see_credits) {
+            $html .= '<a class="ainav-operations-status" href="' . $hubbase . '?view=help">';
+            $html .= '<span>' . s(get_string('creditbalance', 'block_aiplugin_nav')) . '</span>';
+            $html .= '<span class="ainav-credits-badge" id="ainav-credits-badge" aria-live="polite">' .
+                s(get_string('balanceunavailable', 'block_aiplugin_nav')) . '</span></a>';
         }
         $html .= '</div>';
-        
-        $html .= '</div>'; // .ainav-bar
-        
-        // Site Quick Links Section (moved to top for quick user access)
-        $html .= $this->render_site_links_section();
-        
-        // AI Tools Quick Access Section
-        $html .= $this->render_ai_tools_section();
-        
-        // Cache Management Section (admin only)
-        $html .= $this->render_cache_management_section();
-        
-        // Add Report Modal
-        $html .= $this->render_create_report_modal();
-        
-        $html .= '</div>'; // .ainav-container
+        $html .= $this->render_action_launcher($registry);
+        $html .= '</div>';
 
-        // Load AMD module to fetch credits asynchronously after page render.
-        // Shown to admins, editing teachers, and non-editing teachers.
         if ($can_see_credits) {
             $PAGE->requires->js_call_amd('block_aiplugin_nav/credits', 'init');
         }
-        
+        $this->get_required_javascript();
         $this->content->text = $html;
-        
         return $this->content;
     }
     
@@ -1404,7 +1347,7 @@ class block_aiplugin_nav extends block_base {
      * Get the complete plugin registry for version checking and updates.
      * Each plugin has component name, status, download URL, description, and access info.
      */
-    private function get_complete_plugin_registry() {
+    public function get_complete_plugin_registry() {
         return array(
             // Configuration Plugin (Install First)
             array(
@@ -1971,29 +1914,6 @@ class block_aiplugin_nav extends block_base {
                 'goto_url' => '/payment/gateway/paddle/admin/reports.php',
             ),
             array(
-                'name' => 'Training Pathways',
-                'component' => 'local_trainingpathways',
-                'plugin_type' => 'local',
-                'plugin_name' => 'trainingpathways',
-                'icon' => 'map',
-                'category' => 'training',
-                'description' => 'Visual employee training journey management system. Create multi-stage training pathways, assign employees, and track task completion with real-time progress.',
-                'access' => 'Site admin > Plugins > Local plugins > Training Pathways',
-                'goto_url' => '/local/trainingpathways/manage.php',
-            ),
-            array(
-                'name' => 'Training Plan',
-                'component' => 'block_trainingplan',
-                'plugin_type' => 'block',
-                'plugin_name' => 'trainingplan',
-                'icon' => 'calendar-clock',
-                'category' => 'training',
-                'credits_required' => 5000,
-                'description' => 'Weekly overdue digest to trainers. One email per trainer listing every learner whose training plan has fallen behind — each shown against the specific course they are stuck on. Settings → Notification Settings to control the kill switch, test recipients, and overdue cutoff.',
-                'access' => 'Site admin > Plugins > Blocks > Training Plan > Notification Settings section',
-                'goto_url' => '/admin/settings.php?section=blocksettingtrainingplan',
-            ),
-            array(
                 'name' => 'Workshop Scheduler',
                 'component' => 'local_workshops',
                 'plugin_type' => 'local',
@@ -2129,26 +2049,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'box',
                 'category' => 'other',
                 'description' => 'Student Activity & Participation Evidence.',
-                'access' => 'Site admin > Plugins',
-            ),
-            array(
-                'name' => 'Training Pathways Block',
-                'component' => 'block_trainingpathways',
-                'plugin_type' => 'block',
-                'plugin_name' => 'trainingpathways',
-                'icon' => 'box',
-                'category' => 'other',
-                'description' => 'Training Pathways Block.',
-                'access' => 'Site admin > Plugins',
-            ),
-            array(
-                'name' => 'Prerequisite 2 Enrolment',
-                'component' => 'enrol_prereq2',
-                'plugin_type' => 'enrol',
-                'plugin_name' => 'prereq2',
-                'icon' => 'box',
-                'category' => 'other',
-                'description' => 'Prerequisite 2 Enrolment.',
                 'access' => 'Site admin > Plugins',
             ),
             array(
@@ -2419,16 +2319,26 @@ class block_aiplugin_nav extends block_base {
      */
     private function has_capability_anywhere($capability) {
         global $USER, $DB;
+
+        // Registry rendering asks the same capability question for many actions.
+        // Cache once per request so a large course enrolment list is never scanned
+        // repeatedly while building menus and launcher results.
+        static $capabilitycache = array();
+        if (array_key_exists($capability, $capabilitycache)) {
+            return $capabilitycache[$capability];
+        }
         
         // Admins always have access
         if (is_siteadmin()) {
-            return true;
+            $capabilitycache[$capability] = true;
+            return $capabilitycache[$capability];
         }
         
         // Check system context first
         $systemcontext = context_system::instance();
         if (has_capability($capability, $systemcontext)) {
-            return true;
+            $capabilitycache[$capability] = true;
+            return $capabilitycache[$capability];
         }
         
         // Get all courses the user is enrolled in
@@ -2436,11 +2346,13 @@ class block_aiplugin_nav extends block_base {
         foreach ($courses as $course) {
             $coursecontext = context_course::instance($course->id);
             if (has_capability($capability, $coursecontext)) {
-                return true;
+                $capabilitycache[$capability] = true;
+                return $capabilitycache[$capability];
             }
         }
         
-        return false;
+        $capabilitycache[$capability] = false;
+        return $capabilitycache[$capability];
     }
     
     /**
@@ -2448,6 +2360,8 @@ class block_aiplugin_nav extends block_base {
      * For admins, shows all installed plugins with status labels and update buttons.
      */
     private function render_ai_tools_section() {
+        global $USER;
+
         $context = context_system::instance();
         $is_admin = is_siteadmin() || has_capability('moodle/site:config', $context);
         
@@ -2513,7 +2427,8 @@ class block_aiplugin_nav extends block_base {
 
         // V4.9.108 STUDENT-DOC-REPOSITORY — inject "My Documents & Certificates" quick link
         // For students when local_rtocompliance is installed.
-        if ($this->is_plugin_installed('local', 'rtocompliance')) {
+        if ($this->is_plugin_installed('local', 'rtocompliance')
+                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))) {
             $html .= '<div style="margin-top:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.12);">';
             $html .= '<div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;'
                    . 'color:rgba(255,255,255,0.5);margin-bottom:6px;padding:0 4px;">My Portfolio</div>';
@@ -2618,11 +2533,11 @@ class block_aiplugin_nav extends block_base {
     /**
      * Get installed plugin version from version.php.
      */
-    private function get_plugin_version($plugin_type, $plugin_name) {
+    public function get_plugin_version($plugin_type, $plugin_name) {
         return $this->get_plugin_version_data($plugin_type, $plugin_name)['release'];
     }
 
-    private function get_plugin_numeric_version($plugin_type, $plugin_name) {
+    public function get_plugin_numeric_version($plugin_type, $plugin_name) {
         return $this->get_plugin_version_data($plugin_type, $plugin_name)['version'];
     }
     
@@ -2630,7 +2545,7 @@ class block_aiplugin_nav extends block_base {
      * Render plugin management section for admins.
      * Shows ALL plugins with status labels and update/install functionality.
      */
-    private function render_plugin_management_section() {
+    public function render_plugin_management_section() {
         $registry = $this->get_complete_plugin_registry();
         $all_plugins = array();
 
@@ -3401,7 +3316,7 @@ FDR_JS;
     /**
      * Get the documentation URL for a plugin.
      */
-    private function get_plugin_docs_url($component) {
+    public function get_plugin_docs_url($component) {
         $docs_urls = array(
             'quiz_aigrader' => 'https://lms-labs.com/docs/ai-grader',
             'local_aiquizmaker' => 'https://lms-labs.com/docs/ai-quiz-maker',
@@ -3424,9 +3339,6 @@ FDR_JS;
             'local_scormcompress' => 'https://lms-labs.com/docs/scorm-compress',
             'local_mediaoptimiser' => 'https://lms-labs.com/docs/media-optimiser',
             'local_groupmanager' => 'https://lms-labs.com/docs/groups-management',
-            'local_trainingmatrix' => 'https://lms-labs.com/docs/training-matrix',
-            'block_trainingmatrix' => 'https://lms-labs.com/docs/training-matrix',
-            'block_trainingmatrix_teacher' => 'https://lms-labs.com/docs/training-matrix',
             'block_my_progress' => 'https://lms-labs.com/docs/my-progress',
             'block_my_students_progress' => 'https://lms-labs.com/docs/my-students-progress',
             'local_activitynav' => 'https://lms-labs.com/docs/activity-navigation',
@@ -3455,8 +3367,6 @@ FDR_JS;
             'local_workshops' => 'https://lms-labs.com/docs/workshop-scheduler',
             'local_paymentunlockassign' => 'https://lms-labs.com/docs/payment-unlock-assignment',
             'paygw_paddle' => 'https://lms-labs.com/docs/paddle-payment',
-            'local_trainingpathways' => 'https://lms-labs.com/docs/training-pathways',
-            'block_trainingplan' => 'https://lms-labs.com/docs/training-plan',
             'local_chirpvoice' => 'https://lms-labs.com/docs/ai-voiceover',
             'local_studentemail' => 'https://lms-labs.com/docs/student-email-manager',
             'auth_studentemail' => 'https://lms-labs.com/docs/student-email-imap-auth',
@@ -3465,8 +3375,6 @@ FDR_JS;
             'local_lmshomepage' => 'https://lms-labs.com/docs/lms-home-page',
             'local_downalert' => 'https://lms-labs.com/docs/site-down-alert',
             'block_rtocompliance' => 'https://lms-labs.com/docs/rto-compliance',
-            'block_trainingpathways' => 'https://lms-labs.com/docs/training-pathways',
-            'enrol_prereq2' => 'https://lms-labs.com/docs/prereq2-enrolment',
             'local_campion' => 'https://lms-labs.com/docs/campion-integration',
             'local_completionsuspend' => 'https://lms-labs.com/docs/completion-auto-suspend',
             'local_custompage' => 'https://lms-labs.com/docs/custom-pages',
@@ -3567,6 +3475,52 @@ FDR_JS;
             ),
         );
     }
+
+    /**
+     * Get site quick links available to the current user.
+     *
+     * @return array Flat list of available quick links.
+     */
+    public function get_available_site_links() {
+        global $CFG, $USER, $DB;
+
+        $context = context_system::instance();
+        $registry = $this->get_site_links_registry();
+        $is_lmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
+        $links = array();
+
+        foreach ($registry as $groupid => $group) {
+            if (!empty($group['capability']) && !has_capability($group['capability'], $context)) {
+                continue;
+            }
+            foreach ($group['items'] as $link) {
+                if ($is_lmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
+                    continue;
+                }
+                $link['group'] = $groupid;
+                $link['groupname'] = $group['label'];
+                $links[] = $link;
+            }
+        }
+
+        if ($this->is_plugin_installed('local', 'studentemail') &&
+                !empty(get_config('local_studentemail', 'mailbox_enabled')) &&
+                $DB->get_manager()->table_exists('local_studentemail_accounts') &&
+                $DB->record_exists('local_studentemail_accounts', array(
+                    'userid' => $USER->id,
+                    'status' => 'active',
+                ))) {
+            $links[] = array(
+                'name' => get_string('my_email', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/local/studentemail/mailbox.php',
+                'icon' => 'mail',
+                'group' => 'user',
+                'groupname' => get_string('my_profile', 'block_aiplugin_nav'),
+            );
+        }
+
+        return $links;
+    }
     
     /**
      * Get available icons for the icon picker.
@@ -3580,7 +3534,7 @@ FDR_JS;
     /**
      * Get user's custom links from preferences.
      */
-    private function get_custom_links() {
+    public function get_custom_links() {
         global $USER;
         $links_json = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
         $links = json_decode($links_json, true);
@@ -3590,7 +3544,7 @@ FDR_JS;
     /**
      * Get user's custom reports from preferences.
      */
-    private function get_custom_reports() {
+    public function get_custom_reports() {
         global $USER;
         $reports_json = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
         $reports = json_decode($reports_json, true);
@@ -3604,20 +3558,20 @@ FDR_JS;
      *   - mailbox_enabled admin setting is on
      *   - the current user has an active row in local_studentemail_accounts
      */
-    private function render_student_email_quicklink(): string {
+    private function get_student_email_quicklink(): ?array {
         global $CFG, $USER, $DB;
 
         if (!$this->is_plugin_installed('local', 'studentemail')) {
-            return '';
+            return null;
         }
 
         $mailbox_enabled = get_config('local_studentemail', 'mailbox_enabled');
         if (empty($mailbox_enabled)) {
-            return '';
+            return null;
         }
 
         if (!$DB->get_manager()->table_exists('local_studentemail_accounts')) {
-            return '';
+            return null;
         }
 
         $account = $DB->get_record('local_studentemail_accounts', [
@@ -3625,18 +3579,32 @@ FDR_JS;
             'status' => 'active',
         ]);
         if (!$account) {
+            return null;
+        }
+
+        return array(
+            'name' => get_string('my_email', 'block_aiplugin_nav'),
+            'url' => $CFG->wwwroot . '/local/studentemail/mailbox.php',
+            'icon' => 'mail',
+        );
+    }
+
+    /**
+     * Render a "My Email" quicklink for students who have an active provisioned mailbox.
+     */
+    private function render_student_email_quicklink(): string {
+        $link = $this->get_student_email_quicklink();
+        if (!$link) {
             return '';
         }
 
-        $url   = $CFG->wwwroot . '/local/studentemail/mailbox.php';
-        $label = get_string('my_email', 'block_aiplugin_nav');
-        $html  = '<a href="' . $url . '" class="ainav-site-link-card ainav-myemail-link">';
+        $html  = '<a href="' . $link['url'] . '" class="ainav-site-link-card ainav-myemail-link">';
         $html .= '<div class="ainav-site-link-icon">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-        $html .= $this->get_icon_svg('mail');
+        $html .= $this->get_icon_svg($link['icon']);
         $html .= '</svg>';
         $html .= '</div>';
-        $html .= '<div class="ainav-site-link-name">' . $label . '</div>';
+        $html .= '<div class="ainav-site-link-name">' . $link['name'] . '</div>';
         $html .= '</a>';
 
         return $html;
@@ -3727,7 +3695,7 @@ FDR_JS;
     /**
      * Render the Cache Management section (admin only).
      */
-    private function render_cache_management_section() {
+    public function render_cache_management_section() {
         global $DB;
         $context = context_system::instance();
         
@@ -4086,6 +4054,193 @@ FDR_JS;
         
         return $html;
     }
+
+    /**
+     * Render the installed-only action launcher from the same registry as the legacy menus.
+     *
+     * @param array $registry Navigation registry.
+     * @return string
+     */
+    private function render_action_launcher($registry) {
+        global $CFG, $USER;
+
+        $categorylabels = array(
+            'config' => 'Central configuration',
+            'ai_grading' => 'AI grading and assessment',
+            'ai_content' => 'AI content and courses',
+            'ai_media' => 'AI voice and media',
+            'ai_rto' => 'RTO AVETMISS and compliance',
+            'ai_ux' => 'AI personalisation',
+            'block' => 'Blocks and dashboards',
+            'training' => 'Training scheduling and course operations',
+            'enrolment' => 'Enrolment and access',
+            'integrity' => 'Academic integrity',
+            'comms' => 'Communications',
+            'branding' => 'Branding and appearance',
+            'media_storage' => 'Media and storage',
+            'security' => 'Security authentication and SSO',
+            'reporting' => 'Reporting and analytics',
+            'payments' => 'Payments',
+        );
+        $actions = array();
+        $seen = array();
+        $groups = array(
+            'Settings' => array_merge(
+                isset($registry['settings']['ai_items']) ? $registry['settings']['ai_items'] : array(),
+                isset($registry['settings']['admin_items']) ? $registry['settings']['admin_items'] : array()
+            ),
+            'Manage' => isset($registry['manage']['items']) ? $registry['manage']['items'] : array(),
+            'Report' => isset($registry['tools']['items']) ? $registry['tools']['items'] : array(),
+        );
+
+        foreach ($groups as $actionlabel => $items) {
+            foreach ($items as $item) {
+                if (!empty($item['capability']) && !$this->has_capability_anywhere($item['capability'])) {
+                    continue;
+                }
+                if (empty($item['url']) || empty($item['name'])) {
+                    continue;
+                }
+                $key = $actionlabel . '|' . $item['url'] . '|' . $item['name'];
+                if (isset($seen[$key])) {
+                    continue;
+                }
+                $seen[$key] = true;
+                $component = trim(
+                    (isset($item['plugin_type']) ? $item['plugin_type'] : '') . '_' .
+                    (isset($item['plugin_name']) ? $item['plugin_name'] : ''),
+                    '_'
+                );
+                $category = isset($item['category']) ? $item['category'] : '';
+                $actions[] = array(
+                    'name' => $item['name'],
+                    'action' => $actionlabel,
+                    'url' => $item['url'],
+                    'category' => isset($categorylabels[$category]) ? $categorylabels[$category] : $category,
+                    'aliases' => trim(
+                        str_replace(array('_', '-'), ' ', $component . ' ' . (isset($item['plugin_name']) ? $item['plugin_name'] : '')) .
+                        ' ' . (isset($item['aliases']) ? $item['aliases'] : '')
+                    ),
+                );
+            }
+        }
+
+        foreach ($this->get_custom_reports() as $report) {
+            if (empty($report['url']) || empty($report['name'])) {
+                continue;
+            }
+            $actions[] = array(
+                'name' => $report['name'],
+                'action' => 'Report',
+                'url' => $report['url'],
+                'category' => 'Custom reports',
+                'aliases' => 'custom saved report',
+                'external' => true,
+            );
+        }
+
+        // Site Quick Links use the same capability and role visibility rules as
+        // Their rendered cards.
+        $context = context_system::instance();
+        $is_lmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
+        foreach ($this->get_site_links_registry() as $group) {
+            if (!empty($group['capability']) && !has_capability($group['capability'], $context)) {
+                continue;
+            }
+            foreach ($group['items'] as $link) {
+                if ($is_lmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
+                    continue;
+                }
+                $actions[] = array(
+                    'name' => $link['name'],
+                    'action' => 'Site',
+                    'url' => $link['url'],
+                    'category' => 'Site quick links',
+                    'aliases' => 'Moodle account administration navigation',
+                );
+            }
+        }
+
+        $email = $this->get_student_email_quicklink();
+        if ($email) {
+            $actions[] = array(
+                'name' => $email['name'],
+                'action' => 'Open',
+                'url' => $email['url'],
+                'category' => 'Site quick links communications',
+                'aliases' => 'mail mailbox student email',
+            );
+        }
+
+        foreach ($this->get_custom_links() as $link) {
+            if (empty($link['url']) || empty($link['name'])) {
+                continue;
+            }
+            $actions[] = array(
+                'name' => $link['name'],
+                'action' => 'Open',
+                'url' => $link['url'],
+                'category' => 'Custom site links',
+                'aliases' => 'custom saved quick link',
+                'external' => true,
+            );
+        }
+
+        // Student portfolio links are rendered in the non-admin tools section.
+        $isadmin = is_siteadmin() || has_capability('moodle/site:config', $context);
+        if (!$isadmin
+                && $this->is_plugin_installed('local', 'rtocompliance')
+                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))) {
+            $actions[] = array(
+                'name' => 'My Documents & Certificates',
+                'action' => 'Open',
+                'url' => (new moodle_url('/local/rtocompliance/mydocs.php'))->out(false),
+                'category' => 'My portfolio RTO compliance',
+                'aliases' => 'student documents files evidence',
+            );
+            $actions[] = array(
+                'name' => 'My Certificates',
+                'action' => 'Open',
+                'url' => (new moodle_url('/local/rtocompliance/mycerts.php'))->out(false),
+                'category' => 'My portfolio RTO compliance',
+                'aliases' => 'student certificates awards',
+            );
+        }
+
+        foreach ($registry['external']['items'] as $link) {
+            if (empty($link['url']) || empty($link['name'])) {
+                continue;
+            }
+            $actions[] = array(
+                'name' => $link['name'],
+                'action' => 'External',
+                'url' => $link['url'],
+                'category' => 'LMS Labs help account and services',
+                'aliases' => 'website pricing credits affiliate',
+                'external' => true,
+            );
+        }
+
+        usort($actions, function ($a, $b) {
+            return strcasecmp($a['name'] . $a['action'], $b['name'] . $b['action']);
+        });
+
+        $json = json_encode($actions, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $html = '<div class="ainav-launcher-overlay" id="ainav-action-launcher" role="dialog" aria-modal="true" aria-labelledby="ainav-launcher-title" aria-describedby="ainav-launcher-status" aria-hidden="true">';
+        $html .= '<div class="ainav-launcher-panel">';
+        $html .= '<div class="ainav-launcher-header"><div><h2 id="ainav-launcher-title">Find an action</h2><p>Search installed plugin settings, management pages, and reports.</p></div>';
+        $html .= '<button type="button" class="ainav-launcher-close" aria-label="Close action launcher">';
+        $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' . $this->get_icon_svg('x') . '</svg></button></div>';
+        $html .= '<div class="ainav-launcher-search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' . $this->get_icon_svg('search') . '</svg>';
+        $html .= '<label class="sr-only" for="ainav-launcher-search">Search actions</label>';
+        $html .= '<input type="search" id="ainav-launcher-search" autocomplete="off" placeholder="Try a plugin, task, category, or report" aria-controls="ainav-launcher-results"></div>';
+        $html .= '<div id="ainav-launcher-status" class="ainav-launcher-status" aria-live="polite" aria-atomic="true"></div>';
+        $html .= '<div id="ainav-launcher-results" class="ainav-launcher-results"></div>';
+        $html .= '<div class="ainav-launcher-empty" hidden>No matching actions. Try a plugin name, “settings”, “manage”, “report”, or a category such as compliance.</div>';
+        $html .= '</div></div>';
+        $html .= '<script type="application/json" id="ainav-launcher-actions">' . $json . '</script>';
+        return $html;
+    }
     
     /**
      * Render the Create Report modal.
@@ -4152,6 +4307,140 @@ FDR_JS;
         
         $PAGE->requires->js_amd_inline("
             require(['jquery', 'core/ajax', 'core/notification'], function ($, Ajax, Notification) {
+                // Accessible action launcher.
+                var launcher = $('#ainav-action-launcher');
+                var launcherTrigger = $('#ainav-launcher-trigger');
+                var launcherSearch = $('#ainav-launcher-search');
+                var launcherResults = $('#ainav-launcher-results');
+                var launcherStatus = $('#ainav-launcher-status');
+                var launcherEmpty = launcher.find('.ainav-launcher-empty');
+                var launcherActions = [];
+                var launcherLastFocus = null;
+                var launcherActive = -1;
+                try {
+                    launcherActions = JSON.parse($('#ainav-launcher-actions').text() || '[]');
+                } catch (ignore) {}
+
+                function normaliseLauncherText(value) {
+                    return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+                }
+
+                function renderLauncherResults() {
+                    var query = normaliseLauncherText(launcherSearch.val());
+                    var terms = query ? query.split(/\\s+/) : [];
+                    var matches = launcherActions.filter(function (item) {
+                        var haystack = normaliseLauncherText([
+                            item.name, item.action, item.category, item.aliases
+                        ].join(' '));
+                        return terms.every(function (term) { return haystack.indexOf(term) !== -1; });
+                    });
+                    launcherResults.empty();
+                    matches.forEach(function (item) {
+                        var link = $('<a class=\"ainav-launcher-result\"></a>').attr('href', item.url);
+                        if (item.external) {
+                            link.attr({target: '_blank', rel: 'noopener'});
+                        }
+                        $('<span class=\"ainav-launcher-result-action\"></span>').text(item.action).appendTo(link);
+                        var copy = $('<span class=\"ainav-launcher-result-copy\"></span>').appendTo(link);
+                        $('<strong></strong>').text(item.name).appendTo(copy);
+                        var metadata = item.category || 'Installed plugin';
+                        if (item.external) {
+                            metadata += ' · Opens in a new window';
+                        }
+                        $('<small></small>').text(metadata).appendTo(copy);
+                        launcherResults.append(link);
+                    });
+                    launcherActive = -1;
+                    launcherEmpty.prop('hidden', matches.length !== 0);
+                    launcherStatus.text(matches.length + (matches.length === 1 ? ' action available.' : ' actions available.'));
+                }
+
+                function closeLauncher() {
+                    if (!launcher.hasClass('is-open')) {
+                        return;
+                    }
+                    launcher.removeClass('is-open').attr('aria-hidden', 'true');
+                    $('body').removeClass('ainav-launcher-open');
+                    if (launcherLastFocus) {
+                        launcherLastFocus.focus();
+                    }
+                }
+
+                function openLauncher() {
+                    launcherLastFocus = document.activeElement;
+                    $('.ainav-dropdown').removeClass('is-open');
+                    launcher.addClass('is-open').attr('aria-hidden', 'false');
+                    $('body').addClass('ainav-launcher-open');
+                    renderLauncherResults();
+                    window.setTimeout(function () { launcherSearch.trigger('focus'); }, 0);
+                }
+
+                launcherTrigger.on('click', openLauncher);
+                launcher.find('.ainav-launcher-close').on('click', closeLauncher);
+                launcher.on('click', function (e) {
+                    if (e.target === this) {
+                        closeLauncher();
+                    }
+                });
+                launcherSearch.on('input', renderLauncherResults);
+                launcherSearch.on('keydown', function (e) {
+                    var results = launcherResults.find('.ainav-launcher-result');
+                    if (!results.length || ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(e.key) === -1) {
+                        return;
+                    }
+                    e.preventDefault();
+                    if (e.key === 'Home') {
+                        launcherActive = 0;
+                    } else if (e.key === 'End') {
+                        launcherActive = results.length - 1;
+                    } else if (e.key === 'ArrowDown') {
+                        launcherActive = (launcherActive + 1) % results.length;
+                    } else {
+                        launcherActive = launcherActive <= 0 ? results.length - 1 : launcherActive - 1;
+                    }
+                    results.eq(launcherActive).trigger('focus');
+                });
+                launcher.on('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        closeLauncher();
+                        return;
+                    }
+                    if (e.key === 'Tab') {
+                        var focusable = launcher.find('button:visible, input:visible, a:visible');
+                        if (!focusable.length) {
+                            return;
+                        }
+                        var first = focusable[0];
+                        var last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) {
+                            e.preventDefault();
+                            last.focus();
+                        } else if (!e.shiftKey && document.activeElement === last) {
+                            e.preventDefault();
+                            first.focus();
+                        }
+                    }
+                });
+                launcherResults.on('keydown', '.ainav-launcher-result', function (e) {
+                    var results = launcherResults.find('.ainav-launcher-result');
+                    var index = results.index(this);
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
+                        e.preventDefault();
+                        if (e.key === 'Home') {
+                            index = 0;
+                        } else if (e.key === 'End') {
+                            index = results.length - 1;
+                        } else if (e.key === 'ArrowDown') {
+                            index = (index + 1) % results.length;
+                        } else {
+                            index = index <= 0 ? results.length - 1 : index - 1;
+                        }
+                        launcherActive = index;
+                        results.eq(index).trigger('focus');
+                    }
+                });
+
                 // Toggle dropdown on click
                 $('.ainav-dropdown-trigger').on('click', function (e) {
                     e.stopPropagation();
@@ -4378,9 +4667,9 @@ FDR_JS;
                     }]);
                 });
                 
-                // ============================================
+                // --------------------------------------------
                 // Plugin Version Checking (v1.7.0)
-                // ============================================
+                // --------------------------------------------
 
                 // FIX-ENDPOINT-ORDER (v2.4.16): PHP proxy moved to position #1.
                 // The PHP proxy (check_versions.php) already has its own multi-endpoint
@@ -4521,11 +4810,17 @@ FDR_JS;
                             updateIcon.show().attr('data-downloadurl', latestDlUrl).attr('data-sha256', latest.sha256 || '').css('cursor', 'pointer');
                             pluginsNeedingUpdate.push({
                                 component: component,
-                                name: latest.name,
+                                name: latest.name || component,
                                 downloadUrl: latestDlUrl,
                                 sha256: latest.sha256 || '',
                                 installedVersion: plugin.installedVersion || '?',
-                                latestVersion: latest.version || '?'
+                                latestVersion: latest.version || '?',
+                                releaseDate: latest.releaseDate || 'Not supplied',
+                                compatibility: latest.compatibility || latest.moodleCompatibility ||
+                                    (latest.documentation && Array.isArray(latest.documentation.requirements)
+                                        ? latest.documentation.requirements.join('; ')
+                                        : 'Not supplied — confirm with LMS Labs before staging'),
+                                changelog: Array.isArray(latest.changelog) ? latest.changelog : []
                             });
                         } else if (comparison === 0) {
                             // Latest version - show testing (orange) or ready (green)
@@ -4546,7 +4841,7 @@ FDR_JS;
                     // Show/hide Auto Update All button only
                     if (pluginsNeedingUpdate.length > 0) {
                         $('#ainav-update-all').hide(); // Hide Download All - Auto Update All is primary
-                        $('#ainav-autoupdate-all').show().find('span').text('Auto Update All (' + pluginsNeedingUpdate.length + ')');
+                        $('#ainav-autoupdate-all').show().find('span').text('Review Updates (' + pluginsNeedingUpdate.length + ')');
                     } else {
                         $('#ainav-update-all').hide();
                         $('#ainav-autoupdate-all').hide();
@@ -4602,11 +4897,11 @@ FDR_JS;
                     if (toast) toast.classList.remove('ainav-uptodate-toast-visible');
                 });
 
-                // ============================================================
+                // ------------------------------------------------------------
                 // Plugin Update Popup (v2.3.83)
                 // Shown after \"Check for Updates\" completes. Mirrors the popup
                 // on the lms-labs.com admin panel.
-                // ============================================================
+                // ------------------------------------------------------------
                 function showUpdatePopup(updates) {
                     var overlay = document.getElementById('ainav-update-popup-overlay');
                     if (!overlay) return;
@@ -4948,7 +5243,7 @@ FDR_JS;
                             if (response.success) {
                                 btn.html('<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"/></svg>');
                                 btn.removeClass('ainav-pm-action-install').addClass('ainav-pm-action-success');
-                                Notification.addNotification({message: pluginName + ' installed! Redirecting to upgrade...', type: 'success'});
+                                Notification.addNotification({message: pluginName + ' files staged. Continuing to Moodle upgrade...', type: 'success'});
                                 // Redirect to admin page for database upgrade
                                 setTimeout(function () {
                                     window.location.href = M.cfg.wwwroot + '/admin/index.php';
@@ -4981,68 +5276,155 @@ FDR_JS;
                     }
                 }
                 
-                // Update icon click - trigger auto update (v2.2.32)
-                $(document).on('click', '.ainav-pm-action-update', function () {
-                    var icon = $(this);
-                    var downloadUrl = icon.attr('data-downloadurl');
-                    var component = icon.data('component');
-                    var card = icon.closest('.ainav-pm-card');
-                    var pluginName = card.find('.ainav-pm-name').text();
-                    
-                    if (!downloadUrl) {
-                        console.log('[AI Quick Links] No download URL for update icon');
+                function ainavEsc(value) {
+                    return $('<span>').text(String(value == null ? '' : value)).html();
+                }
+
+                function findReviewedUpdate(component) {
+                    return pluginsNeedingUpdate.filter(function (plugin) {
+                        return plugin.component === component;
+                    })[0] || null;
+                }
+
+                function showUpdateReview(candidates, bulk) {
+                    var valid = candidates.filter(function (plugin) {
+                        return plugin && /^[a-f0-9]{64}$/i.test(plugin.sha256 || '');
+                    });
+                    if (valid.length !== candidates.length) {
+                        Notification.alert('Update Cannot Be Verified',
+                            'One or more selected releases has no valid published SHA-256. Check for updates again; no files were changed.');
                         return;
                     }
-                    
-                    console.log('[AI Quick Links] Single plugin update:', component, downloadUrl);
-                    
-                    // Show loading state with spinner
-                    icon.css('pointer-events', 'none');
-                    icon.html('<span class=\"ainav-spinner\"></span>');
-                    
-                    // Call the auto-update external function (use Ajax/Notification from outer scope)
-                    Ajax.call([{
-                        methodname: 'block_aiplugin_nav_auto_update_plugin',
+
+                    var rows = valid.map(function (plugin, index) {
+                        var notes = plugin.changelog.length
+                            ? '<ul>' + plugin.changelog.slice(0, 5).map(function (note) {
+                                return '<li>' + ainavEsc(note) + '</li>';
+                            }).join('') + '</ul>'
+                            : '<em>No release notes were supplied.</em>';
+                        return '<article style=\"border:1px solid #d1d5db;border-radius:6px;padding:12px;margin:10px 0;\">' +
+                            '<label style=\"display:flex;gap:10px;align-items:flex-start;\">' +
+                            '<input type=\"checkbox\" class=\"ainav-review-select\" data-index=\"' + index + '\" ' +
+                            (bulk ? '' : 'checked disabled') + ' style=\"margin-top:5px;\">' +
+                            '<span><strong>' + ainavEsc(plugin.name) + '</strong> <code>' + ainavEsc(plugin.component) + '</code><br>' +
+                            'Installed: ' + ainavEsc(plugin.installedVersion) + ' &rarr; Available: ' + ainavEsc(plugin.latestVersion) + '<br>' +
+                            'Release date: ' + ainavEsc(plugin.releaseDate) + '<br>' +
+                            'Moodle compatibility: ' + ainavEsc(plugin.compatibility) + '<br>' +
+                            'SHA-256 verified by server before staging: <code>' + ainavEsc(plugin.sha256) + '</code><br>' +
+                            '<strong>Release notes</strong>' + notes + '</span></label></article>';
+                    }).join('');
+
+                    var overlay = $('<div class=\"ainav-update-review\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"ainav-review-title\" ' +
+                        'style=\"position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;\">' +
+                        '<div style=\"background:#fff;color:#111;border-radius:8px;padding:22px;max-width:760px;width:100%;max-height:90vh;overflow:auto;\">' +
+                        '<h3 id=\"ainav-review-title\">Review plugin updates</h3>' +
+                        '<p>Select only the plugins you reviewed. Files will be staged one at a time; Moodle must still confirm the database upgrade.</p>' +
+                        rows +
+                        '<div class=\"ainav-review-status\" aria-live=\"polite\"></div>' +
+                        '<div style=\"display:flex;justify-content:flex-end;gap:8px;margin-top:16px;\">' +
+                        '<button type=\"button\" class=\"btn btn-secondary ainav-review-cancel\">Cancel</button>' +
+                        '<button type=\"button\" class=\"btn btn-primary ainav-review-confirm\" disabled>Confirm selected updates</button>' +
+                        '</div></div></div>');
+                    $('body').append(overlay);
+                    var confirm = overlay.find('.ainav-review-confirm');
+                    function selected() {
+                        return overlay.find('.ainav-review-select:checked').map(function () {
+                            return valid[parseInt($(this).attr('data-index'), 10)];
+                        }).get();
+                    }
+                    function refreshConfirm() {
+                        var count = selected().length;
+                        confirm.prop('disabled', count === 0).text('Confirm ' + count + ' selected update' + (count === 1 ? '' : 's'));
+                    }
+                    overlay.on('change', '.ainav-review-select', refreshConfirm);
+                    overlay.find('.ainav-review-cancel').on('click', function () { overlay.remove(); });
+                    confirm.on('click', function () {
+                        var reviewed = selected();
+                        if (!reviewed.length) return;
+                        overlay.find('input, button').prop('disabled', true);
+                        stageReviewedUpdates(reviewed, overlay.find('.ainav-review-status'), confirm);
+                    });
+                    refreshConfirm();
+                    overlay.find('.ainav-review-select').first().trigger('focus');
+                }
+
+                function stageReviewedUpdates(reviewed, status, confirm) {
+                    var outcomes = [];
+                    function finish(failedIndex) {
+                        var staged = outcomes.filter(function (o) { return o.result === 'staged'; });
+                        var failed = outcomes.filter(function (o) { return o.result === 'failed'; });
+                        var notStarted = failedIndex == null ? [] : reviewed.slice(failedIndex + 1);
+                        var html = '<h4>Staging outcome</h4><ul>' +
+                            staged.map(function (o) { return '<li>' + ainavEsc(o.name) + ': files staged; Moodle upgrade required</li>'; }).join('') +
+                            failed.map(function (o) { return '<li><strong>' + ainavEsc(o.name) + ': failed</strong> — ' + ainavEsc(o.message) + '</li>'; }).join('') +
+                            notStarted.map(function (o) { return '<li>' + ainavEsc(o.name) + ': not started because the batch stopped safely</li>'; }).join('') +
+                            '</ul><p>No update is complete until Moodle confirms its upgrade.</p>';
+                        status.html(html);
+                        confirm.hide();
+                        var actions = $('<div style=\"display:flex;justify-content:flex-end;gap:8px\"></div>');
+                        var close = $('<button type=\"button\" class=\"btn btn-secondary\">Close</button>');
+                        close.on('click', function () { status.closest('.ainav-update-review').remove(); });
+                        actions.append(close);
+                        if (failed.length) {
+                            var retry = $('<button type=\"button\" class=\"btn btn-secondary\">Review failed plugin again</button>');
+                            retry.on('click', function () {
+                                status.closest('.ainav-update-review').remove();
+                                showUpdateReview([reviewed[failedIndex]], false);
+                            });
+                            actions.append(retry);
+                        }
+                        if (staged.length) {
+                            actions.append($('<a class=\"btn btn-primary\">Continue to Moodle upgrade</a>')
+                                .attr('href', M.cfg.wwwroot + '/admin/index.php'));
+                        }
+                        status.after(actions);
+                    }
+                    function next(index) {
+                        if (index >= reviewed.length) {
+                            finish(null);
+                            return;
+                        }
+                        var plugin = reviewed[index];
+                        status.text('Staging ' + (index + 1) + ' of ' + reviewed.length + ': ' + plugin.name);
+                        Ajax.call([{
+                            methodname: 'block_aiplugin_nav_auto_update_plugin',
                             args: {
-                                downloadurl: downloadUrl,
-                                component: component,
-                                expectedsha256: (latestVersions && latestVersions[component] && latestVersions[component].sha256) || ''
-                            },
-                            done: function (response) {
-                                console.log('[AI Quick Links] Update response:', response);
-                                if (response.success) {
-                                    icon.hide();
-                                    // Show upgrade prompt modal (same as Update All flow)
-                                    showUpgradePrompt(pluginName);
-                                } else {
-                                    Notification.alert('Update Failed', response.message || 'Could not install plugin. Check file permissions.');
-                                    icon.css('opacity', '1').css('pointer-events', 'auto');
-                                }
-                            },
-                            fail: function (error) {
-                                console.error('[AI Quick Links] Update failed:', error);
-                                Notification.alert('Update Failed', 'Could not install plugin: ' + (error.message || 'Unknown error'));
-                                icon.html('<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"#22c55e\" stroke-width=\"2\"><path d=\"M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83\"/></svg>');
-                                icon.css('pointer-events', 'auto');
+                                downloadurl: plugin.downloadUrl,
+                                component: plugin.component,
+                                expectedsha256: plugin.sha256,
+                                expectedversion: plugin.latestVersion,
+                                reviewconfirmed: 1
                             }
-                        }]);
+                        }])[0].done(function (response) {
+                            if (!response.success) {
+                                outcomes.push({name: plugin.name, result: 'failed', message: response.message || 'Unknown error'});
+                                finish(index);
+                                return;
+                            }
+                            outcomes.push({name: plugin.name, result: 'staged'});
+                            $('.ainav-pm-action-update[data-component=\"' + plugin.component + '\"]').hide();
+                            next(index + 1);
+                        }).fail(function (error) {
+                            outcomes.push({name: plugin.name, result: 'failed', message: (error && error.message) || 'Request failed'});
+                            finish(index);
+                        });
+                    }
+                    next(0);
+                }
+
+                // Update icon click opens review; it never starts an update directly.
+                $(document).on('click', '.ainav-pm-action-update', function () {
+                    var icon = $(this);
+                    var component = icon.data('component');
+                    var plugin = findReviewedUpdate(component);
+                    if (plugin) showUpdateReview([plugin], false);
                 });
                 
                 // Update All functionality
                 $('#ainav-update-all').on('click', function () {
                     if (pluginsNeedingUpdate.length === 0) return;
                     
-                    // Download all plugins that need updates
-                    pluginsNeedingUpdate.forEach(function (plugin, index) {
-                        setTimeout(function () {
-                            window.open(plugin.downloadUrl, '_blank');
-                        }, index * 500); // Stagger downloads by 500ms
-                    });
-                    
-                    // Show success message
-                    var names = pluginsNeedingUpdate.map(function (p) { return p.name; }).join(', ');
-                    $('#ainav-success-message').text(pluginsNeedingUpdate.length + ' plugin download(s) started: ' + names + '. Install via Site Admin > Plugins > Install plugins.');
-                    $('#ainav-update-success-modal').addClass('is-open');
+                    showUpdateReview(pluginsNeedingUpdate.slice(), true);
                 });
                 
                 // Close success modal
@@ -5055,121 +5437,18 @@ FDR_JS;
                 // Legacy: AUTO UPDATE - Individual plugin button (v1.8.0) - kept for backwards compatibility
                 // Note: v2.2.32+ uses the update icon click handler above
                 
-                // AUTO UPDATE ALL (v1.8.0) - uses Ajax/Notification from outer scope
+                // Bulk action opens an itemized, opt-in review. Nothing is preselected.
                 $('#ainav-autoupdate-all').on('click', function () {
                     if (pluginsNeedingUpdate.length === 0) return;
-                    
-                    var btn = $(this);
-                    var originalHtml = btn.html();
-                    var completed = 0;
-                    var failed = 0;
-                    var failedDetails = []; // Collect actual error messages per plugin
-
-                    // Always update block_aiplugin_nav first so the latest plugin_updater.php
-                    // is on disk before touching any other plugin.  Each subsequent AJAX call
-                    // is a fresh PHP request, so the new installer takes effect immediately
-                    // without a page reload.
-                    pluginsNeedingUpdate = pluginsNeedingUpdate.slice().sort(function (a, b) {
-                        if (a.component === 'block_aiplugin_nav') return -1;
-                        if (b.component === 'block_aiplugin_nav') return 1;
-                        return 0;
-                    });
-                    var selfUpdating = pluginsNeedingUpdate.length > 0 &&
-                                       pluginsNeedingUpdate[0].component === 'block_aiplugin_nav';
-                    
-                    btn.html('<span class=\"ainav-spinner\"></span> Updating...').prop('disabled', true);
-                    
-                    var calls = pluginsNeedingUpdate.map(function (plugin) {
-                        return {
-                            methodname: 'block_aiplugin_nav_auto_update_plugin',
-                            args: {
-                                downloadurl: plugin.downloadUrl,
-                                component: plugin.component,
-                                expectedsha256: plugin.sha256 || ''
-                            }
-                        };
-                    });
-                    
-                    // Process sequentially to avoid overwhelming the server
-                    function processNext(index) {
-                        if (index >= calls.length) {
-                            // All done
-                            if (failed === 0) {
-                                // Change button to show success and prompt refresh (use Unicode checkmark)
-                                btn.text('\\u2713 Refresh').addClass('ainav-btn-success').prop('disabled', false);
-                                btn.attr('title', 'Refresh this page to finish the update process');
-                                // Change click handler to refresh page
-                                btn.off('click').on('click', function () {
-                                    window.location.href = M.cfg.wwwroot + '/admin/index.php';
-                                });
-                            } else {
-                                btn.html(originalHtml).prop('disabled', false);
-                                // Build detailed error message showing each plugin's reason
-                                // Escape helper — prevents XSS from API-controlled name/reason strings.
-                                function ainav_esc(str) { return $('<span>').text(String(str || '')).html(); }
-                                var detailMsg = completed + ' plugins updated, ' + failed + ' failed.';
-                                if (failedDetails.length > 0) {
-                                    detailMsg += '<br><br><strong>Failure details:</strong><ul style=\"text-align:left;margin:8px 0 0 0;padding-left:18px;\">';
-                                    failedDetails.forEach(function (d) {
-                                            var hint = '';
-                                         if (d.reason.indexOf('remove old plugin') !== -1 || d.reason.indexOf('write permission') !== -1) {
-                                             hint = '<br><em style=\"color:#555;font-size:.87em;\">Fix: run <code>sudo chown -R www-data:www-data</code> on the plugin directory, then update <strong>block_aiplugin_nav</strong> manually to get the latest auto-updater before retrying.</em>';
-                                         } else if (d.reason.indexOf('Component mismatch') !== -1) {
-                                             hint = '<br><em style=\"color:#555;font-size:.87em;\">Fix: update <strong>block_aiplugin_nav</strong> to the latest version manually, then retry — the ZIP component mapping has been corrected.</em>';
-                                         }
-                                         detailMsg += '<li style=\"margin-bottom:6px;\"><strong>' + ainav_esc(d.name) + ':</strong> ' + ainav_esc(d.reason) + hint + '</li>';
-                                    });
-                                    detailMsg += '</ul>';
-                                }
-                                // Use a custom modal so HTML renders (Notification.alert strips HTML)
-                                var overlay = $('<div style=\"position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;\"></div>');
-                                var modal = $('<div style=\"background:#fff;border-radius:8px;padding:24px 28px;max-width:520px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.25);\"><h4 style=\"margin:0 0 12px;color:#b91c1c;font-size:1.1rem;\">Auto Update Failed</h4><div style=\"font-size:.92rem;line-height:1.5;\">' + detailMsg + '</div><div style=\"text-align:right;margin-top:20px;\"><button style=\"background:#2563eb;color:#fff;border:none;border-radius:6px;padding:8px 20px;cursor:pointer;font-size:.9rem;\">OK</button></div></div>');
-                                modal.find('button').on('click', function () { overlay.remove(); });
-                                overlay.on('click', function (e) { if (e.target === overlay[0]) overlay.remove(); });
-                                overlay.append(modal);
-                                $('body').append(overlay);
-                            }
-                            return;
-                        }
-                        
-                        var currentPlugin = pluginsNeedingUpdate[index];
-                        Ajax.call([calls[index]])[0].done(function (response) {
-                            if (response.success) {
-                                completed++;
-                                // Hide the update icon on individual card (icon-only, no text)
-                                var updateIcon = $('.ainav-pm-action-update[data-component=\"' + currentPlugin.component + '\"]');
-                                updateIcon.hide();
-                                // If the QuickLinks block just updated itself, show a brief
-                                // inline note — subsequent AJAX calls already use the new
-                                // plugin_updater.php on disk, so no reload is needed.
-                                if (selfUpdating && index === 0 && calls.length > 1) {
-                                    btn.html('<span class=\"ainav-spinner\"></span> Updater refreshed \u2713 — continuing...');
-                                }
-                            } else {
-                                failed++;
-                                var reason = response.message || 'Unknown error';
-                                console.error('[AI Quick Links] Auto-update failed for ' + currentPlugin.component + ': ' + reason);
-                                failedDetails.push({ name: currentPlugin.name || currentPlugin.component, reason: reason });
-                            }
-                            processNext(index + 1);
-                        }).fail(function (error) {
-                            failed++;
-                            var reason = (error && error.message) ? error.message : 'AJAX request failed (check browser console)';
-                            console.error('[AI Quick Links] Auto-update AJAX fail for ' + currentPlugin.component + ':', error);
-                            failedDetails.push({ name: currentPlugin.name || currentPlugin.component, reason: reason });
-                            processNext(index + 1);
-                        });
-                    }
-                    
-                    processNext(0);
+                    showUpdateReview(pluginsNeedingUpdate.slice(), true);
                 });
                 
                 // Show upgrade prompt modal
                 function showUpgradePrompt(pluginName) {
                     var modal = $('<div class=\"ainav-upgrade-overlay\"><div class=\"ainav-upgrade-modal\">' +
                         '<div class=\"ainav-upgrade-icon\"><svg viewBox=\"0 0 24 24\" width=\"48\" height=\"48\" fill=\"none\" stroke=\"#10b981\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"/></svg></div>' +
-                        '<h3 class=\"ainav-upgrade-title\">Plugin Files Updated!</h3>' +
-                        '<p class=\"ainav-upgrade-message\">' + pluginName + ' has been installed. Click below to complete the database upgrade.</p>' +
+                        '<h3 class=\"ainav-upgrade-title\">Plugin files staged</h3>' +
+                        '<p class=\"ainav-upgrade-message\">' + pluginName + ' is not yet upgraded. Continue to Moodle so it can confirm the database upgrade.</p>' +
                         '<div class=\"ainav-upgrade-actions\">' +
                         '<a href=\"" . $CFG->wwwroot . "/admin/index.php\" class=\"ainav-btn-primary\">Run Database Upgrade</a>' +
                         '<button type=\"button\" class=\"ainav-btn-secondary\" onclick=\"this.closest(\'.ainav-upgrade-overlay\').remove()\">Close</button>' +
@@ -5177,9 +5456,9 @@ FDR_JS;
                     $('body').append(modal);
                 }
                 
-                // ============================================
+                // --------------------------------------------
                 // Cache Management (v2.0.0)
-                // ============================================
+                // --------------------------------------------
                 
                 // Purge Caches button - uses Ajax/Notification from outer scope
                 $('#ainav-purge-caches-btn').on('click', function () {
@@ -5278,10 +5557,10 @@ FDR_JS;
                     }]);
                 });
                 
-                // ============================================
+                // --------------------------------------------
                 // Primary Color Detection (v1.8.9) - Moodle 5 compatibility
                 // Detects theme primary color from DOM when PHP can't get it.
-                // ============================================
+                // --------------------------------------------
                 (function detectPrimaryColor() {
                     var container = document.querySelector('.ainav-container');
                     if (!container) return;

@@ -2,6 +2,50 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.70] - 2026-08-30
+
+### Removed
+- Removed the seven private Wombat Training Plan suite components from the
+  Quicklinks action registry, plugin manager, and documentation links:
+  Training Matrix HCM, My Training Progress, Staff Training Dashboard,
+  Training Pathways, Training Pathways Block, Training Plan, and
+  Prerequisite 2 Enrolment.
+- Installed sites will no longer offer settings, management, report, install,
+  update, or documentation actions for those client-specific components.
+- No database schema changes. Savepoint 2026083003.
+
+## [2.4.69] - 2026-08-30
+
+### Added
+- Added an accessible Find an action launcher for installed plugin Settings,
+  Manage, Reports, Site Quick Links, custom links/reports, student portfolio,
+  and external Quicklinks destinations.
+- Search matches plugin names, components, aliases, action types, and operational
+  categories, with live result announcements and keyboard result navigation.
+- Added modal focus containment, Escape-to-close, focus restoration, high-contrast
+  focus indicators, and a full-screen mobile layout.
+- Repeated capability checks are cached for the request so large course enrolment
+  lists are not scanned once per action.
+- Added a durable Management Hub page with URL-addressable Plugins, Reports,
+  Updates, Custom Links, and Help views.
+- Added server-side search, plugin status/category filters, stable plugin
+  selection URLs, grouped plugin actions, installed versions, support,
+  credits/account links, and site diagnostics.
+- Added custom-link editing and ordering, retained custom-report creation and
+  deletion, and moved cache purge/scheduling controls into the Help view.
+- Preserved every prior site Quick Link in the searchable Custom Links view,
+  including conditional mailbox and administrator destinations, plus specialist
+  RTO certificate and plagiarism settings.
+
+### Changed
+- Replaced the dashboard's embedded plugin-management mini-application and long
+  menus with a compact Management Hub launcher and installed/status summary.
+- Kept the established update renderer, APIs, and individual/bulk update
+  behaviour intact in the Updates view.
+- Added scoped responsive, zoom-safe, forced-colour, focus, and reduced-motion
+  styles. No database schema changes. Savepoint 2026083002.
+- Restricted saved custom-link and custom-report destinations to HTTP(S).
+
 ## [2.4.68] - 2026-08-30
 
 ### Fixed
@@ -291,7 +335,6 @@ No DB schema changes. Savepoint 2026081204.
 
 ### Changed
 - Added official Moodle 5.x compatibility declaration (`$plugin->supported = [400, 500]`)
-
 
 
 ## [2.2.0] - 2025-12-21

@@ -104,5 +104,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026083001, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026083002) {
+        // v2.4.69: add the installed-plugin action launcher.
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026083002, 'aiplugin_nav');
+    }
+
     return true;
 }

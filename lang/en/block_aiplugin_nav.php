@@ -53,6 +53,46 @@ $string['install_first'] = 'Install First';
 $string['foundation_plugin'] = 'Foundation Plugin — Install First';
 $string['update_available'] = 'Update Available';
 
+// Management Hub.
+$string['managementhub'] = 'Management Hub';
+$string['findanaction'] = 'Find an action';
+$string['managementhubintro'] = 'Search the LMS Labs catalogue, inspect installed plugins, open reports, review updates, manage custom links, and find support.';
+$string['hubviews'] = 'Management Hub views';
+$string['hubviewplugins'] = 'Plugins';
+$string['hubviewreports'] = 'Reports';
+$string['hubviewupdates'] = 'Updates';
+$string['hubviewcustomlinks'] = 'Custom Links';
+$string['hubviewhelp'] = 'Help';
+$string['hubsearch'] = 'Search this view';
+$string['hubsearchplaceholder'] = 'Search by plugin, component, category, or action';
+$string['hubfilters'] = 'Plugin filters';
+$string['hubfilterall'] = 'All plugins';
+$string['hubfilterinstalled'] = 'Installed';
+$string['hubfilteravailable'] = 'Not installed';
+$string['hubresultcount'] = '{$a} result(s)';
+$string['hubemptyplugins'] = 'No plugins match this search or filter. Clear the search or choose a different filter.';
+$string['hubemptyreports'] = 'No reports match this search. Clear the search to browse available reports.';
+$string['hubemptycustomlinks'] = 'No custom links match this search. Add a link below or clear the search.';
+$string['hubemptyhelp'] = 'No help resources match this search. Clear the search to browse available resources.';
+$string['installedplugincount'] = '{$a} installed';
+$string['hubversion'] = 'Version: {$a}';
+$string['hubmanage'] = 'Manage';
+$string['hubcertificatesettings'] = 'Certificate settings';
+$string['hubmanageplagiarism'] = 'Manage plagiarism plugins';
+$string['hubreviewstatus'] = 'Version and update status';
+$string['updatesintro'] = 'Check available versions and review individual or bulk updates. Existing update safeguards and Moodle upgrade steps remain unchanged.';
+$string['creditbalance'] = 'Credit balance';
+$string['balanceunavailable'] = 'Balance unavailable';
+$string['helpintro'] = 'Open LMS Labs support and account resources. External links open in a new tab.';
+$string['hubdiagnostics'] = 'Site diagnostics';
+$string['hubmoodleversion'] = 'Moodle version';
+$string['invalidcustomlink'] = 'Enter a link name and a valid absolute URL.';
+$string['customlinklimit'] = 'You can save up to 20 custom links.';
+$string['customreportlimit'] = 'You can save up to 20 custom reports.';
+$string['customreports'] = 'Custom reports';
+$string['deletecustomlinkconfirm'] = 'Delete the custom link “{$a}”?';
+$string['deletecustomreportconfirm'] = 'Delete the custom report “{$a}”?';
+
 // AI Tools Quick Access Section
 $string['ai_tools_section'] = 'AI Tools Quick Access';
 $string['ai_essay_grader'] = 'AI Essay Grader';
@@ -109,6 +149,10 @@ $string['preferences'] = 'Preferences';
 
 // Create Link Modal
 $string['create_link'] = 'Create Link';
+$string['edit_link'] = 'Edit';
+$string['update_link'] = 'Update link';
+$string['moveup'] = 'Move up';
+$string['movedown'] = 'Move down';
 $string['select_icon'] = 'Select Icon';
 $string['link_name'] = 'Link Name';
 $string['link_name_placeholder'] = 'Enter link name...';

@@ -61,12 +61,11 @@ define(['core/ajax'], function (Ajax) {
         }
 
         // Badge next to the Buy Credits link.
-        var badge = document.getElementById('ainav-credits-badge');
-        if (badge) {
+        document.querySelectorAll('.ainav-credits-badge').forEach(function (badge) {
             badge.className   = 'ainav-credits-badge ' + cls;
             badge.textContent = text;
             badge.style.display = '';
-        }
+        });
     }
 
     return {
