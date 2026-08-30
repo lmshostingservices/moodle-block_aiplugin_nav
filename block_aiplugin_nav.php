@@ -5253,7 +5253,7 @@ FDR_JS;
 
                     Ajax.call([{
                         methodname: 'block_aiplugin_nav_plugin_unlock',
-                        args: { pluginid: pluginId },
+                        args: { pluginid: pluginId, plugincomponent: component },
                         done: function (response) {
                             if (response.success) {
                                 if (response.alreadyunlocked) {
@@ -5262,10 +5262,13 @@ FDR_JS;
                                         type: 'success'
                                     });
                                 } else {
-                                    var consumed = response.creditsconsumed || creditsNeeded;
+                                    var source = response.source || 'credits';
+                                    var consumed = Number(response.creditsconsumed || 0);
                                     var remaining = response.remainingcredits;
-                                    var msg = consumed.toLocaleString() + ' credits consumed for ' + pluginName + '.';
-                                    if (remaining !== '' && remaining !== undefined) {
+                                    var msg = source === 'marketplace'
+                                        ? 'Marketplace purchase recognised for ' + pluginName + '. No credits consumed.'
+                                        : consumed.toLocaleString() + ' credits consumed for ' + pluginName + '.';
+                                    if (source !== 'marketplace' && remaining !== '' && remaining !== undefined) {
                                         msg += ' Remaining: ' + remaining;
                                     }
                                     Notification.addNotification({message: msg, type: 'success'});

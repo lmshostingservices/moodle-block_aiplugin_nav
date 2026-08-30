@@ -2,6 +2,16 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.79] - 2026-08-30
+
+### Fixed
+- Plugin unlock requests now include the full Moodle component and supplementary
+  site URL so paid Moodle Marketplace purchases can be recognised.
+- Marketplace entitlements display as no-credit unlocks rather than incorrectly
+  falling back to the plugin's normal credit price in the success message.
+- The entitlement source returned by LMS Labs is preserved for the block UI.
+- No database schema changes. Savepoint 2026083012.
+
 ## [2.4.78] - 2026-08-30
 
 ### Removed
