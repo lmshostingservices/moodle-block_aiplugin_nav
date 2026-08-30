@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * AI Plugin Navigation block.
@@ -22,8 +22,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalNotNeeded -- Block class files require direct-access protection.
 defined('MOODLE_INTERNAL') || die();
 
+// Long embedded markup, SQL, and dormant registry examples cannot be wrapped without changing their content.
+// phpcs:disable moodle.Files.LineLength,moodle.WhiteSpace.WhiteSpaceInStrings.EndLine,Squiz.PHP.CommentedOutCode.Found,moodle.PHP.ForbiddenGlobalUse.BadGlobal,moodle.Commenting.InlineComment
+/**
+ * AI Plugin Navigation block.
+ */
 class block_aiplugin_nav extends block_base {
     /**
      * Initialize the block.
@@ -43,25 +49,29 @@ class block_aiplugin_nav extends block_base {
      * This block applies to all pages.
      */
     public function applicable_formats() {
-        return array(
+        return [
             'all' => true,
             'my' => true,
             'site-index' => true,
             'course-view' => true,
             'mod' => true,
-        );
+        ];
     }
 
     /**
      * Check if plugin is installed.
      * Static cache prevents repeated get_plugin_list() calls for the same type.
+     *
+     * @param string $plugintype Plugin type.
+     * @param string $pluginname Plugin name.
+     * @return bool Whether the plugin is installed.
      */
     public function is_plugin_installed($plugintype, $pluginname) {
-        static $plugin_lists = array();
-        if (!isset($plugin_lists[$plugintype])) {
-            $plugin_lists[$plugintype] = core_component::get_plugin_list($plugintype);
+        static $pluginlists = [];
+        if (!isset($pluginlists[$plugintype])) {
+            $pluginlists[$plugintype] = core_component::get_plugin_list($plugintype);
         }
-        return isset($plugin_lists[$plugintype][$pluginname]);
+        return isset($pluginlists[$plugintype][$pluginname]);
     }
 
     /**
@@ -73,17 +83,17 @@ class block_aiplugin_nav extends block_base {
      */
     private function user_has_role_shortname($userid, $shortname) {
         global $DB;
-        static $role_cache = array();
+        static $rolecache = [];
         $key = $userid . '_' . $shortname;
-        if (!isset($role_cache[$key])) {
+        if (!isset($rolecache[$key])) {
             $sql = "SELECT ra.id 
                     FROM {role_assignments} ra
                     JOIN {role} r ON r.id = ra.roleid
                     WHERE ra.userid = :userid
                     AND r.shortname = :shortname";
-            $role_cache[$key] = $DB->record_exists_sql($sql, ['userid' => $userid, 'shortname' => $shortname]);
+            $rolecache[$key] = $DB->record_exists_sql($sql, ['userid' => $userid, 'shortname' => $shortname]);
         }
-        return $role_cache[$key];
+        return $rolecache[$key];
     }
 
     /**
@@ -92,7 +102,7 @@ class block_aiplugin_nav extends block_base {
      */
     private function debug_credits_check() {
         global $CFG;
-        
+
         $debug = [
             'step1_isAdmin' => has_capability('moodle/site:config', context_system::instance()),
             'step2_aiconfigLibExists' => false,
@@ -105,17 +115,17 @@ class block_aiplugin_nav extends block_base {
             'step9_response' => '',
             'step10_finalResult' => null,
         ];
-        
-        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        $debug['step2_aiconfigLibExists'] = file_exists($aiconfig_lib);
-        
+
+        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        $debug['step2_aiconfigLibExists'] = file_exists($aiconfiglib);
+
         if ($debug['step2_aiconfigLibExists']) {
-            require_once($aiconfig_lib);
+            require_once($aiconfiglib);
         }
-        
+
         $debug['step3_getSiteIdFunctionExists'] = function_exists('local_aiconfig_get_siteid');
         $debug['step4_getApiKeyFunctionExists'] = function_exists('local_aiconfig_get_apikey');
-        
+
         if ($debug['step3_getSiteIdFunctionExists']) {
             $debug['step5_siteId'] = trim(local_aiconfig_get_siteid('block_aiplugin_nav') ?? '');
         }
@@ -123,7 +133,7 @@ class block_aiplugin_nav extends block_base {
             $rawkey = trim(local_aiconfig_get_apikey('block_aiplugin_nav') ?? '');
             $debug['step6_apiKey'] = !empty($rawkey) ? substr($rawkey, 0, 8) . '...' : '(empty)';
         }
-        
+
         if (!empty($debug['step5_siteId']) && $debug['step6_apiKey'] !== '(empty)') {
             $debug['step7_apiCallMade'] = true;
             $siteid = $debug['step5_siteId'];
@@ -131,18 +141,18 @@ class block_aiplugin_nav extends block_base {
 
             // Multi-endpoint fallback: Replit first (always reachable from Vultr IPs),
             // Lms-labs.com second. essaygraderai.app removed — legacy dead domain.
-            $credit_bases = [
+            $creditbases = [
                 'https://ai-grader-site-nct185.replit.app',
                 'https://lms-labs.com',
             ];
             $qs = '?siteId=' . rawurlencode($siteid) . '&apiKey=' . rawurlencode($apikey);
-            $debug['step7b_url'] = $credit_bases[0] . '/api/credits' . $qs;
+            $debug['step7b_url'] = $creditbases[0] . '/api/credits' . $qs;
 
             \core\session\manager::write_close();
             require_once($CFG->libdir . '/filelib.php');
             $response = false;
             $httpcode = 0;
-            foreach ($credit_bases as $base) {
+            foreach ($creditbases as $base) {
                 $curl = new \curl();
                 $response = $curl->get($base . '/api/credits' . $qs, [], [
                     'CURLOPT_TIMEOUT'        => 8,
@@ -150,7 +160,9 @@ class block_aiplugin_nav extends block_base {
                     'CURLOPT_HTTPHEADER'     => ['Accept: application/json'],
                 ]);
                 $httpcode = (int)($curl->info['http_code'] ?? 0);
-                if ($httpcode === 200 && !empty($response)) { break; }
+                if ($httpcode === 200 && !empty($response)) {
+                    break;
+                }
             }
             $debug['step8_httpCode'] = $httpcode;
             $debug['step8b_curlError'] = $curl->error ?? '';
@@ -163,7 +175,7 @@ class block_aiplugin_nav extends block_base {
                 $debug['step10_finalResult'] = $data['credits'];
             }
         }
-        
+
         return $debug;
     }
 
@@ -175,33 +187,33 @@ class block_aiplugin_nav extends block_base {
      */
     private function get_credits_balance() {
         global $CFG;
-        
+
         // Try to load the central config library.
-        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        if (file_exists($aiconfig_lib)) {
-            require_once($aiconfig_lib);
+        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($aiconfiglib)) {
+            require_once($aiconfiglib);
         }
-        
+
         // Get credentials from central config.
         $siteid = '';
         $apikey = '';
-        
+
         if (function_exists('local_aiconfig_get_siteid')) {
             $siteid = trim(local_aiconfig_get_siteid('block_aiplugin_nav') ?? '');
         }
         if (function_exists('local_aiconfig_get_apikey')) {
             $apikey = trim(local_aiconfig_get_apikey('block_aiplugin_nav') ?? '');
         }
-        
+
         // If no credentials, return null.
         if (empty($siteid) || empty($apikey)) {
             return null;
         }
-        
+
         // Make API request to fetch credits.
         // Multi-endpoint fallback: Replit first (always reachable from Vultr/datacenter IPs),
         // Lms-labs.com second. essaygraderai.app removed — legacy dead domain.
-        $credit_bases = [
+        $creditbases = [
             'https://ai-grader-site-nct185.replit.app',
             'https://lms-labs.com',
         ];
@@ -212,7 +224,7 @@ class block_aiplugin_nav extends block_base {
         require_once($CFG->libdir . '/filelib.php');
         $response = false;
         $httpcode = 0;
-        foreach ($credit_bases as $base) {
+        foreach ($creditbases as $base) {
             $curl = new \curl();
             $response = $curl->get($base . '/api/credits' . $qs, [], [
                 'CURLOPT_TIMEOUT'        => 5,
@@ -220,21 +232,23 @@ class block_aiplugin_nav extends block_base {
                 'CURLOPT_HTTPHEADER'     => ['Accept: application/json'],
             ]);
             $httpcode = (int)($curl->info['http_code'] ?? 0);
-            if ($httpcode === 200 && !empty($response)) { break; }
+            if ($httpcode === 200 && !empty($response)) {
+                break;
+            }
         }
 
         if ($httpcode !== 200 || empty($response)) {
             return null;
         }
-        
+
         $data = json_decode($response, true);
         if (!$data || !isset($data['credits'])) {
             return null;
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Get color class for credits badge based on amount.
      *
@@ -248,7 +262,7 @@ class block_aiplugin_nav extends block_base {
         $amount = (int) $credits;
         if ($amount < 100) {
             return 'ainav-credits-red';
-        } elseif ($amount < 1000) {
+        } else if ($amount < 1000) {
             return 'ainav-credits-orange';
         }
         return 'ainav-credits-green';
@@ -262,11 +276,11 @@ class block_aiplugin_nav extends block_base {
      * @return array Complete plugin registry with detection and URL patterns.
      */
     public function get_master_plugin_registry() {
-        return array(
+        return [
             // ===== AI PLUGINS (Credit-Based) =====
-            // Note: Plugins with only Site ID/API Key don't have settings_url
-            // As those credentials come from AI Grader Central Config
-            'quiz_aigrader' => array(
+            // Note: Plugins with only Site ID/API Key don't have settings_url.
+            // As those credentials come from AI Grader Central Config.
+            'quiz_aigrader' => [
                 'name' => 'AI Essay Grader',
                 'plugin_type' => 'quiz',
                 'plugin_name' => 'aigrader',
@@ -274,8 +288,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/mod/quiz/report/aigrader/grader_report.php',
                 'icon' => 'edit-3',
                 'category' => 'ai_grading',
-            ),
-            'local_aiquizmaker' => array(
+            ],
+            'local_aiquizmaker' => [
                 'name' => 'AI Quiz Maker',
                 'plugin_type' => 'local',
                 'plugin_name' => 'aiquizmaker',
@@ -283,12 +297,12 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/aiquizmaker/index.php',
                 'icon' => 'pen-tool',
                 'category' => 'ai_grading',
-            ),
+            ],
             // Local_essaymaker is the legacy name for local_aiquizmaker (renamed at v3.16.16).
-            // Some sites still have it installed from the transition period with broken class
+            // Some sites still have it installed from the transition period with broken class.
             // Namespaces that cause a fatal PHP collision with local_aiquizmaker.
             // This entry makes the block detect it and offer the namespace-fix upgrade (v3.16.89).
-            'local_essaymaker' => array(
+            'local_essaymaker' => [
                 'name' => 'AI Quiz Maker (Legacy — update to fix)',
                 'plugin_type' => 'local',
                 'plugin_name' => 'essaymaker',
@@ -297,121 +311,121 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'pen-tool',
                 'category' => 'ai_grading',
                 'legacy' => true,
-            ),
-            'mod_smartworkbook' => array(
+            ],
+            'mod_smartworkbook' => [
                 'name' => 'AI Smart Workbook',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'smartworkbook',
                 'settings_url' => '/admin/settings.php?section=modsettingsmartworkbook',
                 'icon' => 'book-open',
                 'category' => 'ai_content',
-            ),
-            'mod_contentcreator' => array(
+            ],
+            'mod_contentcreator' => [
                 'name' => 'AI Content Creator',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'contentcreator',
                 'settings_url' => '/admin/settings.php?section=modsettingcontentcreator',
                 'icon' => 'book-open',
                 'category' => 'ai_content',
-            ),
-            'mod_aiknowledgecheck' => array(
+            ],
+            'mod_aiknowledgecheck' => [
                 'name' => 'AI Knowledge Check',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aiknowledgecheck',
                 'settings_url' => '/admin/settings.php?section=modsettingaiknowledgecheck',
                 'icon' => 'check-square',
                 'category' => 'ai_grading',
-            ),
-            'mod_aiactivities' => array(
+            ],
+            'mod_aiactivities' => [
                 'name' => 'AI Learning Activities',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aiactivities',
                 'settings_url' => '/admin/settings.php?section=modsettingaiactivities',
                 'icon' => 'layers',
                 'category' => 'ai_content',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // 'mod_aiquiz' => array(
-            //     'name' => 'AI Quiz',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aiquiz',
-            //     'settings_url' => '/admin/settings.php?section=modsettingaiquiz',
-            //     'icon' => 'help-circle',
-            //     'category' => 'ai_credit',
+            // 'name' => 'AI Quiz',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'aiquiz',
+            // 'settings_url' => '/admin/settings.php?section=modsettingaiquiz',
+            // 'icon' => 'help-circle',
+            // 'category' => 'ai_credit',
             // ),
-            // TESTING - Hidden until ready
+            // TESTING - Hidden until ready.
             // 'mod_practicalassessment' => array(
-            //     'name' => 'AI Practical Assessment',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'practicalassessment',
-            //     'icon' => 'clipboard-check',
-            //     'category' => 'ai_credit',
+            // 'name' => 'AI Practical Assessment',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'practicalassessment',
+            // 'icon' => 'clipboard-check',
+            // 'category' => 'ai_credit',
             // ),
-            'mod_learningmapping' => array(
+            'mod_learningmapping' => [
                 'name' => 'AI Mapping',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'learningmapping',
                 'settings_url' => '/admin/settings.php?section=modsettinglearningmapping',
                 'icon' => 'table',
                 'category' => 'ai_grading',
-            ),
-            'mod_courseinfo' => array(
+            ],
+            'mod_courseinfo' => [
                 'name' => 'AI Course Information',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'courseinfo',
                 'settings_url' => '/admin/settings.php?section=modsettingcourseinfo',
                 'icon' => 'file-text',
                 'category' => 'ai_content',
-            ),
-            'mod_productexplainer' => array(
+            ],
+            'mod_productexplainer' => [
                 'name' => 'AI Slide Flow',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'productexplainer',
                 'settings_url' => '/admin/settings.php?section=modsettingproductexplainer',
                 'icon' => 'presentation',
                 'category' => 'ai_content',
-            ),
-            'mod_verifyid' => array(
+            ],
+            'mod_verifyid' => [
                 'name' => 'AI Verify ID',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'verifyid',
                 'settings_url' => '/admin/settings.php?section=modsettingverifyid',
                 'icon' => 'user-check',
                 'category' => 'ai_ux',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // 'quizaccess_webcamproctor' => array(
-            //     'name' => 'AI Webcam Proctoring',
-            //     'plugin_type' => 'quizaccess',
-            //     'plugin_name' => 'webcamproctor',
-            //     'report_url' => '/mod/quiz/accessrule/webcamproctor/report.php',
-            //     'icon' => 'video',
-            //     'category' => 'ai_credit',
+            // 'name' => 'AI Webcam Proctoring',
+            // 'plugin_type' => 'quizaccess',
+            // 'plugin_name' => 'webcamproctor',
+            // 'report_url' => '/mod/quiz/accessrule/webcamproctor/report.php',
+            // 'icon' => 'video',
+            // 'category' => 'ai_credit',
             // ),
             // 'mod_aivideoconf' => array(
-            //     'name' => 'AI Video Conference',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aivideoconf',
-            //     'icon' => 'video-cam',
-            //     'category' => 'ai_credit',
+            // 'name' => 'AI Video Conference',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'aivideoconf',
+            // 'icon' => 'video-cam',
+            // 'category' => 'ai_credit',
             // ),
-            'mod_aivideoactivity' => array(
+            'mod_aivideoactivity' => [
                 'name' => 'AI Video Activity',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aivideoactivity',
                 'settings_url' => '/admin/settings.php?section=modsettingaivideoactivity',
                 'icon' => 'play-circle',
                 'category' => 'ai_media',
-            ),
-            'mod_slideshow' => array(
+            ],
+            'mod_slideshow' => [
                 'name' => 'AI Slideshow with Voiceover',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'slideshow',
                 'settings_url' => '/admin/settings.php?section=modsettingslideshow',
                 'icon' => 'image',
                 'category' => 'ai_media',
-            ),
-            'local_chirpvoice' => array(
+            ],
+            'local_chirpvoice' => [
                 'name' => 'AI SCORM Voiceover',
                 'plugin_type' => 'local',
                 'plugin_name' => 'chirpvoice',
@@ -419,8 +433,8 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'headset',
                 'category' => 'ai_media',
                 'aliases' => 'AI Voiceover Chirp HD voice narration',
-            ),
-            'local_moodlesupport' => array(
+            ],
+            'local_moodlesupport' => [
                 'name' => 'AI Moodle Support',
                 'plugin_type' => 'local',
                 'plugin_name' => 'moodlesupport',
@@ -428,8 +442,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/moodlesupport/index.php',
                 'icon' => 'help-circle',
                 'category' => 'ai_ux',
-            ),
-            'local_rtocompliance' => array(
+            ],
+            'local_rtocompliance' => [
                 'name' => 'AI RTO Compliance',
                 'plugin_type' => 'local',
                 'plugin_name' => 'rtocompliance',
@@ -439,8 +453,8 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'briefcase',
                 'category' => 'ai_rto',
                 'aliases' => 'RTO AVETMISS VET compliance',
-            ),
-            'block_rtocompliance' => array(
+            ],
+            'block_rtocompliance' => [
                 'name' => 'RTO Compliance Dashboard',
                 'plugin_type' => 'block',
                 'plugin_name' => 'rtocompliance',
@@ -448,8 +462,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/rtocompliance/index.php',
                 'icon' => 'layout-dashboard',
                 'category' => 'ai_rto',
-            ),
-            'local_rplkit' => array(
+            ],
+            'local_rplkit' => [
                 'name' => 'RPL Kit',
                 'plugin_type' => 'local',
                 'plugin_name' => 'rplkit',
@@ -457,57 +471,57 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/rplkit/index.php',
                 'icon' => 'file-check-2',
                 'category' => 'ai_rto',
-            ),
+            ],
             // ===== BLOCKS =====
-            'block_aigrader_dashboard' => array(
+            'block_aigrader_dashboard' => [
                 'name' => 'AI Grader Dashboard',
                 'plugin_type' => 'block',
                 'plugin_name' => 'aigrader_dashboard',
                 'settings_url' => '/admin/settings.php?section=blocksettingaigrader_dashboard',
                 'icon' => 'layout-dashboard',
                 'category' => 'block',
-            ),
-            'block_aiplugin_nav' => array(
+            ],
+            'block_aiplugin_nav' => [
                 'name' => 'AI Dashboard Quick Links',
                 'plugin_type' => 'block',
                 'plugin_name' => 'aiplugin_nav',
                 'settings_url' => '/admin/settings.php?section=blocksettingaiplugin_nav',
                 'icon' => 'navigation',
                 'category' => 'block',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // 'block_trainingmatrix' => array(
-            //     'name' => 'My Training Progress',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'bar-chart-2',
-            //     'category' => 'block',
+            // 'name' => 'My Training Progress',
+            // 'plugin_type' => 'block',
+            // 'plugin_name' => 'trainingmatrix',
+            // 'icon' => 'bar-chart-2',
+            // 'category' => 'block',
             // ),
             // 'block_trainingmatrix_teacher' => array(
-            //     'name' => 'Staff Training Dashboard',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix_teacher',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
+            // 'name' => 'Staff Training Dashboard',
+            // 'plugin_type' => 'block',
+            // 'plugin_name' => 'trainingmatrix_teacher',
+            // 'icon' => 'users-2',
+            // 'category' => 'block',
             // ),
-            'block_my_progress' => array(
+            'block_my_progress' => [
                 'name' => 'My Progress',
                 'plugin_type' => 'block',
                 'plugin_name' => 'my_progress',
                 'settings_url' => '/admin/settings.php?section=blocksettingmy_progress',
                 'icon' => 'bar-chart-2',
                 'category' => 'block',
-            ),
-            'block_my_students_progress' => array(
+            ],
+            'block_my_students_progress' => [
                 'name' => 'My Students Progress',
                 'plugin_type' => 'block',
                 'plugin_name' => 'my_students_progress',
                 'settings_url' => '/admin/settings.php?section=blocksettingmy_students_progress',
                 'icon' => 'users',
                 'category' => 'block',
-            ),
+            ],
             // ===== CENTRAL CONFIG =====
-            'local_aiconfig' => array(
+            'local_aiconfig' => [
                 'name' => 'AI Grader Central Config',
                 'plugin_type' => 'local',
                 'plugin_name' => 'aiconfig',
@@ -515,19 +529,19 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/admin/settings.php?section=local_aiconfig',
                 'icon' => 'settings',
                 'category' => 'config',
-            ),
+            ],
             // ===== TIME SAVING PLUGINS (Admin) =====
-            // TESTING - Hidden until ready
+            // TESTING - Hidden until ready.
             // 'local_trainingmatrix' => array(
-            //     'name' => 'AI Training Matrix HCM',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'settings_url' => '/admin/settings.php?section=local_trainingmatrix',
-            //     'page_url' => '/local/trainingmatrix/index.php',
-            //     'icon' => 'users-2',
-            //     'category' => 'admin',
+            // 'name' => 'AI Training Matrix HCM',
+            // 'plugin_type' => 'local',
+            // 'plugin_name' => 'trainingmatrix',
+            // 'settings_url' => '/admin/settings.php?section=local_trainingmatrix',
+            // 'page_url' => '/local/trainingmatrix/index.php',
+            // 'icon' => 'users-2',
+            // 'category' => 'admin',
             // ),
-            'local_groupmanager' => array(
+            'local_groupmanager' => [
                 'name' => 'Groups Management',
                 'plugin_type' => 'local',
                 'plugin_name' => 'groupmanager',
@@ -535,8 +549,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/groupmanager/index.php',
                 'icon' => 'users',
                 'category' => 'enrolment',
-            ),
-            'enrol_prerequisite' => array(
+            ],
+            'enrol_prerequisite' => [
                 'name' => 'Course Prerequisite',
                 'plugin_type' => 'enrol',
                 'plugin_name' => 'prerequisite',
@@ -545,8 +559,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/enrol/prerequisite/gates.php',
                 'icon' => 'lock',
                 'category' => 'enrolment',
-            ),
-            'local_courseversion' => array(
+            ],
+            'local_courseversion' => [
                 'name' => 'Course Version Control',
                 'plugin_type' => 'local',
                 'plugin_name' => 'courseversion',
@@ -554,8 +568,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/courseversion/index.php',
                 'icon' => 'folder',
                 'category' => 'security',
-            ),
-            'local_sitefont' => array(
+            ],
+            'local_sitefont' => [
                 'name' => 'Change Site Font',
                 'plugin_type' => 'local',
                 'plugin_name' => 'sitefont',
@@ -563,8 +577,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/admin/settings.php?section=local_sitefont',
                 'icon' => 'sliders',
                 'category' => 'branding',
-            ),
-            'local_cohortbranding' => array(
+            ],
+            'local_cohortbranding' => [
                 'name' => 'Cohort Branding',
                 'plugin_type' => 'local',
                 'plugin_name' => 'cohortbranding',
@@ -572,16 +586,16 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/cohortbranding/index.php',
                 'icon' => 'palette',
                 'category' => 'branding',
-            ),
-            'gradingform_benchmarks' => array(
+            ],
+            'gradingform_benchmarks' => [
                 'name' => 'Assignment Benchmarks',
                 'plugin_type' => 'gradingform',
                 'plugin_name' => 'benchmarks',
                 'settings_url' => '/admin/settings.php?section=gradingformbenchmarks',
                 'icon' => 'award',
                 'category' => 'ai_grading',
-            ),
-            'auth_simple2fa' => array(
+            ],
+            'auth_simple2fa' => [
                 'name' => 'Simple 2FA & SSO',
                 'plugin_type' => 'auth',
                 'plugin_name' => 'simple2fa',
@@ -589,8 +603,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/admin/settings.php?section=authsettingsimple2fa',
                 'icon' => 'shield',
                 'category' => 'security',
-            ),
-            'local_groupcap' => array(
+            ],
+            'local_groupcap' => [
                 'name' => 'Group Membership Limit',
                 'plugin_type' => 'local',
                 'plugin_name' => 'groupcap',
@@ -598,8 +612,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/admin/settings.php?section=local_groupcap',
                 'icon' => 'users',
                 'category' => 'enrolment',
-            ),
-            'local_paymentunlockassign' => array(
+            ],
+            'local_paymentunlockassign' => [
                 'name' => 'Payment Unlock Assignment',
                 'plugin_type' => 'local',
                 'plugin_name' => 'paymentunlockassign',
@@ -607,8 +621,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/paymentunlockassign/manage.php',
                 'icon' => 'lock',
                 'category' => 'enrolment',
-            ),
-            'plagiarism_essayguard' => array(
+            ],
+            'plagiarism_essayguard' => [
                 'name' => 'Essay Guard',
                 'plugin_type' => 'plagiarism',
                 'plugin_name' => 'essayguard',
@@ -617,8 +631,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/plagiarism/essayguard/report.php',
                 'icon' => 'shield',
                 'category' => 'integrity',
-            ),
-            'plagiarism_docguard' => array(
+            ],
+            'plagiarism_docguard' => [
                 'name' => 'DocGuard',
                 'plugin_type' => 'plagiarism',
                 'plugin_name' => 'docguard',
@@ -627,8 +641,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/plagiarism/docguard/report.php',
                 'icon' => 'file-search',
                 'category' => 'integrity',
-            ),
-            'local_videocompress' => array(
+            ],
+            'local_videocompress' => [
                 'name' => 'Video Compress',
                 'plugin_type' => 'local',
                 'plugin_name' => 'videocompress',
@@ -636,8 +650,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/videocompress/index.php',
                 'icon' => 'film',
                 'category' => 'media_storage',
-            ),
-            'local_scormcompress' => array(
+            ],
+            'local_scormcompress' => [
                 'name' => 'SCORM Compress',
                 'plugin_type' => 'local',
                 'plugin_name' => 'scormcompress',
@@ -645,8 +659,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/scormcompress/index.php',
                 'icon' => 'archive',
                 'category' => 'media_storage',
-            ),
-            'local_mediaoptimiser' => array(
+            ],
+            'local_mediaoptimiser' => [
                 'name' => 'Media Optimiser',
                 'plugin_type' => 'local',
                 'plugin_name' => 'mediaoptimiser',
@@ -654,16 +668,16 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/mediaoptimiser/index.php',
                 'icon' => 'hard-drive',
                 'category' => 'media_storage',
-            ),
-            'local_activitynav' => array(
+            ],
+            'local_activitynav' => [
                 'name' => 'Activity Navigation',
                 'plugin_type' => 'local',
                 'plugin_name' => 'activitynav',
                 'settings_url' => '/admin/settings.php?section=local_activitynav',
                 'icon' => 'navigation',
                 'category' => 'training',
-            ),
-            'local_courseavailabilitydelay' => array(
+            ],
+            'local_courseavailabilitydelay' => [
                 'name' => 'Course Availability Delay',
                 'plugin_type' => 'local',
                 'plugin_name' => 'courseavailabilitydelay',
@@ -671,8 +685,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/courseavailabilitydelay/manage.php',
                 'icon' => 'clock',
                 'category' => 'training',
-            ),
-            'local_recertify' => array(
+            ],
+            'local_recertify' => [
                 'name' => 'Course Recertification',
                 'plugin_type' => 'local',
                 'plugin_name' => 'recertify',
@@ -682,8 +696,8 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'refresh-cw',
                 'category' => 'training',
                 'aliases' => 'recertify recertification renew certification',
-            ),
-            'local_completionsuspend' => array(
+            ],
+            'local_completionsuspend' => [
                 'name' => 'Completion Auto-Suspend',
                 'plugin_type' => 'local',
                 'plugin_name' => 'completionsuspend',
@@ -693,16 +707,16 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'user-check',
                 'category' => 'training',
                 'aliases' => 'completion suspend auto suspend users',
-            ),
-            'local_workshops' => array(
+            ],
+            'local_workshops' => [
                 'name' => 'Workshop Scheduler',
                 'plugin_type' => 'local',
                 'plugin_name' => 'workshops',
                 'page_url' => '/local/workshops/index.php',
                 'icon' => 'calendar',
                 'category' => 'training',
-            ),
-            'local_downalert' => array(
+            ],
+            'local_downalert' => [
                 'name' => 'Site Down Alert',
                 'plugin_type' => 'local',
                 'plugin_name' => 'downalert',
@@ -710,8 +724,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/local/downalert/report.php',
                 'icon' => 'zap',
                 'category' => 'comms',
-            ),
-            'local_studentemail' => array(
+            ],
+            'local_studentemail' => [
                 'name' => 'Student Email Manager',
                 'plugin_type' => 'local',
                 'plugin_name' => 'studentemail',
@@ -719,16 +733,16 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/studentemail/dashboard.php',
                 'icon' => 'mail',
                 'category' => 'comms',
-            ),
-            'auth_studentemail' => array(
+            ],
+            'auth_studentemail' => [
                 'name' => 'Student Email IMAP Auth',
                 'plugin_type' => 'auth',
                 'plugin_name' => 'studentemail',
                 'settings_url' => '/admin/settings.php?section=authsettingstudentemail',
                 'icon' => 'mail',
                 'category' => 'comms',
-            ),
-            'format_aicourse' => array(
+            ],
+            'format_aicourse' => [
                 'name' => 'AI Course Format',
                 'plugin_type' => 'format',
                 'plugin_name' => 'aicourse',
@@ -736,24 +750,24 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/course/format/aicourse/admin_report.php',
                 'icon' => 'book-open',
                 'category' => 'ai_content',
-            ),
-            'quizaccess_aigrader' => array(
+            ],
+            'quizaccess_aigrader' => [
                 'name' => 'Quiz Access Rule',
                 'plugin_type' => 'quizaccess',
                 'plugin_name' => 'aigrader',
                 'settings_url' => '/admin/settings.php?section=quizaccessaigrader',
                 'icon' => 'lock',
                 'category' => 'enrolment',
-            ),
-            'availability_groupmanager' => array(
+            ],
+            'availability_groupmanager' => [
                 'name' => 'Groups Availability Condition',
                 'plugin_type' => 'availability',
                 'plugin_name' => 'groupmanager',
                 'settings_url' => '/admin/settings.php?section=availabilitysettinggroupmanager',
                 'icon' => 'users',
                 'category' => 'enrolment',
-            ),
-            'paygw_paddle' => array(
+            ],
+            'paygw_paddle' => [
                 'name' => 'Paddle Payment Gateway',
                 'plugin_type' => 'paygw',
                 'plugin_name' => 'paddle',
@@ -764,8 +778,8 @@ class block_aiplugin_nav extends block_base {
                 'report_url' => '/payment/gateway/paddle/admin/pricemap.php',
                 'icon' => 'credit-card',
                 'category' => 'payments',
-            ),
-            'local_aiquizremedial' => array(
+            ],
+            'local_aiquizremedial' => [
                 'name' => 'AI Quiz Remedial Learning',
                 'plugin_type' => 'local',
                 'plugin_name' => 'aiquizremedial',
@@ -773,8 +787,8 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/aiquizremedial/index.php',
                 'icon' => 'refresh-cw',
                 'category' => 'ai_grading',
-            ),
-            'local_ailogin' => array(
+            ],
+            'local_ailogin' => [
                 'name' => 'AI Login Designer',
                 'plugin_type' => 'local',
                 'plugin_name' => 'ailogin',
@@ -782,35 +796,35 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/ailogin/admin.php',
                 'icon' => 'layout',
                 'category' => 'ai_ux',
-            ),
-            'mod_attendance' => array(
+            ],
+            'mod_attendance' => [
                 'name' => 'Attendance',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'attendance',
                 'report_url' => '/blocks/aiplugin_nav/attendance_report.php',
                 'icon' => 'users',
                 'category' => 'training',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // 'assignfeedback_aipdf' => array(
-            //     'name' => 'AI PDF Assignment Grader',
-            //     'plugin_type' => 'assignfeedback',
-            //     'plugin_name' => 'aipdf',
-            //     'settings_url' => '/admin/settings.php?section=assignfeedback_aipdf',
-            //     'icon' => 'file-text',
-            //     'category' => 'ai_credit',
+            // 'name' => 'AI PDF Assignment Grader',
+            // 'plugin_type' => 'assignfeedback',
+            // 'plugin_name' => 'aipdf',
+            // 'settings_url' => '/admin/settings.php?section=assignfeedback_aipdf',
+            // 'icon' => 'file-text',
+            // 'category' => 'ai_credit',
             // ),
-            // TESTING - Hidden until ready
+            // TESTING - Hidden until ready.
             // 'report_performanceintel' => array(
-            //     'name' => 'Speed (Performance Intelligence)',
-            //     'plugin_type' => 'report',
-            //     'plugin_name' => 'performanceintel',
-            //     'settings_url' => '/admin/settings.php?section=report_performanceintel',
-            //     'page_url' => '/report/performanceintel/index.php',
-            //     'icon' => 'zap',
-            //     'category' => 'utility',
+            // 'name' => 'Speed (Performance Intelligence)',
+            // 'plugin_type' => 'report',
+            // 'plugin_name' => 'performanceintel',
+            // 'settings_url' => '/admin/settings.php?section=report_performanceintel',
+            // 'page_url' => '/report/performanceintel/index.php',
+            // 'icon' => 'zap',
+            // 'category' => 'utility',
             // ),
-            'local_beacon' => array(
+            'local_beacon' => [
                 'name' => 'Beacon — Reports & Analytics',
                 'plugin_type' => 'local',
                 'plugin_name' => 'beacon',
@@ -818,16 +832,16 @@ class block_aiplugin_nav extends block_base {
                 'page_url' => '/local/beacon/index.php',
                 'icon' => 'bar-chart-2',
                 'category' => 'reporting',
-            ),
-            'local_lmshomepage' => array(
+            ],
+            'local_lmshomepage' => [
                 'name' => 'LMS Home Page',
                 'plugin_type' => 'local',
                 'plugin_name' => 'lmshomepage',
                 'settings_url' => '/admin/settings.php?section=local_lmshomepage',
                 'icon' => 'home',
                 'category' => 'branding',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -836,22 +850,22 @@ class block_aiplugin_nav extends block_base {
      */
     public function get_links_registry() {
         global $CFG;
-        
+
         $registry = $this->get_master_plugin_registry();
-        $settingsitems = array();
-        $manageitems = array();
-        $reportitems = array();
-        
+        $settingsitems = [];
+        $manageitems = [];
+        $reportitems = [];
+
         // Build settings, manage, and reports from installed plugins.
         foreach ($registry as $component => $plugin) {
             // Check if plugin is installed.
             if (!$this->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])) {
                 continue;
             }
-            
+
             // Add settings link if available.
             if (!empty($plugin['settings_url'])) {
-                $settingsitems[] = array(
+                $settingsitems[] = [
                     'name' => $plugin['name'],
                     'url' => $CFG->wwwroot . $plugin['settings_url'],
                     'icon' => 'settings',
@@ -860,12 +874,12 @@ class block_aiplugin_nav extends block_base {
                     'capability' => 'moodle/site:config',
                     'category' => $plugin['category'],
                     'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
-                );
+                ];
             }
-            
+
             // Add page link to Manage section (management pages like Cohort Branding index).
             if (!empty($plugin['page_url'])) {
-                $manageitems[] = array(
+                $manageitems[] = [
                     'name' => $plugin['name'],
                     'url' => $CFG->wwwroot . $plugin['page_url'],
                     'icon' => $plugin['icon'],
@@ -874,12 +888,12 @@ class block_aiplugin_nav extends block_base {
                     'capability' => 'moodle/site:config',
                     'category' => $plugin['category'],
                     'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
-                );
+                ];
             }
-            
+
             // Add report link if available.
             if (!empty($plugin['report_url'])) {
-                $reportitems[] = array(
+                $reportitems[] = [
                     'name' => $plugin['name'],
                     'url' => $CFG->wwwroot . $plugin['report_url'],
                     'icon' => $plugin['icon'],
@@ -888,41 +902,41 @@ class block_aiplugin_nav extends block_base {
                     'capability' => 'moodle/site:config',
                     'category' => $plugin['category'],
                     'aliases' => isset($plugin['aliases']) ? $plugin['aliases'] : '',
-                );
+                ];
             }
         }
-        
+
         // Group settings by category then sort alphabetically within each group.
-        $config_settings = array_filter($settingsitems, function ($item) {
+        $configsettings = array_filter($settingsitems, function ($item) {
             return $item['category'] === 'config';
         });
-        $ai_cats = array('ai_grading', 'ai_content', 'ai_media', 'ai_rto', 'ai_ux');
-        $admin_cats = array('block', 'training', 'enrolment', 'integrity', 'comms', 'branding', 'media_storage', 'security', 'reporting', 'payments');
-        $ai_settings = array_filter($settingsitems, function ($item) use ($ai_cats) {
-            return in_array($item['category'], $ai_cats);
+        $aicats = ['ai_grading', 'ai_content', 'ai_media', 'ai_rto', 'ai_ux'];
+        $admincats = ['block', 'training', 'enrolment', 'integrity', 'comms', 'branding', 'media_storage', 'security', 'reporting', 'payments'];
+        $aisettings = array_filter($settingsitems, function ($item) use ($aicats) {
+            return in_array($item['category'], $aicats);
         });
-        $admin_settings = array_filter($settingsitems, function ($item) use ($admin_cats) {
-            return in_array($item['category'], $admin_cats);
+        $adminsettings = array_filter($settingsitems, function ($item) use ($admincats) {
+            return in_array($item['category'], $admincats);
         });
-        usort($ai_settings, function ($a, $b) {
+        usort($aisettings, function ($a, $b) {
             return strcasecmp($a['name'], $b['name']);
         });
-        usort($admin_settings, function ($a, $b) {
+        usort($adminsettings, function ($a, $b) {
             return strcasecmp($a['name'], $b['name']);
         });
-        // Prepend config items to AI settings (Central Config appears first)
-        $ai_settings = array_merge(array_values($config_settings), array_values($ai_settings));
+        // Prepend config items to AI settings (Central Config appears first).
+        $aisettings = array_merge(array_values($configsettings), array_values($aisettings));
         usort($manageitems, function ($a, $b) {
             return strcasecmp($a['name'], $b['name']);
         });
-        
-        // Inject "Manage Plagiarism Plugins" into Settings > Admin Plugins column
-        // If Essay Guard or DocGuard is installed. This page controls the global
-        // Plagiarism_use_essayguard / plagiarism_use_docguard toggles that Moodle
+
+        // Inject "Manage Plagiarism Plugins" into Settings > Admin Plugins column.
+        // If Essay Guard or DocGuard is installed. This page controls the global.
+        // Plagiarism_use_essayguard / plagiarism_use_docguard toggles that Moodle.
         // Requires before either plugin will run on any activity.
         // Inject "Certificate Settings" for RTO Compliance into the AI settings column.
         if ($this->is_plugin_installed('local', 'rtocompliance')) {
-            $ai_settings[] = array(
+            $aisettings[] = [
                 'name'        => 'RTO Compliance — Certificate Settings',
                 'url'         => $CFG->wwwroot . '/admin/settings.php?section=local_rtocompliance_certs',
                 'icon'        => 'settings',
@@ -930,13 +944,13 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'rtocompliance',
                 'capability'  => 'moodle/site:config',
                 'category'    => 'ai_rto',
-            );
+            ];
         }
 
-        $has_plagiarism_plugin = $this->is_plugin_installed('plagiarism', 'essayguard')
+        $hasplagiarismplugin = $this->is_plugin_installed('plagiarism', 'essayguard')
                               || $this->is_plugin_installed('plagiarism', 'docguard');
-        if ($has_plagiarism_plugin) {
-            $admin_settings[] = array(
+        if ($hasplagiarismplugin) {
+            $adminsettings[] = [
                 'name'        => 'Manage Plagiarism Plugins',
                 'url'         => $CFG->wwwroot . '/admin/settings.php?section=manageplagiarismplugins',
                 'icon'        => 'sliders',
@@ -944,82 +958,82 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => '',
                 'capability'  => 'moodle/site:config',
                 'category'    => 'integrity',
-            );
+            ];
         }
-        
-        $links = array(
+
+        $links = [
             // Reports Section.
-            'tools' => array(
+            'tools' => [
                 'label' => get_string('ai_reports', 'block_aiplugin_nav'),
                 'items' => $reportitems,
-            ),
+            ],
             // Settings Section (grouped by category).
-            'settings' => array(
+            'settings' => [
                 'label' => get_string('ai_settings', 'block_aiplugin_nav'),
                 'items' => $settingsitems,
-                'ai_items' => array_values($ai_settings),
-                'admin_items' => array_values($admin_settings),
-            ),
+                'ai_items' => array_values($aisettings),
+                'admin_items' => array_values($adminsettings),
+            ],
             // Manage Section (management pages).
-            'manage' => array(
+            'manage' => [
                 'label' => get_string('ai_manage', 'block_aiplugin_nav'),
                 'items' => $manageitems,
-            ),
+            ],
             // External Links.
-            'external' => array(
+            'external' => [
                 'label' => '',
-                'items' => array(
-                    array(
+                'items' => [
+                    [
                         'name' => get_string('visit_website', 'block_aiplugin_nav'),
                         'url' => 'https://lms-labs.com',
                         'icon' => 'external-link',
                         'external' => true,
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('buy_credits', 'block_aiplugin_nav'),
                         'url' => 'https://lms-labs.com/pricing',
                         'icon' => 'credit-card',
                         'external' => true,
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('become_affiliate', 'block_aiplugin_nav'),
                         'url' => 'https://lms-labs.com/affiliate/signup',
                         'icon' => 'users',
                         'external' => true,
-                    ),
-                ),
-            ),
-        );
-        
+                    ],
+                ],
+            ],
+        ];
+
         return $links;
     }
-    
+
     /**
      * Get installed plugins grouped by category for the plugins management tab.
-     * 
+     *
      * @return array Plugins grouped by category.
      */
     public function get_installed_plugins_by_category() {
         $registry = $this->get_master_plugin_registry();
-        $categories = array(
-            'config'        => array(),
-            'ai_grading'    => array(),
-            'ai_content'    => array(),
-            'ai_media'      => array(),
-            'ai_rto'        => array(),
-            'ai_ux'         => array(),
-            'block'         => array(),
-            'training'      => array(),
-            'enrolment'     => array(),
-            'integrity'     => array(),
-            'comms'         => array(),
-            'branding'      => array(),
-            'media_storage' => array(),
-            'security'      => array(),
-            'reporting'     => array(),
-            'payments'      => array(),
-        );
-        
+        $categories = [
+            'config'        => [],
+            'ai_grading'    => [],
+            'ai_content'    => [],
+            'ai_media'      => [],
+            'ai_rto'        => [],
+            'ai_ux'         => [],
+            'block'         => [],
+            'training'      => [],
+            'enrolment'     => [],
+            'integrity'     => [],
+            'comms'         => [],
+            'branding'      => [],
+            'media_storage' => [],
+            'security'      => [],
+            'reporting'     => [],
+            'payments'      => [],
+        ];
+
         foreach ($registry as $component => $plugin) {
             if ($this->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])) {
                 $plugin['component'] = $component;
@@ -1027,15 +1041,18 @@ class block_aiplugin_nav extends block_base {
                 $categories[$plugin['category']][] = $plugin;
             }
         }
-        
+
         return $categories;
     }
 
     /**
      * Get SVG icon markup.
+     *
+     * @param string $icon Icon identifier.
+     * @return string SVG markup.
      */
     private function get_icon_svg($icon) {
-        $icons = array(
+        $icons = [
             'search' => '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
             'headset' => '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
             'file-text' => '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
@@ -1106,8 +1123,8 @@ class block_aiplugin_nav extends block_base {
             'archive' => '<polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>',
             'file-check-2' => '<path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="m3 15 2 2 4-4"/>',
             'bell' => '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
-        );
-        
+        ];
+
         return isset($icons[$icon]) ? $icons[$icon] : '';
     }
 
@@ -1120,9 +1137,9 @@ class block_aiplugin_nav extends block_base {
      */
     private function get_theme_primary_color() {
         global $PAGE, $CFG;
-        
+
         $defaultcolor = '#3b82f6';
-        
+
         // Method 1: Try using theme_config::load() for Moodle 4.x/5.x.
         try {
             $themeconfig = \theme_config::load($PAGE->theme->name);
@@ -1137,8 +1154,9 @@ class block_aiplugin_nav extends block_base {
             }
         } catch (Exception $e) {
             // Fall through.
+            unset($e);
         }
-        
+
         // Method 2: Try get_config for current theme.
         $themename = !empty($PAGE->theme->name) ? $PAGE->theme->name : '';
         if (!empty($themename)) {
@@ -1151,7 +1169,7 @@ class block_aiplugin_nav extends block_base {
                 return $primarycolor;
             }
         }
-        
+
         // Method 3: Check parent themes.
         if (!empty($themename)) {
             try {
@@ -1166,20 +1184,21 @@ class block_aiplugin_nav extends block_base {
                 }
             } catch (Exception $e) {
                 // Fall through.
+                unset($e);
             }
         }
-        
+
         // Method 4: Boost theme.
         $boostcolor = get_config('theme_boost', 'brandcolor');
         if (!empty($boostcolor)) {
             return $boostcolor;
         }
-        
+
         // Return special marker for JavaScript detection.
         // JS will detect the primary color from existing themed elements.
         return '__DETECT_FROM_DOM__';
     }
-    
+
     /**
      * Get JavaScript for detecting primary color from DOM.
      * This is more reliable in Moodle 5 where themes use CSS variables.
@@ -1311,7 +1330,7 @@ class block_aiplugin_nav extends block_base {
         $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $html .= $this->get_icon_svg('search');
         $html .= '</svg><span>' . s(get_string('findanaction', 'block_aiplugin_nav')) . '</span></button>';
-        foreach (array('plugins', 'reports', 'updates', 'customlinks', 'help') as $view) {
+        foreach (['plugins', 'reports', 'updates', 'customlinks', 'help'] as $view) {
             if ($view === 'updates' && !has_capability('moodle/site:config', context_system::instance())) {
                 continue;
             }
@@ -1321,11 +1340,11 @@ class block_aiplugin_nav extends block_base {
         $html .= '</nav>';
 
         $isadmin = has_capability('moodle/site:config', context_system::instance());
-        $can_see_credits = $isadmin
+        $canseecredits = $isadmin
             || $this->user_has_role_shortname($USER->id, 'editingteacher')
             || $this->user_has_role_shortname($USER->id, 'teacher')
             || $this->user_has_role_shortname($USER->id, 'lmshsadmin');
-        if ($can_see_credits) {
+        if ($canseecredits) {
             $html .= '<a class="ainav-operations-status" href="' . $hubbase . '?view=help">';
             $html .= '<span>' . s(get_string('creditbalance', 'block_aiplugin_nav')) . '</span>';
             $html .= '<span class="ainav-credits-badge" id="ainav-credits-badge" aria-live="polite">' .
@@ -1335,22 +1354,22 @@ class block_aiplugin_nav extends block_base {
         $html .= $this->render_action_launcher($registry);
         $html .= '</div>';
 
-        if ($can_see_credits) {
+        if ($canseecredits) {
             $PAGE->requires->js_call_amd('block_aiplugin_nav/credits', 'init');
         }
         $this->get_required_javascript();
         $this->content->text = $html;
         return $this->content;
     }
-    
+
     /**
      * Get the complete plugin registry for version checking and updates.
      * Each plugin has component name, status, download URL, description, and access info.
      */
     public function get_complete_plugin_registry() {
-        return array(
-            // Configuration Plugin (Install First)
-            array(
+        return [
+            // Configuration Plugin (Install First).
+            [
                 'name' => 'AI Grader Central Config',
                 'component' => 'local_aiconfig',
                 'plugin_type' => 'local',
@@ -1361,9 +1380,9 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Site admin > Plugins > Local plugins > AI Grader Central Config',
                 'goto_url' => '/admin/settings.php?section=local_aiconfig',
                 'install_first' => true,
-            ),
-            // AI Plugins (Credit-Based)
-            array(
+            ],
+            // AI Plugins (Credit-Based).
+            [
                 'name' => 'AI Essay Grader',
                 'component' => 'quiz_aigrader',
                 'plugin_type' => 'quiz',
@@ -1372,8 +1391,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_grading',
                 'description' => 'AI-powered essay grading with detailed feedback, rubric alignment, and growth mindset guidance.',
                 'access' => 'Quiz > Settings > AI Grader tab',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Quiz Maker',
                 'component' => 'local_aiquizmaker',
                 'plugin_type' => 'local',
@@ -1382,8 +1401,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_grading',
                 'description' => 'Generate quiz and essay questions with marking criteria based on competency units and learning outcomes. Supports model responses, ChatGPT prompt helper, and Moodle XML export.',
                 'access' => 'Quiz → Settings icon (gear) → AI Quiz Maker',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Content Creator',
                 'component' => 'mod_contentcreator',
                 'plugin_type' => 'mod',
@@ -1392,8 +1411,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Create interactive SCORM slideshows with AI-generated images, voiceovers in 52 languages, and embedded activities.',
                 'access' => 'Course > Add activity > AI Content Creator',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Knowledge Check',
                 'component' => 'mod_aiknowledgecheck',
                 'plugin_type' => 'mod',
@@ -1402,8 +1421,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_grading',
                 'description' => 'Self-paced knowledge checks with voice feedback, psychometric distractors, and comprehensive reporting.',
                 'access' => 'Course > Add activity > AI Knowledge Check',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Learning Activities',
                 'component' => 'mod_aiactivities',
                 'plugin_type' => 'mod',
@@ -1412,8 +1431,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Interactive revision activities generated from learning content. 5 types: ordering, category sort, column sort, card select, and matching.',
                 'access' => 'Course > Add activity > AI Learning Activities',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Video Activity',
                 'component' => 'mod_aivideoactivity',
                 'plugin_type' => 'mod',
@@ -1422,8 +1441,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_media',
                 'description' => 'AI-powered video learning with auto-generated questions from YouTube transcripts and voiceover narration.',
                 'access' => 'Course > Add activity > AI Video Activity',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Slideshow with Voiceover',
                 'component' => 'mod_slideshow',
                 'plugin_type' => 'mod',
@@ -1432,8 +1451,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_media',
                 'description' => 'Standalone slideshow player with AI voiceover in 52 languages, progress tracking, and SCORM export.',
                 'access' => 'Course > Add activity > AI Slideshow',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Slides',
                 'component' => 'mod_slides',
                 'plugin_type' => 'mod',
@@ -1442,8 +1461,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Interactive multi-type slide activities with seven slide sub-types (video, flip, image-text, image-poster, introduction, matching, summary). Build rich course content with completion tracking.',
                 'access' => 'Course > Add activity > Slides',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI SCORM Voiceover',
                 'component' => 'local_chirpvoice',
                 'plugin_type' => 'local',
@@ -1453,8 +1472,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Google Chirp 3 HD narration for Articulate Rise 360 SCORM courses. Floating toolbar with 8 voices, 31 languages, speed control, and server-side audio cache (3 credits per paragraph, first play only).',
                 'access' => 'Site admin > Plugins > Local plugins > AI SCORM Voiceover',
                 'goto_url' => '/admin/settings.php?section=local_chirpvoice',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Mapping',
                 'component' => 'mod_learningmapping',
                 'plugin_type' => 'mod',
@@ -1463,8 +1482,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_grading',
                 'description' => 'AI-powered ASQA-compliant mapping table. Uses OpenAI to analyse course content and automatically map activities to training package elements. 100 credits per AI analysis.',
                 'access' => 'Course > Add activity > AI Mapping',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Course Information',
                 'component' => 'mod_courseinfo',
                 'plugin_type' => 'mod',
@@ -1473,8 +1492,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Generates ASQA 2025-compliant course information with step-by-step student guides, activity timings, and Volume of Learning compliance. 100 credits per generation.',
                 'access' => 'Course > Add activity > AI Course Information',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Slide Flow',
                 'component' => 'mod_productexplainer',
                 'plugin_type' => 'mod',
@@ -1483,8 +1502,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'AI-powered slide presentations. Upload a PDF for Product Slides or enter a concept for Concept Slides — AI generates structured training slides with optional voiceover narration (10 credits per generation).',
                 'access' => 'Course > Add activity > AI Slide Flow',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Smart Workbook',
                 'component' => 'mod_smartworkbook',
                 'plugin_type' => 'mod',
@@ -1493,30 +1512,30 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Convert any Word or PDF teacher workbook into an interactive fillable student activity. AI auto-marks submissions against your answer key; teacher reviews and approves before grades post to the gradebook.',
                 'access' => 'Course > Add activity > AI Smart Workbook',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'AI Quiz',
-            //     'component' => 'mod_aiquiz',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aiquiz',
-            //     'icon' => 'help-circle',
-            //     'category' => 'ai',
-            //     'description' => 'AI-powered quiz activity with 5 question types, webcam proctoring, security features, and detailed analytics.',
-            //     'access' => 'Course > Add activity > AI Quiz',
+            // 'name' => 'AI Quiz',
+            // 'component' => 'mod_aiquiz',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'aiquiz',
+            // 'icon' => 'help-circle',
+            // 'category' => 'ai',
+            // 'description' => 'AI-powered quiz activity with 5 question types, webcam proctoring, security features, and detailed analytics.',
+            // 'access' => 'Course > Add activity > AI Quiz',
             // ),
-            // TESTING - Hidden until ready
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'AI Practical Assessment',
-            //     'component' => 'mod_practicalassessment',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'practicalassessment',
-            //     'icon' => 'clipboard-check',
-            //     'category' => 'ai',
-            //     'description' => 'Workplace practical assessments with skills checklists, supervisor verification, and competency mapping.',
-            //     'access' => 'Course > Add activity > AI Practical Assessment',
+            // 'name' => 'AI Practical Assessment',
+            // 'component' => 'mod_practicalassessment',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'practicalassessment',
+            // 'icon' => 'clipboard-check',
+            // 'category' => 'ai',
+            // 'description' => 'Workplace practical assessments with skills checklists, supervisor verification, and competency mapping.',
+            // 'access' => 'Course > Add activity > AI Practical Assessment',
             // ),
-            array(
+            [
                 'name' => 'AI Verify ID',
                 'component' => 'mod_verifyid',
                 'plugin_type' => 'mod',
@@ -1525,29 +1544,29 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_ux',
                 'description' => 'AI-powered identity verification using face comparison with configurable similarity thresholds.',
                 'access' => 'Course > Add activity > AI Verify ID',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'AI Webcam Proctoring',
-            //     'component' => 'quizaccess_webcamproctor',
-            //     'plugin_type' => 'quizaccess',
-            //     'plugin_name' => 'webcamproctor',
-            //     'icon' => 'eye',
-            //     'category' => 'ai',
-            //     'description' => 'Webcam monitoring during quizzes with periodic photo capture for exam integrity.',
-            //     'access' => 'Quiz > Settings > Extra restrictions',
+            // 'name' => 'AI Webcam Proctoring',
+            // 'component' => 'quizaccess_webcamproctor',
+            // 'plugin_type' => 'quizaccess',
+            // 'plugin_name' => 'webcamproctor',
+            // 'icon' => 'eye',
+            // 'category' => 'ai',
+            // 'description' => 'Webcam monitoring during quizzes with periodic photo capture for exam integrity.',
+            // 'access' => 'Quiz > Settings > Extra restrictions',
             // ),
             // Array(
-            //     'name' => 'AI Video Conference',
-            //     'component' => 'mod_aivideoconf',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aivideoconf',
-            //     'icon' => 'video-cam',
-            //     'category' => 'ai',
-            //     'description' => 'HD video conferencing with AI transcription, session recording, and attendance tracking.',
-            //     'access' => 'Course > Add activity > AI Video Conference',
+            // 'name' => 'AI Video Conference',
+            // 'component' => 'mod_aivideoconf',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'aivideoconf',
+            // 'icon' => 'video-cam',
+            // 'category' => 'ai',
+            // 'description' => 'HD video conferencing with AI transcription, session recording, and attendance tracking.',
+            // 'access' => 'Course > Add activity > AI Video Conference',
             // ),
-            array(
+            [
                 'name' => 'AI RTO Compliance',
                 'component' => 'local_rtocompliance',
                 'plugin_type' => 'local',
@@ -1557,13 +1576,13 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'ASQA 2025 compliant Student Management System with trainer credentials, TAS generator, qualification builder, and AI-powered compliance reporting.',
                 'access' => 'Site admin > Plugins > Local plugins > RTO Compliance',
                 'goto_url' => '/local/rtocompliance/index.php',
-            ),
-            // V2.4.62 REMOVE-AIPAGETEMPLATES-FINAL: tiny_aipagetemplates deliberately
-            // ABSENT from this registry. It crashed customer sites, was removed in
-            // V2.4.39, and was accidentally re-added in v2.4.53. It is also
-            // Deprecated server-side (excluded from the lms-labs.com manifest), so
+            ],
+            // V2.4.62 REMOVE-AIPAGETEMPLATES-FINAL: tiny_aipagetemplates deliberately.
+            // ABSENT from this registry. It crashed customer sites, was removed in.
+            // V2.4.39, and was accidentally re-added in v2.4.53. It is also.
+            // Deprecated server-side (excluded from the lms-labs.com manifest), so.
             // It must NEVER be re-added here.
-            array(
+            [
                 'name' => 'RPL Kit',
                 'component' => 'local_rplkit',
                 'plugin_type' => 'local',
@@ -1573,19 +1592,19 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Generates ASQA-mapped RPL assessment kits for any unit of competency: theory quiz (essay questions from Knowledge Evidence), SmartForm checklist (Performance Criteria), and Assignment Benchmarks criteria. Integrates with RTO Compliance for shared qualification data.',
                 'access' => 'Site admin > Plugins > Local plugins > RPL Kit',
                 'goto_url' => '/local/rplkit/index.php',
-            ),
+            ],
             // Array(
-            //     'name' => 'AI Training Matrix HCM',
-            //     'component' => 'local_trainingmatrix',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'users-2',
-            //     'category' => 'ai',
-            //     'description' => 'Human Capital Management for staff competency tracking. AI-powered competency generation (10 credits per position).',
-            //     'access' => 'Site admin > Plugins > Local plugins > AI Training Matrix',
-            //     'goto_url' => '/local/trainingmatrix/index.php',
+            // 'name' => 'AI Training Matrix HCM',
+            // 'component' => 'local_trainingmatrix',
+            // 'plugin_type' => 'local',
+            // 'plugin_name' => 'trainingmatrix',
+            // 'icon' => 'users-2',
+            // 'category' => 'ai',
+            // 'description' => 'Human Capital Management for staff competency tracking. AI-powered competency generation (10 credits per position).',
+            // 'access' => 'Site admin > Plugins > Local plugins > AI Training Matrix',
+            // 'goto_url' => '/local/trainingmatrix/index.php',
             // ),
-            array(
+            [
                 'name' => 'AI Support',
                 'component' => 'local_moodlesupport',
                 'plugin_type' => 'local',
@@ -1595,9 +1614,9 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'AI-powered help desk with trained knowledge base. Answers Moodle questions instantly via chat widget.',
                 'access' => 'Site admin > Plugins > Local plugins > AI Support',
                 'goto_url' => '/local/moodlesupport/index.php',
-            ),
-            // Reporting & Analytics
-            array(
+            ],
+            // Reporting & Analytics.
+            [
                 'name' => 'Beacon — Reports & Analytics',
                 'component' => 'local_beacon',
                 'plugin_type' => 'local',
@@ -1607,21 +1626,21 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Flexible report builder with 49 pre-built recipes. Grain-aware engine prevents row-multiplication errors. Schedule reports by email or cohort with threshold alerts.',
                 'access' => 'Site admin > Plugins > Local plugins > Beacon',
                 'goto_url' => '/local/beacon/index.php',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'Speed',
-            //     'component' => 'report_performanceintel',
-            //     'plugin_type' => 'report',
-            //     'plugin_name' => 'performanceintel',
-            //     'icon' => 'zap',
-            //     'category' => 'utility',
-            //     'description' => 'Performance Intelligence for real-time monitoring of user experience, bottleneck identification, and actionable fixes.',
-            //     'access' => 'Site admin > Reports > Speed (Performance Intelligence)',
-            //     'goto_url' => '/report/performanceintel/index.php',
+            // 'name' => 'Speed',
+            // 'component' => 'report_performanceintel',
+            // 'plugin_type' => 'report',
+            // 'plugin_name' => 'performanceintel',
+            // 'icon' => 'zap',
+            // 'category' => 'utility',
+            // 'description' => 'Performance Intelligence for real-time monitoring of user experience, bottleneck identification, and actionable fixes.',
+            // 'access' => 'Site admin > Reports > Speed (Performance Intelligence)',
+            // 'goto_url' => '/report/performanceintel/index.php',
             // ),
-            // Blocks
-            array(
+            // Blocks.
+            [
                 'name' => 'AI Grader Dashboard',
                 'component' => 'block_aigrader_dashboard',
                 'plugin_type' => 'block',
@@ -1630,8 +1649,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'block',
                 'description' => 'Dashboard showing essays pending AI grading across all courses with quick access links.',
                 'access' => 'Dashboard > Add block > AI Grader Dashboard',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Dashboard Quick Links',
                 'component' => 'block_aiplugin_nav',
                 'plugin_type' => 'block',
@@ -1640,8 +1659,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'block',
                 'description' => 'Central navigation hub for all AI plugins with version checking and quick site links.',
                 'access' => 'Dashboard > Add block > AI Dashboard Quick Links',
-            ),
-            array(
+            ],
+            [
                 'name' => 'My Progress',
                 'component' => 'block_my_progress',
                 'plugin_type' => 'block',
@@ -1650,8 +1669,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'block',
                 'description' => 'Student progress dashboard with real-time course completion tracking and motivational labels.',
                 'access' => 'Dashboard > Add block > My Progress',
-            ),
-            array(
+            ],
+            [
                 'name' => 'My Students Progress',
                 'component' => 'block_my_students_progress',
                 'plugin_type' => 'block',
@@ -1660,32 +1679,32 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'block',
                 'description' => 'Teacher view of student progress across courses with search, filters, and per-student completion tracking.',
                 'access' => 'Dashboard > Add block > My Students Progress',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'My Training Progress',
-            //     'component' => 'block_trainingmatrix',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
-            //     'group' => 'AI Training Matrix HCM',
-            //     'description' => 'Staff training progress with compliance ring, required competencies, and action items.',
-            //     'access' => 'Dashboard > Add block > My Training Progress',
+            // 'name' => 'My Training Progress',
+            // 'component' => 'block_trainingmatrix',
+            // 'plugin_type' => 'block',
+            // 'plugin_name' => 'trainingmatrix',
+            // 'icon' => 'users-2',
+            // 'category' => 'block',
+            // 'group' => 'AI Training Matrix HCM',
+            // 'description' => 'Staff training progress with compliance ring, required competencies, and action items.',
+            // 'access' => 'Dashboard > Add block > My Training Progress',
             // ),
             // Array(
-            //     'name' => 'Staff Training Dashboard',
-            //     'component' => 'block_trainingmatrix_teacher',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix_teacher',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
-            //     'group' => 'AI Training Matrix HCM',
-            //     'description' => 'Manager view of staff compliance, expiring competencies, and staff needing attention.',
-            //     'access' => 'Dashboard > Add block > Staff Training Dashboard',
+            // 'name' => 'Staff Training Dashboard',
+            // 'component' => 'block_trainingmatrix_teacher',
+            // 'plugin_type' => 'block',
+            // 'plugin_name' => 'trainingmatrix_teacher',
+            // 'icon' => 'users-2',
+            // 'category' => 'block',
+            // 'group' => 'AI Training Matrix HCM',
+            // 'description' => 'Manager view of staff compliance, expiring competencies, and staff needing attention.',
+            // 'access' => 'Dashboard > Add block > Staff Training Dashboard',
             // ),
-            // Time Saving Plugins ($100 AUD one-time purchase)
-            array(
+            // Time Saving Plugins ($100 AUD one-time purchase).
+            [
                 'name' => 'Quiz Access Rule',
                 'component' => 'quizaccess_aigrader',
                 'plugin_type' => 'quizaccess',
@@ -1694,8 +1713,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'enrolment',
                 'description' => 'Required dependency for AI Essay Grader. Enables AI grading settings in quiz configuration.',
                 'access' => 'Auto-installed with AI Essay Grader',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Course Prerequisite',
                 'component' => 'enrol_prerequisite',
                 'plugin_type' => 'enrol',
@@ -1704,8 +1723,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'enrolment',
                 'description' => 'Gatekeeper enrolment that suspends students until they complete prerequisite courses.',
                 'access' => 'Course > Enrolment methods > Add > Prerequisite',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Video Compress',
                 'component' => 'local_videocompress',
                 'plugin_type' => 'local',
@@ -1714,8 +1733,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'media_storage',
                 'description' => 'Automatic video compression for file uploads. Reduces storage and improves playback.',
                 'access' => 'Site admin > Plugins > Local plugins > Video Compress',
-            ),
-            array(
+            ],
+            [
                 'name' => 'SCORM Compress',
                 'component' => 'local_scormcompress',
                 'plugin_type' => 'local',
@@ -1724,8 +1743,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'media_storage',
                 'description' => 'Automatic SCORM package compression on upload. Reduces file size and speeds up delivery.',
                 'access' => 'Site admin > Plugins > Local plugins > SCORM Compress',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Media Optimiser',
                 'component' => 'local_mediaoptimiser',
                 'plugin_type' => 'local',
@@ -1734,8 +1753,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'media_storage',
                 'description' => 'Scan your Moodle file store for oversized images, duplicate files, unused backups, and unoptimised video — with impact scores and fix recommendations.',
                 'access' => 'Site admin > Local plugins > Media Optimiser > Dashboard',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Course Format',
                 'component' => 'format_aicourse',
                 'plugin_type' => 'format',
@@ -1744,8 +1763,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_content',
                 'description' => 'Modern course format with world-class AI Tutor that adapts to activity context, assignment-safe mode, and guided practice.',
                 'access' => 'Course > Settings > Course format > AI Course',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Groups Management',
                 'component' => 'local_groupmanager',
                 'plugin_type' => 'local',
@@ -1755,8 +1774,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Cohort-based time-controlled access with intake groups, grace periods, and AVETMISS compliance reports.',
                 'access' => 'Course > Users > Groups Management',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Groups Availability Condition',
                 'component' => 'availability_groupmanager',
                 'plugin_type' => 'availability',
@@ -1767,8 +1786,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Availability restriction based on group intake dates. Activities auto-hide before/after access windows.',
                 'access' => 'Activity > Restrict access > Add restriction > Group Intake Dates',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Course Version Control',
                 'component' => 'local_courseversion',
                 'plugin_type' => 'local',
@@ -1778,8 +1797,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Version management for course materials with auto-lock protection, audit trails, and TAS integration.',
                 'access' => 'Course > Course Version Control',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Activity Navigation',
                 'component' => 'local_activitynav',
                 'plugin_type' => 'local',
@@ -1788,8 +1807,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'training',
                 'description' => 'Streamlined navigation between activities with breadcrumbs, previous/next buttons, and progress tracking.',
                 'access' => 'Site admin > Plugins > Local plugins > Activity Navigation',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Change Site Font',
                 'component' => 'local_sitefont',
                 'plugin_type' => 'local',
@@ -1799,8 +1818,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Global font customisation with 10 Google Fonts, comprehensive CSS overrides, and FontAwesome preservation.',
                 'access' => 'Site admin > Appearance > Change Site Font',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Cohort Branding',
                 'component' => 'local_cohortbranding',
                 'plugin_type' => 'local',
@@ -1810,8 +1829,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Multi-tenant branding per cohort with logos, colours, fonts, and priority system for multi-cohort users.',
                 'access' => 'Site admin > Appearance > Cohort Branding',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Assignment Benchmarks',
                 'component' => 'gradingform_benchmarks',
                 'plugin_type' => 'gradingform',
@@ -1821,8 +1840,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Competency-based checklist grading with automatic grade calculation and evidence requirements.',
                 'access' => 'Assignment > Grading method > Benchmarks',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Certificate Pro',
                 'component' => 'mod_certificatepro',
                 'plugin_type' => 'mod',
@@ -1831,8 +1850,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Testing-stage certificate activity tracked by the LMS Labs release pipeline.',
                 'access' => 'Course > Add an activity or resource > Certificate Pro',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Simple 2FA & SSO',
                 'component' => 'auth_simple2fa',
                 'plugin_type' => 'auth',
@@ -1842,8 +1861,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Two-factor authentication with Google Authenticator TOTP for admin accounts. Includes built-in OAuth2/OIDC SSO.',
                 'access' => 'Site admin > Plugins > Authentication > Simple 2FA',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Group Membership Limit',
                 'component' => 'local_groupcap',
                 'plugin_type' => 'local',
@@ -1853,8 +1872,8 @@ class block_aiplugin_nav extends block_base {
                 'credits_required' => 1000,
                 'description' => 'Enforce maximum group size. Blocks self-enrolment and manual additions when a group reaches its member limit.',
                 'access' => 'Course > Participants > Groups > Edit Group',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Payment Unlock Assignment',
                 'component' => 'local_paymentunlockassign',
                 'plugin_type' => 'local',
@@ -1865,8 +1884,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Monetise late assignment submissions. Students pay via Stripe to reopen locked assignments for another attempt. Configurable fees per attempt, admin overrides, revenue reporting, and full audit log.',
                 'access' => 'Site admin > Plugins > Local plugins > Payment Unlock Assignment',
                 'goto_url' => '/local/paymentunlockassign/manage.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Essay Guard',
                 'component' => 'plagiarism_essayguard',
                 'plugin_type' => 'plagiarism',
@@ -1877,8 +1896,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Live writing-process analysis for academic integrity. Monitors keystroke dynamics, paste events, burst typing, pause patterns, and revision behaviour — gives teachers a Low / Medium / High risk badge on every submission.',
                 'access' => 'Site admin > Plugins > Plagiarism prevention > Essay Guard',
                 'goto_url' => '/plagiarism/essayguard/settings.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'DocGuard',
                 'component' => 'plagiarism_docguard',
                 'plugin_type' => 'plagiarism',
@@ -1889,8 +1908,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'AI and plagiarism detection for PDF and Word document submissions. Extracts text, detects question/answer sections, and scores each answer across 12 signals — producing a Low / Medium / High risk badge per file.',
                 'access' => 'Site admin > Plugins > Plagiarism prevention > DocGuard',
                 'goto_url' => '/plagiarism/docguard/settings.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Course Availability Delay',
                 'component' => 'local_courseavailabilitydelay',
                 'plugin_type' => 'local',
@@ -1901,8 +1920,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Delay when enrolled courses appear on a student\'s My Courses dashboard. Set per-course delays (days since enrolment) or fixed unlock dates, with per-user overrides and bulk CSV import.',
                 'access' => 'Site admin > Plugins > Local plugins > Course Availability Delay',
                 'goto_url' => '/local/courseavailabilitydelay/manage.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Paddle Payment Gateway',
                 'component' => 'paygw_paddle',
                 'plugin_type' => 'paygw',
@@ -1912,8 +1931,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Paddle as Merchant of Record for global tax-compliant payments. Hosted checkout, automatic enrolment, 30-currency support.',
                 'access' => 'Site admin > Plugins > Payment gateways > Paddle',
                 'goto_url' => '/payment/gateway/paddle/admin/reports.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Workshop Scheduler',
                 'component' => 'local_workshops',
                 'plugin_type' => 'local',
@@ -1923,8 +1942,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Complete workshop logistics and bookings management. Schedule face-to-face, webinar and hybrid workshops, manage participant bookings, track checklists, and upload documents.',
                 'access' => 'Site admin > Workshops > Manage Workshops',
                 'goto_url' => '/local/workshops/index.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Quiz Remedial Learning',
                 'component' => 'local_aiquizremedial',
                 'plugin_type' => 'local',
@@ -1934,8 +1953,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Auto-generates AI explanations with optional voiceover and images for wrong quiz answers. Dynamic credit system.',
                 'access' => 'Site admin > Plugins > Local plugins > AI Quiz Remedial Learning',
                 'goto_url' => '/local/aiquizremedial/index.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Login Designer',
                 'component' => 'local_ailogin',
                 'plugin_type' => 'local',
@@ -1945,8 +1964,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'AI-powered branded login page designer. Generates a custom colour scheme and CSS via AI (25 credits per generation). Animated favicon particles, logo upload, slogan and subtext customisation.',
                 'access' => 'Site admin > Plugins > Local plugins > AI Login Designer',
                 'goto_url' => '/local/ailogin/admin.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Site Down Alert',
                 'component' => 'local_downalert',
                 'plugin_type' => 'local',
@@ -1956,8 +1975,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Multi-site uptime monitoring with deep server diagnostics. Checks HTTP, SSL, DNS, disk, CPU, memory, MySQL, Redis, PHP-FPM, and Moodle health — then emails a root-cause alert when any site goes down.',
                 'access' => 'Site admin > Plugins > Local plugins > Site Down Alert',
                 'goto_url' => '/local/downalert/report.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'LMS Home Page',
                 'component' => 'local_lmshomepage',
                 'plugin_type' => 'local',
@@ -1967,8 +1986,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Customise the Moodle home page layout and content for a professional landing experience.',
                 'access' => 'Site admin > Plugins > Local plugins > LMS Home Page',
                 'goto_url' => '/admin/settings.php?section=local_lmshomepage',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Student Email Manager',
                 'component' => 'local_studentemail',
                 'plugin_type' => 'local',
@@ -1978,8 +1997,8 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Auto-provisions and manages cPanel email accounts for every enrolled student. Dashboard with live stats, bulk actions, and a student "My Email" portal showing credentials and Roundcube webmail link.',
                 'access' => 'Site admin > Plugins > Local plugins > Student Email Manager',
                 'goto_url' => '/local/studentemail/dashboard.php',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Student Email IMAP Auth',
                 'component' => 'auth_studentemail',
                 'plugin_type' => 'auth',
@@ -1988,40 +2007,40 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'comms',
                 'description' => 'Lets students log into Moodle using their provisioned college email address and password, verified in real-time via IMAP. Works alongside Student Email Manager.',
                 'access' => 'Site admin > Plugins > Authentication > Student Email IMAP Auth',
-            ),
+            ],
             // TESTING — BigBlueButton and Recordings hidden until fully tested.
             // Array(
-            //     'name' => 'BigBlueButton (Moodle 4.x)',
-            //     'component' => 'mod_bigbluebuttonbn',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'bigbluebuttonbn',
-            //     'icon' => 'video',
-            //     'category' => 'utility',
-            //     'description' => 'HD video conferencing with breakout rooms, polling, and session recording. Moodle 4.x compatible build.',
-            //     'access' => 'Course > Add activity > BigBlueButton',
+            // 'name' => 'BigBlueButton (Moodle 4.x)',
+            // 'component' => 'mod_bigbluebuttonbn',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'bigbluebuttonbn',
+            // 'icon' => 'video',
+            // 'category' => 'utility',
+            // 'description' => 'HD video conferencing with breakout rooms, polling, and session recording. Moodle 4.x compatible build.',
+            // 'access' => 'Course > Add activity > BigBlueButton',
             // ),
             // Array(
-            //     'name' => 'BigBlueButton Recordings (Moodle 4.x)',
-            //     'component' => 'mod_recordingsbn',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'recordingsbn',
-            //     'icon' => 'play-circle',
-            //     'category' => 'utility',
-            //     'description' => 'Companion plugin for BigBlueButton. Browse, manage, and share session recordings within Moodle courses.',
-            //     'access' => 'Course > Add activity > BigBlueButton Recordings',
+            // 'name' => 'BigBlueButton Recordings (Moodle 4.x)',
+            // 'component' => 'mod_recordingsbn',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'recordingsbn',
+            // 'icon' => 'play-circle',
+            // 'category' => 'utility',
+            // 'description' => 'Companion plugin for BigBlueButton. Browse, manage, and share session recordings within Moodle courses.',
+            // 'access' => 'Course > Add activity > BigBlueButton Recordings',
             // ),
-            // TESTING - Hidden until ready
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => 'AI PDF Assignment Grader',
-            //     'component' => 'assignfeedback_aipdf',
-            //     'plugin_type' => 'assignfeedback',
-            //     'plugin_name' => 'aipdf',
-            //     'icon' => 'file-text',
-            //     'category' => 'ai',
-            //     'description' => 'AI-powered PDF assignment grading with rubric-based feedback and inline annotations.',
-            //     'access' => 'Assignment > Feedback types > AI PDF Grader',
+            // 'name' => 'AI PDF Assignment Grader',
+            // 'component' => 'assignfeedback_aipdf',
+            // 'plugin_type' => 'assignfeedback',
+            // 'plugin_name' => 'aipdf',
+            // 'icon' => 'file-text',
+            // 'category' => 'ai',
+            // 'description' => 'AI-powered PDF assignment grading with rubric-based feedback and inline annotations.',
+            // 'access' => 'Assignment > Feedback types > AI PDF Grader',
             // ),
-            array(
+            [
                 'name' => 'Workshop Attendance Condition',
                 'component' => 'availability_workshopattendance',
                 'plugin_type' => 'availability',
@@ -2030,8 +2049,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Workshop Attendance Condition.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'RTO Compliance Dashboard',
                 'component' => 'block_rtocompliance',
                 'plugin_type' => 'block',
@@ -2040,8 +2059,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'ai_rto',
                 'description' => 'RTO Compliance Dashboard.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Student Activity & Participation Evidence',
                 'component' => 'block_studentactivity',
                 'plugin_type' => 'block',
@@ -2050,8 +2069,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Student Activity & Participation Evidence.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Grader Tester',
                 'component' => 'local_aitester',
                 'plugin_type' => 'local',
@@ -2060,8 +2079,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'AI Grader Tester.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Apache / WAF 403 Monitor',
                 'component' => 'local_apachemon',
                 'plugin_type' => 'local',
@@ -2070,8 +2089,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Apache / WAF 403 Monitor.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Campion Education Integration',
                 'component' => 'local_campion',
                 'plugin_type' => 'local',
@@ -2080,8 +2099,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Campion Education Integration.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Completion Auto-Suspend',
                 'component' => 'local_completionsuspend',
                 'plugin_type' => 'local',
@@ -2090,8 +2109,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Completion Auto-Suspend.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Custom Pages',
                 'component' => 'local_custompage',
                 'plugin_type' => 'local',
@@ -2100,8 +2119,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Custom Pages.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Essay Maker (Legacy)',
                 'component' => 'local_essaymaker',
                 'plugin_type' => 'local',
@@ -2110,8 +2129,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'AI Essay Maker (Legacy).',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Course Recertification',
                 'component' => 'local_recertify',
                 'plugin_type' => 'local',
@@ -2120,8 +2139,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Course Recertification.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Student Evidence Export',
                 'component' => 'local_student_export',
                 'plugin_type' => 'local',
@@ -2130,8 +2149,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Student Evidence Export.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'AI Training Simulation',
                 'component' => 'mod_aitrainingsim',
                 'plugin_type' => 'mod',
@@ -2140,8 +2159,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'AI Training Simulation.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Workplace Task',
                 'component' => 'mod_workplacetask',
                 'plugin_type' => 'mod',
@@ -2150,8 +2169,8 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Workplace Task.',
                 'access' => 'Site admin > Plugins',
-            ),
-            array(
+            ],
+            [
                 'name' => 'Wilkinson Coutts Question Behaviour',
                 'component' => 'qbehaviour_wilkinsoncoutts',
                 'plugin_type' => 'qbehaviour',
@@ -2160,188 +2179,191 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Wilkinson Coutts Question Behaviour.',
                 'access' => 'Site admin > Plugins',
-            ),
-        );
+            ],
+        ];
     }
-    
+
     /**
      * Get the AI Tools registry for quick access section.
      * Each tool has a capability that determines who can see it.
      */
     private function get_ai_tools_registry() {
-        return array(
-            array(
+        return [
+            [
                 'name' => get_string('ai_essay_grader', 'block_aiplugin_nav'),
                 'access' => get_string('ai_essay_grader_access', 'block_aiplugin_nav'),
                 'icon' => 'pen-tool',
                 'plugin_type' => 'quiz',
                 'plugin_name' => 'aigrader',
                 'capability' => 'mod/quiz:grade',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_content_creator', 'block_aiplugin_nav'),
                 'access' => get_string('ai_content_creator_access', 'block_aiplugin_nav'),
                 'icon' => 'book-open',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'contentcreator',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_knowledge_check', 'block_aiplugin_nav'),
                 'access' => get_string('ai_knowledge_check_access', 'block_aiplugin_nav'),
                 'icon' => 'check-square',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aiknowledgecheck',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => get_string('ai_practical_assessment', 'block_aiplugin_nav'),
-            //     'access' => get_string('ai_practical_assessment_access', 'block_aiplugin_nav'),
-            //     'icon' => 'clipboard-check',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'practicalassessment',
-            //     'capability' => 'moodle/course:manageactivities',
+            // 'name' => get_string('ai_practical_assessment', 'block_aiplugin_nav'),
+            // 'access' => get_string('ai_practical_assessment_access', 'block_aiplugin_nav'),
+            // 'icon' => 'clipboard-check',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'practicalassessment',
+            // 'capability' => 'moodle/course:manageactivities',
             // ),
-            array(
+            [
                 'name' => get_string('ai_learning_activities', 'block_aiplugin_nav'),
                 'access' => get_string('ai_learning_activities_access', 'block_aiplugin_nav'),
                 'icon' => 'layers',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aiactivities',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_verify_id', 'block_aiplugin_nav'),
                 'access' => get_string('ai_verify_id_access', 'block_aiplugin_nav'),
                 'icon' => 'user-check',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'verifyid',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_video_activity', 'block_aiplugin_nav'),
                 'access' => get_string('ai_video_activity_access', 'block_aiplugin_nav'),
                 'icon' => 'play-circle',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'aivideoactivity',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => get_string('ai_quiz', 'block_aiplugin_nav'),
-            //     'access' => get_string('ai_quiz_access', 'block_aiplugin_nav'),
-            //     'icon' => 'help-circle',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aiquiz',
-            //     'capability' => 'moodle/course:manageactivities',
+            // 'name' => get_string('ai_quiz', 'block_aiplugin_nav'),
+            // 'access' => get_string('ai_quiz_access', 'block_aiplugin_nav'),
+            // 'icon' => 'help-circle',
+            // 'plugin_type' => 'mod',
+            // 'plugin_name' => 'aiquiz',
+            // 'capability' => 'moodle/course:manageactivities',
             // ),
-            array(
+            [
                 'name' => get_string('ai_essay_maker', 'block_aiplugin_nav'),
                 'access' => get_string('ai_essay_maker_access', 'block_aiplugin_nav'),
                 'icon' => 'edit-3',
                 'plugin_type' => 'local',
                 'plugin_name' => 'aiquizmaker',
                 'capability' => 'mod/quiz:manage',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('learning_mapping', 'block_aiplugin_nav'),
                 'access' => get_string('learning_mapping_access', 'block_aiplugin_nav'),
                 'icon' => 'table',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'learningmapping',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_course_information', 'block_aiplugin_nav'),
                 'access' => get_string('ai_course_information_access', 'block_aiplugin_nav'),
                 'icon' => 'file-text',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'courseinfo',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_product_explainer', 'block_aiplugin_nav'),
                 'access' => get_string('ai_product_explainer_access', 'block_aiplugin_nav'),
                 'icon' => 'presentation',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'productexplainer',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('ai_smart_workbook', 'block_aiplugin_nav'),
                 'access' => get_string('ai_smart_workbook_access', 'block_aiplugin_nav'),
                 'icon' => 'book-open',
                 'plugin_type' => 'mod',
                 'plugin_name' => 'smartworkbook',
                 'capability' => 'moodle/course:manageactivities',
-            ),
-            array(
+            ],
+            [
                 'name' => get_string('workshop_scheduler', 'block_aiplugin_nav'),
                 'access' => get_string('workshop_scheduler_access', 'block_aiplugin_nav'),
                 'icon' => 'calendar',
                 'plugin_type' => 'local',
                 'plugin_name' => 'workshops',
                 'capability' => 'moodle/site:config',
-            ),
-            // TESTING - Hidden until ready
+            ],
+            // TESTING - Hidden until ready.
             // Array(
-            //     'name' => get_string('ai_video_conference', 'block_aiplugin_nav'),
-            //     'access' => get_string('ai_video_conference_access', 'block_aiplugin_nav'),
-            //     'icon' => 'video-cam',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'aivideoconf',
-            //     'capability' => 'moodle/course:manageactivities',
+            // 'name' => get_string('ai_video_conference', 'block_aiplugin_nav'),
+            // 'access' => get_string('ai_video_conference_access', 'block_aiplugin_nav'),
+            // 'icon' => 'video-cam',
+            // 'plugin_type' => 'local',
+            // 'plugin_name' => 'aivideoconf',
+            // 'capability' => 'moodle/course:manageactivities',
             // ),
             // Array(
-            //     'name' => get_string('ai_webcam_proctoring', 'block_aiplugin_nav'),
-            //     'access' => get_string('ai_webcam_proctoring_access', 'block_aiplugin_nav'),
-            //     'icon' => 'eye',
-            //     'plugin_type' => 'quizaccess',
-            //     'plugin_name' => 'webcamproctor',
-            //     'capability' => 'mod/quiz:manage',
+            // 'name' => get_string('ai_webcam_proctoring', 'block_aiplugin_nav'),
+            // 'access' => get_string('ai_webcam_proctoring_access', 'block_aiplugin_nav'),
+            // 'icon' => 'eye',
+            // 'plugin_type' => 'quizaccess',
+            // 'plugin_name' => 'webcamproctor',
+            // 'capability' => 'mod/quiz:manage',
             // ),
             // Array(
-            //     'name' => get_string('training_matrix', 'block_aiplugin_nav'),
-            //     'access' => get_string('training_matrix_access', 'block_aiplugin_nav'),
-            //     'icon' => 'users-2',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'capability' => 'moodle/site:config',
+            // 'name' => get_string('training_matrix', 'block_aiplugin_nav'),
+            // 'access' => get_string('training_matrix_access', 'block_aiplugin_nav'),
+            // 'icon' => 'users-2',
+            // 'plugin_type' => 'local',
+            // 'plugin_name' => 'trainingmatrix',
+            // 'capability' => 'moodle/site:config',
             // ),
-        );
+        ];
     }
-    
+
     /**
      * Check if user has capability in any course context.
      * This is used for dashboard display where we want to show tools
      * if the user has the capability in at least one course.
+     *
+     * @param string $capability Capability name.
+     * @return bool Whether the user has the capability.
      */
     private function has_capability_anywhere($capability) {
         global $USER, $DB;
 
         // Registry rendering asks the same capability question for many actions.
-        // Cache once per request so a large course enrolment list is never scanned
-        // repeatedly while building menus and launcher results.
-        static $capabilitycache = array();
+        // Cache once per request so a large course enrolment list is never scanned.
+        // Repeatedly while building menus and launcher results.
+        static $capabilitycache = [];
         if (array_key_exists($capability, $capabilitycache)) {
             return $capabilitycache[$capability];
         }
-        
-        // Admins always have access
+
+        // Admins always have access.
         if (is_siteadmin()) {
             $capabilitycache[$capability] = true;
             return $capabilitycache[$capability];
         }
-        
-        // Check system context first
+
+        // Check system context first.
         $systemcontext = context_system::instance();
         if (has_capability($capability, $systemcontext)) {
             $capabilitycache[$capability] = true;
             return $capabilitycache[$capability];
         }
-        
-        // Get all courses the user is enrolled in
+
+        // Get all courses the user is enrolled in.
         $courses = enrol_get_my_courses('id', 'id ASC', 0);
         foreach ($courses as $course) {
             $coursecontext = context_course::instance($course->id);
@@ -2350,11 +2372,11 @@ class block_aiplugin_nav extends block_base {
                 return $capabilitycache[$capability];
             }
         }
-        
+
         $capabilitycache[$capability] = false;
         return $capabilitycache[$capability];
     }
-    
+
     /**
      * Render the AI Tools quick access section with version checking.
      * For admins, shows all installed plugins with status labels and update buttons.
@@ -2363,17 +2385,17 @@ class block_aiplugin_nav extends block_base {
         global $USER;
 
         $context = context_system::instance();
-        $is_admin = is_siteadmin() || has_capability('moodle/site:config', $context);
-        
-        // For admins, show comprehensive plugin management
-        if ($is_admin) {
+        $isadmin = is_siteadmin() || has_capability('moodle/site:config', $context);
+
+        // For admins, show comprehensive plugin management.
+        if ($isadmin) {
             return $this->render_plugin_management_section();
         }
-        
-        // For non-admins, show simple AI Tools grid
+
+        // For non-admins, show simple AI Tools grid.
         $tools = $this->get_ai_tools_registry();
-        $visible_tools = array();
-        
+        $visibletools = [];
+
         foreach ($tools as $tool) {
             if (!$this->is_plugin_installed($tool['plugin_type'], $tool['plugin_name'])) {
                 continue;
@@ -2381,35 +2403,35 @@ class block_aiplugin_nav extends block_base {
             if (!empty($tool['capability']) && !$this->has_capability_anywhere($tool['capability'])) {
                 continue;
             }
-            $visible_tools[] = $tool;
+            $visibletools[] = $tool;
         }
-        
-        if (empty($visible_tools)) {
+
+        if (empty($visibletools)) {
             return '';
         }
-        
-        // Get default collapsed setting
-        $collapsed_default = get_config('block_aiplugin_nav', 'aitools_collapsed_default');
-        $collapsed_class = $collapsed_default ? ' ainav-section-collapsed' : '';
-        
-        $html = '<div class="ainav-tools-section' . $collapsed_class . '" id="ainav-tools-section-user">';
+
+        // Get default collapsed setting.
+        $collapseddefault = get_config('block_aiplugin_nav', 'aitools_collapsed_default');
+        $collapsedclass = $collapseddefault ? ' ainav-section-collapsed' : '';
+
+        $html = '<div class="ainav-tools-section' . $collapsedclass . '" id="ainav-tools-section-user">';
         $html .= '<div class="ainav-tools-header">';
-        
-        // Toggle button with arrow (same as admin view)
+
+        // Toggle button with arrow (same as admin view).
         $html .= '<button type="button" class="ainav-section-toggle" id="ainav-toggle-tools-user" title="' . get_string('collapse_section', 'block_aiplugin_nav') . '">';
         $html .= '<svg class="ainav-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $html .= '<polyline points="6 9 12 15 18 9"/>';
         $html .= '</svg>';
         $html .= '</button>';
-        
+
         $html .= '<span class="ainav-tools-title">' . get_string('ai_tools_section', 'block_aiplugin_nav') . '</span>';
         $html .= '</div>';
-        
-        // Collapsible content wrapper
+
+        // Collapsible content wrapper.
         $html .= '<div class="ainav-section-content" id="ainav-tools-content-user">';
         $html .= '<div class="ainav-tools-grid">';
-        
-        foreach ($visible_tools as $tool) {
+
+        foreach ($visibletools as $tool) {
             $html .= '<div class="ainav-tool-card">';
             $html .= '<div class="ainav-tool-icon">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -2422,13 +2444,15 @@ class block_aiplugin_nav extends block_base {
             $html .= '</div>';
             $html .= '</div>';
         }
-        
+
         $html .= '</div>';
 
-        // V4.9.108 STUDENT-DOC-REPOSITORY — inject "My Documents & Certificates" quick link
+        // V4.9.108 STUDENT-DOC-REPOSITORY — inject "My Documents & Certificates" quick link.
         // For students when local_rtocompliance is installed.
-        if ($this->is_plugin_installed('local', 'rtocompliance')
-                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))) {
+        if (
+            $this->is_plugin_installed('local', 'rtocompliance')
+                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))
+        ) {
             $html .= '<div style="margin-top:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.12);">';
             $html .= '<div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;'
                    . 'color:rgba(255,255,255,0.5);margin-bottom:6px;padding:0 4px;">My Portfolio</div>';
@@ -2453,9 +2477,9 @@ class block_aiplugin_nav extends block_base {
             $html .= '</div>';
         }
 
-        $html .= '</div>'; // End .ainav-section-content
-        
-        // Toggle section JavaScript (user view)
+        $html .= '</div>'; // End .ainav-section-content.
+
+        // Toggle section JavaScript (user view).
         $html .= '<script>
         (function () {
             var section = document.getElementById("ainav-tools-section-user");
@@ -2481,28 +2505,28 @@ class block_aiplugin_nav extends block_base {
             });
         })();
         </script>';
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Read plugin version.php ONCE and return both release string and numeric version.
      * Static cache prevents reading the same file twice per request.
      *
-     * @param string $plugin_type Plugin type (mod, local, block, etc.)
-     * @param string $plugin_name Plugin folder name.
+     * @param string $plugintype Plugin type (mod, local, block, etc.)
+     * @param string $pluginname Plugin folder name.
      * @return array ['release' => string|null, 'version' => string]
      */
-    private function get_plugin_version_data($plugin_type, $plugin_name) {
+    private function get_plugin_version_data($plugintype, $pluginname) {
         global $CFG;
-        static $version_cache = array();
-        $key = $plugin_type . '_' . $plugin_name;
-        if (isset($version_cache[$key])) {
-            return $version_cache[$key];
+        static $versioncache = [];
+        $key = $plugintype . '_' . $pluginname;
+        if (isset($versioncache[$key])) {
+            return $versioncache[$key];
         }
-        $type_dirs = array(
+        $typedirs = [
             'quiz' => 'mod/quiz/report',
             'mod' => 'mod',
             'local' => 'local',
@@ -2514,59 +2538,70 @@ class block_aiplugin_nav extends block_base {
             'gradingform' => 'grade/grading/form',
             'paygw' => 'payment/gateway',
             'assignfeedback' => 'mod/assign/feedback',
-        );
-        $dir = isset($type_dirs[$plugin_type]) ? $type_dirs[$plugin_type] : $plugin_type;
-        $version_file = $CFG->dirroot . '/' . $dir . '/' . $plugin_name . '/version.php';
-        if (!file_exists($version_file)) {
-            $version_cache[$key] = array('release' => null, 'version' => '0');
-            return $version_cache[$key];
+        ];
+        $dir = isset($typedirs[$plugintype]) ? $typedirs[$plugintype] : $plugintype;
+        $versionfile = $CFG->dirroot . '/' . $dir . '/' . $pluginname . '/version.php';
+        if (!file_exists($versionfile)) {
+            $versioncache[$key] = ['release' => null, 'version' => '0'];
+            return $versioncache[$key];
         }
         $plugin = new stdClass();
-        include($version_file);
-        $version_cache[$key] = array(
+        include($versionfile);
+        $versioncache[$key] = [
             'release' => isset($plugin->release) ? $plugin->release : null,
             'version' => isset($plugin->version) ? (string)$plugin->version : '0',
-        );
-        return $version_cache[$key];
+        ];
+        return $versioncache[$key];
     }
 
     /**
      * Get installed plugin version from version.php.
+     *
+     * @param string $plugintype Plugin type.
+     * @param string $pluginname Plugin name.
+     * @return string Plugin release version.
      */
-    public function get_plugin_version($plugin_type, $plugin_name) {
-        return $this->get_plugin_version_data($plugin_type, $plugin_name)['release'];
+    public function get_plugin_version($plugintype, $pluginname) {
+        return $this->get_plugin_version_data($plugintype, $pluginname)['release'];
     }
 
-    public function get_plugin_numeric_version($plugin_type, $plugin_name) {
-        return $this->get_plugin_version_data($plugin_type, $plugin_name)['version'];
+    /**
+     * Get the numeric version of an installed plugin.
+     *
+     * @param string $plugintype Plugin type.
+     * @param string $pluginname Plugin name.
+     * @return int|null Numeric plugin version.
+     */
+    public function get_plugin_numeric_version($plugintype, $pluginname) {
+        return $this->get_plugin_version_data($plugintype, $pluginname)['version'];
     }
-    
+
     /**
      * Render plugin management section for admins.
      * Shows ALL plugins with status labels and update/install functionality.
      */
     public function render_plugin_management_section() {
         $registry = $this->get_complete_plugin_registry();
-        $all_plugins = array();
+        $allplugins = [];
 
         // 5-minute cross-request cache for plugin installed status + versions.
         // Reading 44 version.php files on every admin page load is the biggest bottleneck.
-        $cache_ttl = 300; // 5 minutes.
-        $cache_time = (int)get_config('block_aiplugin_nav', 'plugin_status_cache_time');
-        $plugin_status_map = null;
-        if ($cache_time && (time() - $cache_time) < $cache_ttl) {
-            $cached_json = get_config('block_aiplugin_nav', 'plugin_status_cache_data');
-            if ($cached_json) {
-                $plugin_status_map = json_decode($cached_json, true);
+        $cachettl = 300; // 5 minutes.
+        $cachetime = (int)get_config('block_aiplugin_nav', 'plugin_status_cache_time');
+        $pluginstatusmap = null;
+        if ($cachetime && (time() - $cachetime) < $cachettl) {
+            $cachedjson = get_config('block_aiplugin_nav', 'plugin_status_cache_data');
+            if ($cachedjson) {
+                $pluginstatusmap = json_decode($cachedjson, true);
             }
         }
 
-        // Cache invalidation: detect newly installed/removed plugins by hashing
-        // The count of each plugin type we care about. If anything changed since the
-        // Cache was built (e.g. admin installed local_aiconfig manually), bust the cache
+        // Cache invalidation: detect newly installed/removed plugins by hashing.
+        // The count of each plugin type we care about. If anything changed since the.
+        // Cache was built (e.g. admin installed local_aiconfig manually), bust the cache.
         // Immediately rather than waiting up to 5 minutes for the TTL to expire.
-        if ($plugin_status_map !== null) {
-            $live_hash = md5(
+        if ($pluginstatusmap !== null) {
+            $livehash = md5(
                 count(core_component::get_plugin_list('local')) . '|' .
                 count(core_component::get_plugin_list('mod')) . '|' .
                 count(core_component::get_plugin_list('block')) . '|' .
@@ -2580,79 +2615,79 @@ class block_aiplugin_nav extends block_base {
                 count(core_component::get_plugin_list('plagiarism')) . '|' .
                 count(core_component::get_plugin_list('format'))
             );
-            $stored_hash = get_config('block_aiplugin_nav', 'plugin_list_hash');
-            if ($stored_hash !== $live_hash) {
+            $storedhash = get_config('block_aiplugin_nav', 'plugin_list_hash');
+            if ($storedhash !== $livehash) {
                 // Plugin landscape changed — invalidate the cache immediately.
-                $plugin_status_map = null;
-                set_config('plugin_list_hash', $live_hash, 'block_aiplugin_nav');
+                $pluginstatusmap = null;
+                set_config('plugin_list_hash', $livehash, 'block_aiplugin_nav');
             }
         }
 
-        if ($plugin_status_map !== null) {
+        if ($pluginstatusmap !== null) {
             // Cache hit: reconstruct $all_plugins from registry + cached status data.
             foreach ($registry as $plugin) {
                 $component = $plugin['component'];
-                $status = isset($plugin_status_map[$component]) ? $plugin_status_map[$component] : array();
+                $status = isset($pluginstatusmap[$component]) ? $pluginstatusmap[$component] : [];
                 $plugin['is_installed'] = !empty($status['is_installed']);
                 $plugin['installed_version'] = isset($status['installed_version']) ? $status['installed_version'] : null;
                 $plugin['installed_numeric_version'] = isset($status['installed_numeric_version']) ? $status['installed_numeric_version'] : '0';
-                $all_plugins[] = $plugin;
+                $allplugins[] = $plugin;
             }
         } else {
             // Cache miss: read all version.php files, then persist to config.
-            $new_status_map = array();
+            $newstatusmap = [];
             foreach ($registry as $plugin) {
-                $is_installed = $this->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name']);
-                $vdata = $is_installed ? $this->get_plugin_version_data($plugin['plugin_type'], $plugin['plugin_name'])
-                                       : array('release' => null, 'version' => '0');
-                $plugin['is_installed'] = $is_installed;
+                $isinstalled = $this->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name']);
+                $vdata = $isinstalled ? $this->get_plugin_version_data($plugin['plugin_type'], $plugin['plugin_name'])
+                                       : ['release' => null, 'version' => '0'];
+                $plugin['is_installed'] = $isinstalled;
                 $plugin['installed_version'] = $vdata['release'];
                 $plugin['installed_numeric_version'] = $vdata['version'];
-                $all_plugins[] = $plugin;
-                $new_status_map[$plugin['component']] = array(
-                    'is_installed' => $is_installed,
+                $allplugins[] = $plugin;
+                $newstatusmap[$plugin['component']] = [
+                    'is_installed' => $isinstalled,
                     'installed_version' => $vdata['release'],
                     'installed_numeric_version' => $vdata['version'],
-                );
+                ];
             }
-            set_config('plugin_status_cache_data', json_encode($new_status_map), 'block_aiplugin_nav');
+            set_config('plugin_status_cache_data', json_encode($newstatusmap), 'block_aiplugin_nav');
             set_config('plugin_status_cache_time', time(), 'block_aiplugin_nav');
         }
-        
-        if (empty($all_plugins)) {
+
+        if (empty($allplugins)) {
             return '';
         }
-        
-        $plugins_json = array();
-        foreach ($all_plugins as $plugin) {
-            $plugins_json[] = array(
+
+        $pluginsjson = [];
+        foreach ($allplugins as $plugin) {
+            $pluginsjson[] = [
                 'component' => $plugin['component'],
                 'installedVersion' => $plugin['installed_version'],
                 'installedNumericVersion' => $plugin['installed_numeric_version'],
                 'isInstalled' => $plugin['is_installed'],
-            );
+            ];
         }
-        
-        // Get default collapsed setting
-        $collapsed_default = get_config('block_aiplugin_nav', 'aitools_collapsed_default');
-        $collapsed_class = $collapsed_default ? ' ainav-section-collapsed' : '';
-        
-        $html = '<div class="ainav-tools-section ainav-plugin-management' . $collapsed_class . '" id="ainav-tools-section">';
-        
-        // Header with AI Support link and Update All button
+
+        // Get default collapsed setting.
+        $collapseddefault = get_config('block_aiplugin_nav', 'aitools_collapsed_default');
+        $collapsedclass = $collapseddefault ? ' ainav-section-collapsed' : '';
+
+        $html = '<div class="ainav-tools-section ainav-plugin-management' . $collapsedclass . '" id="ainav-tools-section">';
+
+        // Header with AI Support link and Update All button.
         $html .= '<div class="ainav-tools-header ainav-pm-header">';
-        
-        // Toggle button with arrow
+
+        // Toggle button with arrow.
         $html .= '<button type="button" class="ainav-section-toggle" id="ainav-toggle-tools" title="' . get_string('collapse_section', 'block_aiplugin_nav') . '">';
         $html .= '<svg class="ainav-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $html .= '<polyline points="6 9 12 15 18 9"/>';
         $html .= '</svg>';
         $html .= '</button>';
-        
+
         $html .= '<span class="ainav-tools-title">' . get_string('ai_tools_section', 'block_aiplugin_nav') . '</span>';
         $html .= '<div class="ainav-pm-actions">';
-        
-        // AI Moodle Support button (only show if installed)
+
+        // AI Moodle Support button (only show if installed).
         if ($this->is_plugin_installed('local', 'moodlesupport')) {
             global $CFG;
             $html .= '<a href="' . $CFG->wwwroot . '/local/moodlesupport/index.php" class="ainav-btn ainav-btn-support">';
@@ -2662,7 +2697,7 @@ class block_aiplugin_nav extends block_base {
             $html .= '<span>' . get_string('ai_support', 'block_aiplugin_nav') . '</span>';
             $html .= '</a>';
         }
-        
+
         $html .= '<button type="button" class="ainav-btn ainav-btn-check" id="ainav-check-versions">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ainav-btn-icon">';
         $html .= '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
@@ -2683,52 +2718,56 @@ class block_aiplugin_nav extends block_base {
         $html .= '</button>';
         $html .= '</div>';
         $html .= '</div>';
-        
-        // Collapsible content wrapper
-        $html .= '<div class="ainav-section-content" id="ainav-tools-content">';
-        
-        // Plugin categories - Super-group layout matching the approved design
-        // Left super-group: AI & Learning Intelligence (5 category columns)
-        // Right super-group: Administration & Operations (9 category columns)
 
-        // Helper: filter plugins by one or more categories
-        $get_cat = function ($all, $cats) {
+        // Collapsible content wrapper.
+        $html .= '<div class="ainav-section-content" id="ainav-tools-content">';
+
+        // Plugin categories - Super-group layout matching the approved design.
+        // Left super-group: AI & Learning Intelligence (5 category columns).
+        // Right super-group: Administration & Operations (9 category columns).
+
+        // Helper: filter plugins by one or more categories.
+        $getcat = function ($all, $cats) {
             return array_values(array_filter($all, function ($p) use ($cats) {
                 return in_array($p['category'], $cats);
             }));
         };
 
-        // Render Foundation plugin card first (local_aiconfig)
-        $foundation_plugins  = array_values(array_filter($all_plugins, function ($p) {
+        // Render Foundation plugin card first (local_aiconfig).
+        $foundationplugins  = array_values(array_filter($allplugins, function ($p) {
             return !empty($p['install_first']);
         }));
 
-        // AI super-group categories (left)
-        $cat_ai_grading   = $get_cat($all_plugins, array('ai_grading'));
-        $cat_ai_content   = $get_cat($all_plugins, array('ai_content'));
-        $cat_ai_media     = $get_cat($all_plugins, array('ai_media'));
-        $cat_ai_rto       = $get_cat($all_plugins, array('ai_rto'));
-        $cat_ai_ux        = $get_cat($all_plugins, array('ai_ux'));
+        // AI super-group categories (left).
+        $cataigrading   = $getcat($allplugins, ['ai_grading']);
+        $cataicontent   = $getcat($allplugins, ['ai_content']);
+        $cataimedia     = $getcat($allplugins, ['ai_media']);
+        $catairto       = $getcat($allplugins, ['ai_rto']);
+        $cataiux        = $getcat($allplugins, ['ai_ux']);
 
-        // Admin super-group categories (right)
-        $cat_block        = $get_cat($all_plugins, array('block'));
-        $cat_training     = $get_cat($all_plugins, array('training'));
-        $cat_enrolment    = $get_cat($all_plugins, array('enrolment'));
-        $cat_integrity    = $get_cat($all_plugins, array('integrity'));
-        $cat_comms        = $get_cat($all_plugins, array('comms'));
-        $cat_branding     = $get_cat($all_plugins, array('branding'));
-        $cat_media_storage = $get_cat($all_plugins, array('media_storage'));
-        $cat_security     = $get_cat($all_plugins, array('security'));
-        $cat_reporting    = $get_cat($all_plugins, array('reporting'));
-        $cat_payments     = $get_cat($all_plugins, array('payments'));
+        // Admin super-group categories (right).
+        $catblock        = $getcat($allplugins, ['block']);
+        $cattraining     = $getcat($allplugins, ['training']);
+        $catenrolment    = $getcat($allplugins, ['enrolment']);
+        $catintegrity    = $getcat($allplugins, ['integrity']);
+        $catcomms        = $getcat($allplugins, ['comms']);
+        $catbranding     = $getcat($allplugins, ['branding']);
+        $catmediastorage = $getcat($allplugins, ['media_storage']);
+        $catsecurity     = $getcat($allplugins, ['security']);
+        $catreporting    = $getcat($allplugins, ['reporting']);
+        $catpayments     = $getcat($allplugins, ['payments']);
 
-        // Helper: render one category column
-        $render_cat_col = function ($title, $plugins, $is_ai = true) use (&$html) {
-            if (empty($plugins)) return;
-            $installed = count(array_filter($plugins, function ($p) { return !empty($p['is_installed']); }));
+        // Helper: render one category column.
+        $rendercatcol = function ($title, $plugins, $isai = true) use (&$html) {
+            if (empty($plugins)) {
+                return;
+            }
+            $installed = count(array_filter($plugins, function ($p) {
+                return !empty($p['is_installed']);
+            }));
             $total     = count($plugins);
-            $tone_cls  = $is_ai ? 'ainav-pm-cat-ai' : 'ainav-pm-cat-admin';
-            $html .= '<div class="ainav-pm-category ' . $tone_cls . '">';
+            $tonecls  = $isai ? 'ainav-pm-cat-ai' : 'ainav-pm-cat-admin';
+            $html .= '<div class="ainav-pm-category ' . $tonecls . '">';
             $html .= '<div class="ainav-pm-category-header">';
             $html .= '<div class="ainav-pm-category-title">' . htmlspecialchars($title) . '</div>';
             $html .= '<div class="ainav-pm-category-badge">' . $installed . '/' . $total . '</div>';
@@ -2743,7 +2782,7 @@ class block_aiplugin_nav extends block_base {
 
         // ── Outer wrapper ──────────────────────────────────────────────────
         // ===== World-class plugin finder (search / sort / filter / views) =====
-        $fdr_cats = [
+        $fdrcats = [
             'config' => ['label' => 'Central Config', 'group' => 'ai', 'icon' => 'settings'],
             'ai_grading' => ['label' => 'AI Grading & Assessment', 'group' => 'ai', 'icon' => 'clipboard-check'],
             'ai_content' => ['label' => 'AI Content & Courses', 'group' => 'ai', 'icon' => 'book-open'],
@@ -2761,20 +2800,20 @@ class block_aiplugin_nav extends block_base {
             'reporting' => ['label' => 'Reporting & Analytics', 'group' => 'admin', 'icon' => 'bar-chart-2'],
             'payments' => ['label' => 'Payments', 'group' => 'admin', 'icon' => 'credit-card'],
         ];
-        $fdr_data = [];
-        $fdr_iconkeys = ['star', 'settings'];
-        foreach ($all_plugins as $p) {
+        $fdrdata = [];
+        $fdriconkeys = ['star', 'settings'];
+        foreach ($allplugins as $p) {
             $cat = isset($p['category']) ? $p['category'] : '';
-            if (!isset($fdr_cats[$cat])) {
+            if (!isset($fdrcats[$cat])) {
                 continue;
             }
             $vlabel = $this->format_version_label($p);
-            $fdr_data[] = [
+            $fdrdata[] = [
                 'name'       => $p['name'],
                 'component'  => $p['component'],
                 'cat'        => $cat,
-                'catLabel'   => $fdr_cats[$cat]['label'],
-                'group'      => $fdr_cats[$cat]['group'],
+                'catLabel'   => $fdrcats[$cat]['label'],
+                'group'      => $fdrcats[$cat]['group'],
                 'icon'       => isset($p['icon']) ? $p['icon'] : 'star',
                 'desc'       => isset($p['description']) ? $p['description'] : '',
                 'credits'    => ($p['component'] === 'local_rtocompliance') ? 2000 : 500,
@@ -2783,18 +2822,18 @@ class block_aiplugin_nav extends block_base {
                 'installed'  => !empty($p['is_installed']),
                 'version'    => ($vlabel === '?' ? '' : $vlabel),
                 'foundation' => !empty($p['install_first']),
-                'added'      => count($fdr_data),
-                'popularity' => (!empty($p['is_installed']) ? 1000000 : 0) - count($fdr_data),
+                'added'      => count($fdrdata),
+                'popularity' => (!empty($p['is_installed']) ? 1000000 : 0) - count($fdrdata),
                 'docs'       => $this->get_plugin_docs_url($p['component']),
             ];
-            $fdr_iconkeys[] = isset($p['icon']) ? $p['icon'] : 'star';
+            $fdriconkeys[] = isset($p['icon']) ? $p['icon'] : 'star';
         }
-        foreach ($fdr_cats as $c) {
-            $fdr_iconkeys[] = $c['icon'];
+        foreach ($fdrcats as $c) {
+            $fdriconkeys[] = $c['icon'];
         }
-        $fdr_icons = [];
-        foreach (array_unique($fdr_iconkeys) as $ik) {
-            $fdr_icons[$ik] = $this->get_icon_svg($ik);
+        $fdricons = [];
+        foreach (array_unique($fdriconkeys) as $ik) {
+            $fdricons[$ik] = $this->get_icon_svg($ik);
         }
 
         $html .= '<div class="ainav-fdr">';
@@ -2831,9 +2870,9 @@ class block_aiplugin_nav extends block_base {
 <div class="results" id="results"></div>
 FDR_TOOLBAR;
         $html .= '</div>';
-        $html .= '<script type="application/json" id="ainav-fdr-data">' . json_encode($fdr_data) . '</script>';
-        $html .= '<script type="application/json" id="ainav-fdr-cats">' . json_encode($fdr_cats) . '</script>';
-        $html .= '<script type="application/json" id="ainav-fdr-icons">' . json_encode($fdr_icons) . '</script>';
+        $html .= '<script type="application/json" id="ainav-fdr-data">' . json_encode($fdrdata) . '</script>';
+        $html .= '<script type="application/json" id="ainav-fdr-cats">' . json_encode($fdrcats) . '</script>';
+        $html .= '<script type="application/json" id="ainav-fdr-icons">' . json_encode($fdricons) . '</script>';
         $html .= '<script>';
         $html .= <<<'FDR_JS'
 
@@ -2950,12 +2989,12 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 FDR_JS;
         $html .= '</script>';
-        $html .= '</div>'; // End .ainav-section-content
-        
-        // Hidden data for JavaScript
-        $html .= '<script type="application/json" id="ainav-installed-plugins">' . json_encode($plugins_json) . '</script>';
-        
-        // Toggle section JavaScript
+        $html .= '</div>'; // End .ainav-section-content.
+
+        // Hidden data for JavaScript.
+        $html .= '<script type="application/json" id="ainav-installed-plugins">' . json_encode($pluginsjson) . '</script>';
+
+        // Toggle section JavaScript.
         $html .= '<script>
         (function () {
             var section = document.getElementById("ainav-tools-section");
@@ -2981,8 +3020,8 @@ FDR_JS;
             });
         })();
         </script>';
-        
-        // Success modal
+
+        // Success modal.
         $html .= '<div class="ainav-modal-overlay" id="ainav-update-success-modal">';
         $html .= '<div class="ainav-modal ainav-success-modal">';
         $html .= '<div class="ainav-success-icon">';
@@ -2996,7 +3035,7 @@ FDR_JS;
         $html .= '</div>';
         $html .= '</div>';
 
-        // Credit unlock confirmation modal (v2.3.37)
+        // Credit unlock confirmation modal (v2.3.37).
         // Shown before deducting credits for credit-gated Time Saving Plugins.
         $html .= '<div id="ainav-credit-confirm-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:999990;align-items:center;justify-content:center;">';
         $html .= '<div style="background:#fff;border-radius:8px;padding:28px 24px 24px;max-width:440px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.28);font-family:inherit;">';
@@ -3034,16 +3073,16 @@ FDR_JS;
         // Orange gradient header when updates exist; green when all plugins are current.
         $html .= '<div id="ainav-update-popup-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:999996;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">';
         $html .= '<div class="ainav-update-popup-modal">';
-        // Gradient header — colour set dynamically by JS
+        // Gradient header — colour set dynamically by JS.
         $html .= '<div class="ainav-update-popup-header" id="ainav-update-popup-header" style="background:linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">';
         $html .= '<button type="button" class="ainav-update-popup-close" id="ainav-update-popup-close" aria-label="' . get_string('close', 'block_aiplugin_nav') . '">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
         $html .= '</button>';
         $html .= '<div class="ainav-update-popup-header-inner">';
         $html .= '<div class="ainav-update-popup-icon-wrap">';
-        // Bell icon (shown when updates exist)
+        // Bell icon (shown when updates exist).
         $html .= '<svg id="ainav-update-popup-icon-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
-        // Shield-check icon (shown when up-to-date); hidden by default
+        // Shield-check icon (shown when up-to-date); hidden by default.
         $html .= '<svg id="ainav-update-popup-icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11.5 14.5 16 9"/></svg>';
         $html .= '</div>';
         $html .= '<div>';
@@ -3052,21 +3091,21 @@ FDR_JS;
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        // Body
+        // Body.
         $html .= '<div class="ainav-update-popup-body">';
-        // Plugin list (shown when updates exist)
+        // Plugin list (shown when updates exist).
         $html .= '<div id="ainav-update-popup-list" class="ainav-update-popup-list"></div>';
-        // Up-to-date state (hidden by default; shown when no updates)
+        // Up-to-date state (hidden by default; shown when no updates).
         $html .= '<div id="ainav-update-popup-uptodate" class="ainav-update-popup-uptodate" style="display:none;">';
         $html .= '<div class="ainav-update-popup-sparkle">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>';
         $html .= '</div>';
         $html .= '<p class="ainav-update-popup-uptodate-msg">All your Moodle plugins are running the latest available versions.</p>';
         $html .= '</div>';
-        // Footer buttons
+        // Footer buttons.
         // Left  — "Close" when updates are pending, "Re-check" when everything is current.
         // Right — "Update All Plugins" when pending (triggers the update flow + closes),
-        //         "Perfect, Thanks!" when current (just closes).
+        // "Perfect, Thanks!" when current (just closes).
         // Both labels/icons are set dynamically by showUpdatePopup() below.
         $html .= '<div class="ainav-update-popup-footer">';
         $html .= '<button type="button" id="ainav-update-popup-recheck" class="ainav-update-popup-btn ainav-update-popup-btn-outline">';
@@ -3085,12 +3124,15 @@ FDR_JS;
         $html .= '</div>';
 
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get settings URL for a plugin by component.
+     *
+     * @param string $component Plugin component.
+     * @return string|null Settings URL, or null if unavailable.
      */
     private function get_plugin_settings_url($component) {
         $registry = $this->get_master_plugin_registry();
@@ -3099,7 +3141,7 @@ FDR_JS;
         }
         return null;
     }
-    
+
     /**
      * Render a single plugin card with status label, update/install button, and beautiful tooltip.
      */
@@ -3120,121 +3162,126 @@ FDR_JS;
         return $ver !== '' ? $ver : '?';
     }
 
+    /**
+     * Render a plugin card.
+     *
+     * @param array $plugin Plugin information.
+     * @return string Card HTML.
+     */
     private function render_plugin_card($plugin) {
         global $CFG;
-        $is_installed = !empty($plugin['is_installed']);
-        $card_class = 'ainav-pm-card ainav-pm-card-compact' . ($is_installed ? '' : ' ainav-pm-card-notinstalled');
+        $isinstalled = !empty($plugin['is_installed']);
+        $cardclass = 'ainav-pm-card ainav-pm-card-compact' . ($isinstalled ? '' : ' ainav-pm-card-notinstalled');
         $description = isset($plugin['description']) ? $plugin['description'] : '';
         $access = isset($plugin['access']) ? $plugin['access'] : '';
-        $docs_url = $this->get_plugin_docs_url($plugin['component']);
-        
-        $html = '<div class="' . $card_class . '" data-component="' . htmlspecialchars($plugin['component']) . '" data-installed="' . ($is_installed ? '1' : '0') . '">';
-        
-        // Icon
+        $docsurl = $this->get_plugin_docs_url($plugin['component']);
+
+        $html = '<div class="' . $cardclass . '" data-component="' . htmlspecialchars($plugin['component']) . '" data-installed="' . ($isinstalled ? '1' : '0') . '">';
+
+        // Icon.
         $html .= '<div class="ainav-pm-icon ainav-pm-icon-compact">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $html .= $this->get_icon_svg($plugin['icon']);
         $html .= '</svg>';
         $html .= '</div>';
-        
-        // Plugin info
+
+        // Plugin info.
         $html .= '<div class="ainav-pm-info">';
         $html .= '<div class="ainav-pm-name">' . htmlspecialchars($plugin['name']) . '</div>';
         $html .= '<div class="ainav-pm-version">';
-        
-        if ($is_installed) {
+
+        if ($isinstalled) {
             $html .= '<span class="ainav-pm-version-label">v' . htmlspecialchars($this->format_version_label($plugin)) . '</span>';
             $html .= '<span class="ainav-pm-status-label" data-component="' . htmlspecialchars($plugin['component']) . '"></span>';
         } else {
             $html .= '<span class="ainav-pm-notinstalled-label">' . get_string('not_installed', 'block_aiplugin_nav') . '</span>';
             $html .= '<span class="ainav-pm-status-label" data-component="' . htmlspecialchars($plugin['component']) . '"></span>';
         }
-        
-        // Add docs link
-        if (!empty($docs_url)) {
-            $html .= '<a href="' . htmlspecialchars($docs_url) . '" class="ainav-pm-docs-link-compact" target="_blank" rel="noopener" title="' . get_string('view_docs', 'block_aiplugin_nav') . '">';
+
+        // Add docs link.
+        if (!empty($docsurl)) {
+            $html .= '<a href="' . htmlspecialchars($docsurl) . '" class="ainav-pm-docs-link-compact" target="_blank" rel="noopener" title="' . get_string('view_docs', 'block_aiplugin_nav') . '">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>';
             $html .= '</svg>';
             $html .= get_string('docs', 'block_aiplugin_nav');
             $html .= '</a>';
         }
-        
+
         $html .= '</div>';
         $html .= '</div>';
-        
-        // Action column - show settings icon and green tick when installed
-        $goto_url = isset($plugin['goto_url']) ? $plugin['goto_url'] : '';
-        $settings_url = $this->get_plugin_settings_url($plugin['component']);
-        
+
+        // Action column - show settings icon and green tick when installed.
+        $gotourl = isset($plugin['goto_url']) ? $plugin['goto_url'] : '';
+        $settingsurl = $this->get_plugin_settings_url($plugin['component']);
+
         $html .= '<div class="ainav-pm-action-col">';
-        
-        if ($is_installed) {
-            // Update icon (hidden until update check) - shown when update is available
+
+        if ($isinstalled) {
+            // Update icon (hidden until update check) - shown when update is available.
             $html .= '<span class="ainav-pm-action-btn ainav-pm-action-update" data-component="' . htmlspecialchars($plugin['component']) . '" title="' . get_string('update_available', 'block_aiplugin_nav') . '" style="display:none;">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= '<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>';
             $html .= '</svg>';
             $html .= '</span>';
-            
-            // Go to icon (only for installed plugins with direct access URL - not course/activity specific)
-            if (!empty($goto_url)) {
-                $html .= '<a href="' . $CFG->wwwroot . htmlspecialchars($goto_url) . '" class="ainav-pm-action-btn ainav-pm-action-goto" title="' . get_string('go_to_plugin', 'block_aiplugin_nav') . '">';
+
+            // Go to icon (only for installed plugins with direct access URL - not course/activity specific).
+            if (!empty($gotourl)) {
+                $html .= '<a href="' . $CFG->wwwroot . htmlspecialchars($gotourl) . '" class="ainav-pm-action-btn ainav-pm-action-goto" title="' . get_string('go_to_plugin', 'block_aiplugin_nav') . '">';
                 $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
                 $html .= '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>';
                 $html .= '</svg>';
                 $html .= '</a>';
             }
-            
-            // Settings icon (only for plugins with settings URL)
-            if (!empty($settings_url)) {
-                $html .= '<a href="' . $CFG->wwwroot . htmlspecialchars($settings_url) . '" class="ainav-pm-action-btn ainav-pm-action-settings" title="' . get_string('settings', 'block_aiplugin_nav') . '">';
+
+            // Settings icon (only for plugins with settings URL).
+            if (!empty($settingsurl)) {
+                $html .= '<a href="' . $CFG->wwwroot . htmlspecialchars($settingsurl) . '" class="ainav-pm-action-btn ainav-pm-action-settings" title="' . get_string('settings', 'block_aiplugin_nav') . '">';
                 $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
                 $html .= '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>';
                 $html .= '</svg>';
                 $html .= '</a>';
             }
-            
-            // Installed: Green tick circle with 1px border outline
+
+            // Installed: Green tick circle with 1px border outline.
             $html .= '<span class="ainav-pm-action-btn ainav-pm-action-installed" title="' . get_string('installed', 'block_aiplugin_nav') . '">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">';
             $html .= '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11.5 14.5 16 9"/>';
             $html .= '</svg>';
             $html .= '</span>';
         } else if (!empty($plugin['install_first'])) {
-            // Install First icon for Central Config (not installed)
+            // Install First icon for Central Config (not installed).
             $html .= '<span class="ainav-pm-action-btn ainav-pm-action-installfirst" title="' . get_string('install_first', 'block_aiplugin_nav') . '">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>';
             $html .= '</svg>';
             $html .= '</span>';
         } else {
-            // Not installed - show INSTALL button (auto-install via AJAX)
+            // Not installed - show INSTALL button (auto-install via AJAX).
             // Credit-gated plugins get extra data attributes so the JS can show a confirm popup.
-            $install_credits = (int)($plugin['credits_required'] ?? 0);
-            $install_plugin_id = htmlspecialchars($plugin['plugin_name'] ?? '');
-            if ($install_credits > 0) {
-                $install_title = 'Unlock &amp; Install (' . number_format($install_credits) . ' credits)';
-                $credit_class  = ' ainav-pm-credit-gate';
+            $installcredits = (int)($plugin['credits_required'] ?? 0);
+            $installpluginid = htmlspecialchars($plugin['plugin_name'] ?? '');
+            if ($installcredits > 0) {
+                $installtitle = 'Unlock &amp; Install (' . number_format($installcredits) . ' credits)';
+                $creditclass  = ' ainav-pm-credit-gate';
             } else {
-                $install_title = get_string('auto_install', 'block_aiplugin_nav');
-                $credit_class  = '';
+                $installtitle = get_string('auto_install', 'block_aiplugin_nav');
+                $creditclass  = '';
             }
-            $html .= '<button type="button" class="ainav-pm-action-btn ainav-pm-action-install' . $credit_class . '"'
+            $html .= '<button type="button" class="ainav-pm-action-btn ainav-pm-action-install' . $creditclass . '"'
                 . ' data-component="' . htmlspecialchars($plugin['component']) . '"'
                 . ' data-pluginname="' . htmlspecialchars($plugin['name']) . '"'
-                . ' data-credits-required="' . $install_credits . '"'
-                . ' data-plugin-id="' . $install_plugin_id . '"'
-                . ' title="' . $install_title . '" style="cursor:pointer;">';
+                . ' data-credits-required="' . $installcredits . '"'
+                . ' data-plugin-id="' . $installpluginid . '"'
+                . ' title="' . $installtitle . '" style="cursor:pointer;">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>';
             $html .= '</svg>';
             $html .= '</button>';
         }
         $html .= '</div>';
-        
-        
-        // Beautiful tooltip with description and access info
+
+        // Beautiful tooltip with description and access info.
         if (!empty($description) || !empty($access)) {
             $html .= '<div class="ainav-tooltip">';
             $html .= '<div class="ainav-tooltip-arrow"></div>';
@@ -3261,23 +3308,26 @@ FDR_JS;
             $html .= '</div>';
             $html .= '</div>';
         }
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render a single plugin card in row format with docs link.
+     *
+     * @param array $plugin Plugin information.
+     * @return string Card HTML.
      */
     private function render_plugin_card_row($plugin) {
-        $is_installed = !empty($plugin['is_installed']);
-        $card_class = 'ainav-pm-card-row' . ($is_installed ? '' : ' ainav-pm-card-notinstalled');
-        $docs_url = $this->get_plugin_docs_url($plugin['component']);
-        
-        $html = '<div class="' . $card_class . '" data-component="' . htmlspecialchars($plugin['component']) . '" data-installed="' . ($is_installed ? '1' : '0') . '">';
-        
-        // Left side: Icon + Name
+        $isinstalled = !empty($plugin['is_installed']);
+        $cardclass = 'ainav-pm-card-row' . ($isinstalled ? '' : ' ainav-pm-card-notinstalled');
+        $docsurl = $this->get_plugin_docs_url($plugin['component']);
+
+        $html = '<div class="' . $cardclass . '" data-component="' . htmlspecialchars($plugin['component']) . '" data-installed="' . ($isinstalled ? '1' : '0') . '">';
+
+        // Left side: Icon + Name.
         $html .= '<div class="ainav-pm-card-left">';
         $html .= '<div class="ainav-pm-icon-row">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -3286,38 +3336,41 @@ FDR_JS;
         $html .= '</div>';
         $html .= '<span class="ainav-pm-name-row">' . htmlspecialchars($plugin['name']) . '</span>';
         $html .= '</div>';
-        
-        // Right side: Docs Link + Version Badge
+
+        // Right side: Docs Link + Version Badge.
         $html .= '<div class="ainav-pm-card-right">';
-        
-        // Docs Link
-        if (!empty($docs_url)) {
-            $html .= '<a href="' . htmlspecialchars($docs_url) . '" class="ainav-pm-docs-link" target="_blank" rel="noopener">';
+
+        // Docs Link.
+        if (!empty($docsurl)) {
+            $html .= '<a href="' . htmlspecialchars($docsurl) . '" class="ainav-pm-docs-link" target="_blank" rel="noopener">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>';
             $html .= '</svg>';
             $html .= get_string('view_docs', 'block_aiplugin_nav');
             $html .= '</a>';
         }
-        
-        // Version/Status Badge
-        if ($is_installed) {
+
+        // Version/Status Badge.
+        if ($isinstalled) {
             $html .= '<span class="ainav-pm-version-badge">v' . htmlspecialchars($this->format_version_label($plugin)) . '</span>';
         } else {
             $html .= '<span class="ainav-pm-notinstalled-badge">' . get_string('not_installed', 'block_aiplugin_nav') . '</span>';
         }
-        
+
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Get the documentation URL for a plugin.
+     *
+     * @param string $component Plugin component.
+     * @return string|null Documentation URL, or null if unavailable.
      */
     public function get_plugin_docs_url($component) {
-        $docs_urls = array(
+        $docsurls = [
             'quiz_aigrader' => 'https://lms-labs.com/docs/ai-grader',
             'local_aiquizmaker' => 'https://lms-labs.com/docs/ai-quiz-maker',
             'mod_contentcreator' => 'https://lms-labs.com/docs/ai-content-creator',
@@ -3382,98 +3435,98 @@ FDR_JS;
             'block_studentactivity' => 'https://lms-labs.com/docs/student-activity',
             'mod_aitrainingsim' => 'https://lms-labs.com/docs/ai-training-simulation',
             'mod_workplacetask' => 'https://lms-labs.com/docs/workplace-task',
-        );
-        
-        return isset($docs_urls[$component]) ? $docs_urls[$component] : '';
+        ];
+
+        return isset($docsurls[$component]) ? $docsurls[$component] : '';
     }
-    
+
     /**
      * Get the Site Quick Links registry.
      */
     private function get_site_links_registry() {
         global $CFG;
-        
-        return array(
-            'admin' => array(
+
+        return [
+            'admin' => [
                 'label' => get_string('site_admin', 'block_aiplugin_nav'),
                 'capability' => 'moodle/site:config',
-                'items' => array(
-                    array(
+                'items' => [
+                    [
                         'name' => get_string('site_admin', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/admin/search.php',
                         'icon' => 'sliders',
                         'hide_for_lmshsadmin' => true,
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('manage_users', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/admin/user.php',
                         'icon' => 'users',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('manage_courses', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/course/management.php',
                         'icon' => 'book',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('cohorts', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/cohort/index.php',
                         'icon' => 'users-2',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('reports', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/admin/category.php?category=reports',
                         'icon' => 'bar-chart-2',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('themes', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/admin/themeselector.php',
                         'icon' => 'palette',
                         'hide_for_lmshsadmin' => true,
-                    ),
-                ),
-            ),
-            'user' => array(
+                    ],
+                ],
+            ],
+            'user' => [
                 'label' => get_string('my_profile', 'block_aiplugin_nav'),
                 'capability' => null,
-                'items' => array(
-                    array(
+                'items' => [
+                    [
                         'name' => get_string('dashboard', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/my/',
                         'icon' => 'layout-dashboard',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('my_courses', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/my/courses.php',
                         'icon' => 'graduation-cap',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('my_profile', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/user/profile.php',
                         'icon' => 'user',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('calendar', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/calendar/view.php',
                         'icon' => 'calendar-icon',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('messages', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/message/index.php',
                         'icon' => 'message-square',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('private_files', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/user/files.php',
                         'icon' => 'folder',
-                    ),
-                    array(
+                    ],
+                    [
                         'name' => get_string('preferences', 'block_aiplugin_nav'),
                         'url' => $CFG->wwwroot . '/user/preferences.php',
                         'icon' => 'settings-2',
-                    ),
-                ),
-            ),
-        );
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -3486,15 +3539,15 @@ FDR_JS;
 
         $context = context_system::instance();
         $registry = $this->get_site_links_registry();
-        $is_lmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
-        $links = array();
+        $islmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
+        $links = [];
 
         foreach ($registry as $groupid => $group) {
             if (!empty($group['capability']) && !has_capability($group['capability'], $context)) {
                 continue;
             }
             foreach ($group['items'] as $link) {
-                if ($is_lmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
+                if ($islmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
                     continue;
                 }
                 $link['group'] = $groupid;
@@ -3503,54 +3556,56 @@ FDR_JS;
             }
         }
 
-        if ($this->is_plugin_installed('local', 'studentemail') &&
+        if (
+            $this->is_plugin_installed('local', 'studentemail') &&
                 !empty(get_config('local_studentemail', 'mailbox_enabled')) &&
                 $DB->get_manager()->table_exists('local_studentemail_accounts') &&
-                $DB->record_exists('local_studentemail_accounts', array(
+                $DB->record_exists('local_studentemail_accounts', [
                     'userid' => $USER->id,
                     'status' => 'active',
-                ))) {
-            $links[] = array(
+                ])
+        ) {
+            $links[] = [
                 'name' => get_string('my_email', 'block_aiplugin_nav'),
                 'url' => $CFG->wwwroot . '/local/studentemail/mailbox.php',
                 'icon' => 'mail',
                 'group' => 'user',
                 'groupname' => get_string('my_profile', 'block_aiplugin_nav'),
-            );
+            ];
         }
 
         return $links;
     }
-    
+
     /**
      * Get available icons for the icon picker.
      */
     private function get_available_icons() {
-        return array('link', 'home', 'star', 'heart', 'bookmark', 'globe', 'zap', 'briefcase', 
-                     'mail', 'phone', 'map-pin', 'image', 'music', 'film', 'award', 'coffee', 
-                     'shopping-cart', 'book', 'users', 'folder', 'settings', 'external-link');
+        return ['link', 'home', 'star', 'heart', 'bookmark', 'globe', 'zap', 'briefcase',
+                     'mail', 'phone', 'map-pin', 'image', 'music', 'film', 'award', 'coffee',
+                     'shopping-cart', 'book', 'users', 'folder', 'settings', 'external-link'];
     }
-    
+
     /**
      * Get user's custom links from preferences.
      */
     public function get_custom_links() {
         global $USER;
-        $links_json = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
-        $links = json_decode($links_json, true);
-        return is_array($links) ? $links : array();
+        $linksjson = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
+        $links = json_decode($linksjson, true);
+        return is_array($links) ? $links : [];
     }
-    
+
     /**
      * Get user's custom reports from preferences.
      */
     public function get_custom_reports() {
         global $USER;
-        $reports_json = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
-        $reports = json_decode($reports_json, true);
-        return is_array($reports) ? $reports : array();
+        $reportsjson = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
+        $reports = json_decode($reportsjson, true);
+        return is_array($reports) ? $reports : [];
     }
-    
+
     /**
      * Render a "My Email" quicklink for students who have an active provisioned mailbox.
      * Shown automatically when:
@@ -3565,8 +3620,8 @@ FDR_JS;
             return null;
         }
 
-        $mailbox_enabled = get_config('local_studentemail', 'mailbox_enabled');
-        if (empty($mailbox_enabled)) {
+        $mailboxenabled = get_config('local_studentemail', 'mailbox_enabled');
+        if (empty($mailboxenabled)) {
             return null;
         }
 
@@ -3582,11 +3637,11 @@ FDR_JS;
             return null;
         }
 
-        return array(
+        return [
             'name' => get_string('my_email', 'block_aiplugin_nav'),
             'url' => $CFG->wwwroot . '/local/studentemail/mailbox.php',
             'icon' => 'mail',
-        );
+        ];
     }
 
     /**
@@ -3617,29 +3672,29 @@ FDR_JS;
         global $USER;
         $context = context_system::instance();
         $registry = $this->get_site_links_registry();
-        $custom_links = $this->get_custom_links();
-        
+        $customlinks = $this->get_custom_links();
+
         // Check if user has lmshsadmin role.
-        $is_lmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
-        
+        $islmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
+
         $html = '<div class="ainav-site-links-section">';
         $html .= '<div class="ainav-site-links-header">';
         $html .= '<span class="ainav-site-links-title">' . get_string('site_quick_links', 'block_aiplugin_nav') . '</span>';
         $html .= '</div>';
         $html .= '<div class="ainav-site-links-grid">';
-        
-        foreach ($registry as $group_id => $group) {
-            // Check capability for admin group
+
+        foreach ($registry as $groupid => $group) {
+            // Check capability for admin group.
             if (!empty($group['capability']) && !has_capability($group['capability'], $context)) {
                 continue;
             }
-            
+
             foreach ($group['items'] as $link) {
                 // Skip items hidden for lmshsadmin role.
-                if ($is_lmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
+                if ($islmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
                     continue;
                 }
-                
+
                 $html .= '<a href="' . $link['url'] . '" class="ainav-site-link-card">';
                 $html .= '<div class="ainav-site-link-icon">';
                 $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -3650,12 +3705,12 @@ FDR_JS;
                 $html .= '</a>';
             }
         }
-        
+
         // My Email — auto-shown for students with an active provisioned mailbox.
         $html .= $this->render_student_email_quicklink();
 
-        // Render custom links
-        foreach ($custom_links as $index => $link) {
+        // Render custom links.
+        foreach ($customlinks as $index => $link) {
             $html .= '<div class="ainav-site-link-card ainav-custom-link" data-index="' . $index . '">';
             $html .= '<a href="' . htmlspecialchars($link['url'], ENT_QUOTES, 'UTF-8') . '" class="ainav-custom-link-content" target="_blank" rel="noopener">';
             $html .= '<div class="ainav-site-link-icon">';
@@ -3672,8 +3727,8 @@ FDR_JS;
             $html .= '</button>';
             $html .= '</div>';
         }
-        
-        // Create Link button
+
+        // Create Link button.
         $html .= '<button type="button" class="ainav-create-link-btn" id="ainav-create-link-btn">';
         $html .= '<div class="ainav-create-link-icon">';
         $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -3682,28 +3737,28 @@ FDR_JS;
         $html .= '</div>';
         $html .= '<div class="ainav-create-link-text">' . get_string('create_link', 'block_aiplugin_nav') . '</div>';
         $html .= '</button>';
-        
+
         $html .= '</div>';
         $html .= '</div>';
-        
-        // Add the modal
+
+        // Add the modal.
         $html .= $this->render_create_link_modal();
-        
+
         return $html;
     }
-    
+
     /**
      * Render the Cache Management section (admin only).
      */
     public function render_cache_management_section() {
         global $DB;
         $context = context_system::instance();
-        
+
         // Only show to site admins.
         if (!has_capability('moodle/site:config', $context)) {
             return '';
         }
-        
+
         // Get last purge times.
         $lastmanual = $DB->get_record_sql(
             "SELECT * FROM {block_aiplugin_nav_purge} WHERE purge_type = 'manual' ORDER BY purged_at DESC LIMIT 1"
@@ -3711,28 +3766,28 @@ FDR_JS;
         $lastscheduled = $DB->get_record_sql(
             "SELECT * FROM {block_aiplugin_nav_purge} WHERE purge_type = 'scheduled' ORDER BY purged_at DESC LIMIT 1"
         );
-        
+
         // Get schedule settings.
         $scheduleenabled = get_config('block_aiplugin_nav', 'purge_schedule_enabled');
         $scheduletype = get_config('block_aiplugin_nav', 'purge_schedule_type') ?: 'daily';
         $scheduletime = get_config('block_aiplugin_nav', 'purge_schedule_time') ?: '03:00';
         $scheduleday = get_config('block_aiplugin_nav', 'purge_schedule_day') ?: 0;
-        
+
         // Format times.
         $neverstr = get_string('never', 'block_aiplugin_nav');
         $lastmanualstr = $lastmanual ? userdate($lastmanual->purged_at, get_string('strftimedatetimeshort', 'langconfig')) : $neverstr;
         $lastscheduledstr = $lastscheduled ? userdate($lastscheduled->purged_at, get_string('strftimedatetimeshort', 'langconfig')) : $neverstr;
-        
+
         $html = '<div class="ainav-cache-section">';
         $html .= '<div class="ainav-cache-header">';
         $html .= '<span class="ainav-cache-title">' . get_string('cache_management', 'block_aiplugin_nav') . '</span>';
         $html .= '</div>';
-        
+
         $html .= '<div class="ainav-cache-content">';
-        
+
         // Main row with button and status.
         $html .= '<div class="ainav-cache-main">';
-        
+
         // Purge button with text.
         $html .= '<button type="button" class="ainav-purge-btn" id="ainav-purge-caches-btn">';
         $html .= '<svg class="ainav-purge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -3740,7 +3795,7 @@ FDR_JS;
         $html .= '</svg>';
         $html .= '<span>' . get_string('purge_caches_btn', 'block_aiplugin_nav') . '</span>';
         $html .= '</button>';
-        
+
         // Status and schedule in a group.
         $html .= '<div class="ainav-cache-info">';
         $html .= '<div class="ainav-cache-times">';
@@ -3755,22 +3810,28 @@ FDR_JS;
         $html .= '<span>' . get_string('configure_schedule', 'block_aiplugin_nav') . '</span>';
         $html .= '</button>';
         $html .= '</div>';
-        
+
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         // Schedule modal.
         $html .= $this->render_schedule_modal($scheduleenabled, $scheduletype, $scheduletime, $scheduleday);
-        
+
         return $html;
     }
-    
+
     /**
      * Render the Schedule Modal.
+     *
+     * @param bool $enabled Whether the schedule is enabled.
+     * @param string $type Schedule type.
+     * @param string $time Schedule time.
+     * @param int $day Day of the week.
+     * @return string Modal HTML.
      */
     private function render_schedule_modal($enabled, $type, $time, $day) {
-        $days = array(
+        $days = [
             0 => get_string('sunday', 'block_aiplugin_nav'),
             1 => get_string('monday', 'block_aiplugin_nav'),
             2 => get_string('tuesday', 'block_aiplugin_nav'),
@@ -3778,8 +3839,8 @@ FDR_JS;
             4 => get_string('thursday', 'block_aiplugin_nav'),
             5 => get_string('friday', 'block_aiplugin_nav'),
             6 => get_string('saturday', 'block_aiplugin_nav'),
-        );
-        
+        ];
+
         $html = '<div class="ainav-modal-overlay" id="ainav-schedule-overlay">';
         $html .= '<div class="ainav-modal">';
         $html .= '<div class="ainav-modal-header">';
@@ -3791,7 +3852,7 @@ FDR_JS;
         $html .= '</button>';
         $html .= '</div>';
         $html .= '<div class="ainav-modal-body">';
-        
+
         // Enable toggle.
         $html .= '<div class="ainav-form-group ainav-toggle-group">';
         $html .= '<label class="ainav-form-label">' . get_string('schedule_enabled', 'block_aiplugin_nav') . '</label>';
@@ -3801,7 +3862,7 @@ FDR_JS;
         $html .= '<span class="ainav-toggle-slider"></span>';
         $html .= '</label>';
         $html .= '</div>';
-        
+
         // Schedule type.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label">' . get_string('schedule_type', 'block_aiplugin_nav') . '</label>';
@@ -3810,7 +3871,7 @@ FDR_JS;
         $html .= '<option value="weekly"' . ($type === 'weekly' ? ' selected' : '') . '>' . get_string('schedule_weekly', 'block_aiplugin_nav') . '</option>';
         $html .= '</select>';
         $html .= '</div>';
-        
+
         // Day of week (for weekly).
         $html .= '<div class="ainav-form-group" id="ainav-day-group" style="' . ($type === 'weekly' ? '' : 'display:none;') . '">';
         $html .= '<label class="ainav-form-label">' . get_string('schedule_day', 'block_aiplugin_nav') . '</label>';
@@ -3821,13 +3882,13 @@ FDR_JS;
         }
         $html .= '</select>';
         $html .= '</div>';
-        
+
         // Time.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label">' . get_string('schedule_time', 'block_aiplugin_nav') . '</label>';
         $html .= '<input type="time" id="ainav-schedule-time" class="ainav-form-input" value="' . $time . '">';
         $html .= '</div>';
-        
+
         $html .= '</div>';
         $html .= '<div class="ainav-modal-footer">';
         $html .= '<button type="button" class="ainav-btn ainav-btn-secondary" id="ainav-schedule-cancel">' . get_string('cancel', 'block_aiplugin_nav') . '</button>';
@@ -3835,17 +3896,17 @@ FDR_JS;
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render the Create Link modal.
      */
     private function render_create_link_modal() {
         global $CFG;
-        $available_icons = $this->get_available_icons();
-        
+        $availableicons = $this->get_available_icons();
+
         $html = '<div class="ainav-modal-overlay" id="ainav-modal-overlay">';
         $html .= '<div class="ainav-modal">';
         $html .= '<div class="ainav-modal-header">';
@@ -3857,12 +3918,12 @@ FDR_JS;
         $html .= '</button>';
         $html .= '</div>';
         $html .= '<div class="ainav-modal-body">';
-        
-        // Icon picker
+
+        // Icon picker.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label">' . get_string('select_icon', 'block_aiplugin_nav') . '</label>';
         $html .= '<div class="ainav-icon-picker" id="ainav-icon-picker">';
-        foreach ($available_icons as $icon) {
+        foreach ($availableicons as $icon) {
             $html .= '<button type="button" class="ainav-icon-option" data-icon="' . $icon . '">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= $this->get_icon_svg($icon);
@@ -3872,19 +3933,19 @@ FDR_JS;
         $html .= '</div>';
         $html .= '<input type="hidden" id="ainav-selected-icon" value="link">';
         $html .= '</div>';
-        
-        // Link name input
+
+        // Link name input.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label" for="ainav-link-name">' . get_string('link_name', 'block_aiplugin_nav') . '</label>';
         $html .= '<input type="text" id="ainav-link-name" class="ainav-form-input" placeholder="' . get_string('link_name_placeholder', 'block_aiplugin_nav') . '" maxlength="50">';
         $html .= '</div>';
-        
-        // URL input
+
+        // URL input.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label" for="ainav-link-url">' . get_string('link_url', 'block_aiplugin_nav') . '</label>';
         $html .= '<input type="url" id="ainav-link-url" class="ainav-form-input" placeholder="https://example.com">';
         $html .= '</div>';
-        
+
         $html .= '</div>';
         $html .= '<div class="ainav-modal-footer">';
         $html .= '<button type="button" class="ainav-btn ainav-btn-secondary" id="ainav-modal-cancel">' . get_string('cancel', 'block_aiplugin_nav') . '</button>';
@@ -3892,45 +3953,49 @@ FDR_JS;
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
-    
+
     /**
      * Render a dropdown menu.
+     *
+     * @param string $id Dropdown ID.
+     * @param array $section Dropdown section.
+     * @return string Dropdown HTML.
      */
     private function render_dropdown($id, $section) {
         $html = '';
-        
-        // Filter items based on plugin availability and capabilities
-        $visible_items = array();
+
+        // Filter items based on plugin availability and capabilities.
+        $visibleitems = [];
         foreach ($section['items'] as $item) {
-            // Check capability if required - use has_capability_anywhere for broader access
+            // Check capability if required - use has_capability_anywhere for broader access.
             if (!empty($item['capability']) && !$this->has_capability_anywhere($item['capability'])) {
                 continue;
             }
-            
-            // Check if plugin is installed (skip for external links)
+
+            // Check if plugin is installed (skip for external links).
             if (!isset($item['external']) && isset($item['plugin_type']) && isset($item['plugin_name'])) {
                 if (!$this->is_plugin_installed($item['plugin_type'], $item['plugin_name'])) {
                     continue;
                 }
             }
-            
-            $visible_items[] = $item;
+
+            $visibleitems[] = $item;
         }
-        
-        // Get custom reports for tools dropdown
-        $custom_reports = array();
+
+        // Get custom reports for tools dropdown.
+        $customreports = [];
         if ($id === 'tools') {
-            $custom_reports = $this->get_custom_reports();
+            $customreports = $this->get_custom_reports();
         }
-        
-        // Don't render dropdown if no visible items and no custom reports
-        if (empty($visible_items) && empty($custom_reports)) {
+
+        // Don't render dropdown if no visible items and no custom reports.
+        if (empty($visibleitems) && empty($customreports)) {
             return '';
         }
-        
+
         $html .= '<div class="ainav-dropdown" data-dropdown="' . $id . '">';
         $html .= '<button type="button" class="ainav-dropdown-trigger">';
         $html .= '<span>' . $section['label'] . '</span>';
@@ -3938,32 +4003,32 @@ FDR_JS;
         $html .= $this->get_icon_svg('chevron-down');
         $html .= '</svg>';
         $html .= '</button>';
-        
+
         $html .= '<div class="ainav-dropdown-menu' . ($id === 'settings' ? ' ainav-dropdown-twocol' : '') . '">';
-        
-        // Special 2-column layout for settings dropdown
+
+        // Special 2-column layout for settings dropdown.
         if ($id === 'settings' && !empty($section['ai_items']) && !empty($section['admin_items'])) {
-            // AI & Learning Intelligence column
+            // AI & Learning Intelligence column.
             $html .= '<div class="ainav-dropdown-col">';
             $html .= '<div class="ainav-dropdown-heading ainav-dropdown-heading-ai">&#10022; AI &amp; Learning Intelligence</div>';
-            // Subheading label map for AI categories
-            $ai_cat_labels = array(
+            // Subheading label map for AI categories.
+            $aicatlabels = [
                 'config'     => 'Central Config',
                 'ai_grading' => 'AI Grading &amp; Assessment',
                 'ai_content' => 'AI Content &amp; Courses',
                 'ai_media'   => 'AI Voice &amp; Media',
                 'ai_rto'     => 'RTO &amp; Compliance',
                 'ai_ux'      => 'AI Personalisation',
-            );
-            $last_ai_cat = null;
+            ];
+            $lastaicat = null;
             foreach ($section['ai_items'] as $item) {
                 if (!empty($item['capability']) && !$this->has_capability_anywhere($item['capability'])) {
                     continue;
                 }
-                $item_cat = isset($item['category']) ? $item['category'] : '';
-                if ($item_cat !== $last_ai_cat && isset($ai_cat_labels[$item_cat])) {
-                    $html .= '<div class="ainav-dropdown-subheading">' . $ai_cat_labels[$item_cat] . '</div>';
-                    $last_ai_cat = $item_cat;
+                $itemcat = isset($item['category']) ? $item['category'] : '';
+                if ($itemcat !== $lastaicat && isset($aicatlabels[$itemcat])) {
+                    $html .= '<div class="ainav-dropdown-subheading">' . $aicatlabels[$itemcat] . '</div>';
+                    $lastaicat = $itemcat;
                 }
                 $html .= '<a href="' . $item['url'] . '" class="ainav-dropdown-item">';
                 $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -3977,10 +4042,10 @@ FDR_JS;
             }
             $html .= '</div>';
 
-            // Administration & Operations column
+            // Administration & Operations column.
             $html .= '<div class="ainav-dropdown-col">';
             $html .= '<div class="ainav-dropdown-heading ainav-dropdown-heading-admin">&#9881; Administration &amp; Operations</div>';
-            $admin_cat_labels = array(
+            $admincatlabels = [
                 'block'         => 'Blocks &amp; Dashboards',
                 'training'      => 'Training &amp; Scheduling',
                 'enrolment'     => 'Enrolment &amp; Access',
@@ -3991,16 +4056,16 @@ FDR_JS;
                 'security'      => 'Security &amp; Auth',
                 'reporting'     => 'Reporting &amp; Analytics',
                 'payments'      => 'Payments',
-            );
-            $last_admin_cat = null;
+            ];
+            $lastadmincat = null;
             foreach ($section['admin_items'] as $item) {
                 if (!empty($item['capability']) && !$this->has_capability_anywhere($item['capability'])) {
                     continue;
                 }
-                $item_cat = isset($item['category']) ? $item['category'] : '';
-                if ($item_cat !== $last_admin_cat && isset($admin_cat_labels[$item_cat])) {
-                    $html .= '<div class="ainav-dropdown-subheading">' . $admin_cat_labels[$item_cat] . '</div>';
-                    $last_admin_cat = $item_cat;
+                $itemcat = isset($item['category']) ? $item['category'] : '';
+                if ($itemcat !== $lastadmincat && isset($admincatlabels[$itemcat])) {
+                    $html .= '<div class="ainav-dropdown-subheading">' . $admincatlabels[$itemcat] . '</div>';
+                    $lastadmincat = $itemcat;
                 }
                 $html .= '<a href="' . $item['url'] . '" class="ainav-dropdown-item">';
                 $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -4011,8 +4076,8 @@ FDR_JS;
             }
             $html .= '</div>';
         } else {
-            // Standard single-column layout
-            foreach ($visible_items as $item) {
+            // Standard single-column layout.
+            foreach ($visibleitems as $item) {
                 $html .= '<a href="' . $item['url'] . '" class="ainav-dropdown-item">';
                 $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
                 $html .= $this->get_icon_svg($item['icon']);
@@ -4021,10 +4086,10 @@ FDR_JS;
                 $html .= '</a>';
             }
         }
-        
-        // Add custom reports for tools dropdown
+
+        // Add custom reports for tools dropdown.
         if ($id === 'tools') {
-            foreach ($custom_reports as $index => $report) {
+            foreach ($customreports as $index => $report) {
                 $html .= '<div class="ainav-dropdown-item ainav-custom-report" data-index="' . $index . '">';
                 $html .= '<a href="' . htmlspecialchars($report['url'], ENT_QUOTES, 'UTF-8') . '" class="ainav-custom-report-link" target="_blank" rel="noopener">';
                 $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -4039,8 +4104,8 @@ FDR_JS;
                 $html .= '</button>';
                 $html .= '</div>';
             }
-            
-            // Add Report button
+
+            // Add Report button.
             $html .= '<button type="button" class="ainav-dropdown-item ainav-create-report-btn" id="ainav-create-report-btn">';
             $html .= '<svg class="ainav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= $this->get_icon_svg('plus');
@@ -4049,9 +4114,9 @@ FDR_JS;
             $html .= '</button>';
         }
         $html .= '</div>';
-        
+
         $html .= '</div>';
-        
+
         return $html;
     }
 
@@ -4064,7 +4129,7 @@ FDR_JS;
     private function render_action_launcher($registry) {
         global $CFG, $USER;
 
-        $categorylabels = array(
+        $categorylabels = [
             'config' => 'Central configuration',
             'ai_grading' => 'AI grading and assessment',
             'ai_content' => 'AI content and courses',
@@ -4081,17 +4146,17 @@ FDR_JS;
             'security' => 'Security authentication and SSO',
             'reporting' => 'Reporting and analytics',
             'payments' => 'Payments',
-        );
-        $actions = array();
-        $seen = array();
-        $groups = array(
+        ];
+        $actions = [];
+        $seen = [];
+        $groups = [
             'Settings' => array_merge(
-                isset($registry['settings']['ai_items']) ? $registry['settings']['ai_items'] : array(),
-                isset($registry['settings']['admin_items']) ? $registry['settings']['admin_items'] : array()
+                isset($registry['settings']['ai_items']) ? $registry['settings']['ai_items'] : [],
+                isset($registry['settings']['admin_items']) ? $registry['settings']['admin_items'] : []
             ),
-            'Manage' => isset($registry['manage']['items']) ? $registry['manage']['items'] : array(),
-            'Report' => isset($registry['tools']['items']) ? $registry['tools']['items'] : array(),
-        );
+            'Manage' => isset($registry['manage']['items']) ? $registry['manage']['items'] : [],
+            'Report' => isset($registry['tools']['items']) ? $registry['tools']['items'] : [],
+        ];
 
         foreach ($groups as $actionlabel => $items) {
             foreach ($items as $item) {
@@ -4112,16 +4177,16 @@ FDR_JS;
                     '_'
                 );
                 $category = isset($item['category']) ? $item['category'] : '';
-                $actions[] = array(
+                $actions[] = [
                     'name' => $item['name'],
                     'action' => $actionlabel,
                     'url' => $item['url'],
                     'category' => isset($categorylabels[$category]) ? $categorylabels[$category] : $category,
                     'aliases' => trim(
-                        str_replace(array('_', '-'), ' ', $component . ' ' . (isset($item['plugin_name']) ? $item['plugin_name'] : '')) .
+                        str_replace(['_', '-'], ' ', $component . ' ' . (isset($item['plugin_name']) ? $item['plugin_name'] : '')) .
                         ' ' . (isset($item['aliases']) ? $item['aliases'] : '')
                     ),
-                );
+                ];
             }
         }
 
@@ -4129,96 +4194,98 @@ FDR_JS;
             if (empty($report['url']) || empty($report['name'])) {
                 continue;
             }
-            $actions[] = array(
+            $actions[] = [
                 'name' => $report['name'],
                 'action' => 'Report',
                 'url' => $report['url'],
                 'category' => 'Custom reports',
                 'aliases' => 'custom saved report',
                 'external' => true,
-            );
+            ];
         }
 
-        // Site Quick Links use the same capability and role visibility rules as
+        // Site Quick Links use the same capability and role visibility rules as.
         // Their rendered cards.
         $context = context_system::instance();
-        $is_lmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
+        $islmshsadmin = $this->user_has_role_shortname($USER->id, 'lmshsadmin');
         foreach ($this->get_site_links_registry() as $group) {
             if (!empty($group['capability']) && !has_capability($group['capability'], $context)) {
                 continue;
             }
             foreach ($group['items'] as $link) {
-                if ($is_lmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
+                if ($islmshsadmin && !empty($link['hide_for_lmshsadmin'])) {
                     continue;
                 }
-                $actions[] = array(
+                $actions[] = [
                     'name' => $link['name'],
                     'action' => 'Site',
                     'url' => $link['url'],
                     'category' => 'Site quick links',
                     'aliases' => 'Moodle account administration navigation',
-                );
+                ];
             }
         }
 
         $email = $this->get_student_email_quicklink();
         if ($email) {
-            $actions[] = array(
+            $actions[] = [
                 'name' => $email['name'],
                 'action' => 'Open',
                 'url' => $email['url'],
                 'category' => 'Site quick links communications',
                 'aliases' => 'mail mailbox student email',
-            );
+            ];
         }
 
         foreach ($this->get_custom_links() as $link) {
             if (empty($link['url']) || empty($link['name'])) {
                 continue;
             }
-            $actions[] = array(
+            $actions[] = [
                 'name' => $link['name'],
                 'action' => 'Open',
                 'url' => $link['url'],
                 'category' => 'Custom site links',
                 'aliases' => 'custom saved quick link',
                 'external' => true,
-            );
+            ];
         }
 
         // Student portfolio links are rendered in the non-admin tools section.
         $isadmin = is_siteadmin() || has_capability('moodle/site:config', $context);
-        if (!$isadmin
+        if (
+            !$isadmin
                 && $this->is_plugin_installed('local', 'rtocompliance')
-                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))) {
-            $actions[] = array(
+                && has_capability('local/rtocompliance:viewown', context_user::instance($USER->id))
+        ) {
+            $actions[] = [
                 'name' => 'My Documents & Certificates',
                 'action' => 'Open',
                 'url' => (new moodle_url('/local/rtocompliance/mydocs.php'))->out(false),
                 'category' => 'My portfolio RTO compliance',
                 'aliases' => 'student documents files evidence',
-            );
-            $actions[] = array(
+            ];
+            $actions[] = [
                 'name' => 'My Certificates',
                 'action' => 'Open',
                 'url' => (new moodle_url('/local/rtocompliance/mycerts.php'))->out(false),
                 'category' => 'My portfolio RTO compliance',
                 'aliases' => 'student certificates awards',
-            );
+            ];
         }
 
         foreach ($registry['external']['items'] as $link) {
             if (empty($link['url']) || empty($link['name'])) {
                 continue;
             }
-            $actions[] = array(
+            $actions[] = [
                 'name' => $link['name'],
                 'action' => 'External',
                 'url' => $link['url'],
                 'category' => 'LMS Labs help account and services',
                 'aliases' => 'website pricing credits affiliate',
                 'external' => true,
-            );
+            ];
         }
 
         usort($actions, function ($a, $b) {
@@ -4241,14 +4308,14 @@ FDR_JS;
         $html .= '<script type="application/json" id="ainav-launcher-actions">' . $json . '</script>';
         return $html;
     }
-    
+
     /**
      * Render the Create Report modal.
      */
     private function render_create_report_modal() {
         global $CFG;
-        $available_icons = $this->get_available_icons();
-        
+        $availableicons = $this->get_available_icons();
+
         $html = '<div class="ainav-modal-overlay" id="ainav-report-modal-overlay">';
         $html .= '<div class="ainav-modal">';
         $html .= '<div class="ainav-modal-header">';
@@ -4260,12 +4327,12 @@ FDR_JS;
         $html .= '</button>';
         $html .= '</div>';
         $html .= '<div class="ainav-modal-body">';
-        
-        // Icon picker
+
+        // Icon picker.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label">' . get_string('select_icon', 'block_aiplugin_nav') . '</label>';
         $html .= '<div class="ainav-icon-picker" id="ainav-report-icon-picker">';
-        foreach ($available_icons as $icon) {
+        foreach ($availableicons as $icon) {
             $html .= '<button type="button" class="ainav-icon-option ainav-report-icon-option" data-icon="' . $icon . '">';
             $html .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             $html .= $this->get_icon_svg($icon);
@@ -4275,19 +4342,19 @@ FDR_JS;
         $html .= '</div>';
         $html .= '<input type="hidden" id="ainav-selected-report-icon" value="file-text">';
         $html .= '</div>';
-        
-        // Report name input
+
+        // Report name input.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label" for="ainav-report-name">' . get_string('report_name', 'block_aiplugin_nav') . '</label>';
         $html .= '<input type="text" id="ainav-report-name" class="ainav-form-input" placeholder="' . get_string('report_name_placeholder', 'block_aiplugin_nav') . '" maxlength="50">';
         $html .= '</div>';
-        
-        // URL input
+
+        // URL input.
         $html .= '<div class="ainav-form-group">';
         $html .= '<label class="ainav-form-label" for="ainav-report-url">' . get_string('report_url', 'block_aiplugin_nav') . '</label>';
         $html .= '<input type="url" id="ainav-report-url" class="ainav-form-input" placeholder="https://example.com/report">';
         $html .= '</div>';
-        
+
         $html .= '</div>';
         $html .= '<div class="ainav-modal-footer">';
         $html .= '<button type="button" class="ainav-btn ainav-btn-secondary" id="ainav-report-modal-cancel">' . get_string('cancel', 'block_aiplugin_nav') . '</button>';
@@ -4295,7 +4362,7 @@ FDR_JS;
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
 
@@ -4304,7 +4371,7 @@ FDR_JS;
      */
     public function get_required_javascript() {
         global $PAGE, $CFG;
-        
+
         $PAGE->requires->js_amd_inline("
             require(['jquery', 'core/ajax', 'core/notification'], function ($, Ajax, Notification) {
                 // Accessible action launcher.

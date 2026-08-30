@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * External service to purge all caches.
@@ -60,7 +60,7 @@ class purge_caches extends external_api {
         require_capability('moodle/site:config', $context);
 
         // Purge all caches — use the same complete purge Moodle's own admin page uses.
-        // purge_all_caches() resets MUC caches, theme/CSS revisions, language pack cache,
+        // Purge_all_caches() resets MUC caches, theme/CSS revisions, language pack cache,
         // JS/template caches and more. cache_helper::purge_all() only does MUC caches.
         purge_all_caches();
 

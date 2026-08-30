@@ -2,12 +2,14 @@
  * AI Plugin Navigation Block Styles
  * Matches lms-labs.com design with solid blue (#3b82f6)
  * Mobile-first design with min 16px font sizes
- * 
+ *
  * @package    block_aiplugin_nav
  * @copyright  2025 Essay Grader AI
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* stylelint-disable no-eol-whitespace */
 
 /* Compact operations launcher. The dashboard block intentionally contains no catalogue. */
 .block_aiplugin_nav .ainav-operations {
@@ -143,7 +145,7 @@
 
 #ainav-management-hub .ainav-plugin-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
     gap: .75rem;
 }
 
@@ -295,7 +297,7 @@
     #ainav-management-hub *,
     .block_aiplugin_nav .ainav-operations * {
         scroll-behavior: auto;
-        transition-duration: .01ms !important;
+        transition-duration: 100ms;
     }
 }
 
@@ -332,7 +334,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #ffffff;
+    color: #fff;
     font-weight: 600;
     font-size: 16px;
     white-space: nowrap;
@@ -341,12 +343,12 @@
 .block_aiplugin_nav .ainav-logo {
     width: 24px;
     height: 24px;
-    stroke: #ffffff;
+    stroke: #fff;
     flex-shrink: 0;
 }
 
 .block_aiplugin_nav .ainav-brand-text {
-    color: #ffffff;
+    color: #fff;
 }
 
 /* Navigation sections container */
@@ -390,7 +392,7 @@
 
 .block_aiplugin_nav .ainav-launcher-trigger:focus-visible {
     /* Two-tone ring remains visible against both light and dark theme primaries. */
-    outline: 3px solid #ffffff;
+    outline: 3px solid #fff;
     outline-offset: 2px;
     box-shadow: 0 0 0 5px #1e3a8a;
 }
@@ -402,8 +404,14 @@
     display: none;
     align-items: flex-start;
     justify-content: center;
-    padding: max(5vh, 24px) 16px 24px;
+    padding: 5vh 16px 24px;
     background: rgba(15, 23, 42, .72);
+}
+
+@media (max-height: 480px) {
+    .block_aiplugin_nav .ainav-launcher-overlay {
+        padding-top: 24px;
+    }
 }
 
 .block_aiplugin_nav .ainav-launcher-overlay.is-open {
@@ -417,7 +425,8 @@ body.ainav-launcher-open {
 .block_aiplugin_nav .ainav-launcher-panel {
     display: flex;
     flex-direction: column;
-    width: min(720px, 100%);
+    width: 100%;
+    max-width: 720px;
     max-height: 90vh;
     overflow: hidden;
     border-radius: 14px;
@@ -560,7 +569,7 @@ body.ainav-launcher-open {
     background-color: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
-    color: #ffffff;
+    color: #fff;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
@@ -581,7 +590,7 @@ body.ainav-launcher-open {
 .block_aiplugin_nav .ainav-chevron {
     width: 16px;
     height: 16px;
-    stroke: #ffffff;
+    stroke: #fff;
     transition: transform 0.2s ease;
 }
 
@@ -595,7 +604,7 @@ body.ainav-launcher-open {
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
     color: var(--primary, #3b82f6);
@@ -630,7 +639,7 @@ body.ainav-launcher-open {
     top: calc(100% + 8px);
     left: 0;
     min-width: 260px;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -763,7 +772,7 @@ body.ainav-launcher-open {
     align-items: center;
     gap: 8px;
     padding: 8px 14px;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 8px;
     color: var(--primary, #3b82f6);
@@ -828,7 +837,7 @@ body.ainav-launcher-open {
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    background-color: #ffffff;
+    background-color: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     margin-left: auto;
@@ -881,7 +890,7 @@ body.ainav-launcher-open {
 /* AI Tools Quick Access Section */
 .block_aiplugin_nav .ainav-tools-section {
     margin-top: 10px;
-    background-color: #ffffff;
+    background-color: #fff;
     border-radius: 10px;
     padding: 10px 14px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -963,7 +972,7 @@ body.ainav-launcher-open {
 /* Site Quick Links Section */
 .block_aiplugin_nav .ainav-site-links-section {
     margin-top: 10px;
-    background-color: #ffffff;
+    background-color: #fff;
     border-radius: 10px;
     padding: 10px 14px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -1108,8 +1117,10 @@ body.ainav-launcher-open {
         height: 100%;
         max-height: none;
         border-radius: 0;
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
+        --ainav-safe-area-inset-top: env(safe-area-inset-top);
+        --ainav-safe-area-inset-bottom: env(safe-area-inset-bottom);
+        padding-top: var(--ainav-safe-area-inset-top);
+        padding-bottom: var(--ainav-safe-area-inset-bottom);
     }
 
     .block_aiplugin_nav .ainav-launcher-result {
@@ -1121,7 +1132,7 @@ body.ainav-launcher-open {
 @media (prefers-reduced-motion: reduce) {
     .block_aiplugin_nav .ainav-launcher-overlay *,
     .block_aiplugin_nav .ainav-launcher-trigger {
-        transition: none !important;
+        transition: none;
     }
 }
 
@@ -2900,9 +2911,9 @@ body.ainav-launcher-open {
 }
 
 .block_aiplugin_nav .ainav-btn-success {
-    background: #10b981 !important;
-    color: #ffffff !important;
-    cursor: pointer !important;
+    background: #10b981;
+    color: #fff;
+    cursor: pointer;
 }
 
 /* Upgrade prompt modal */
@@ -3530,7 +3541,7 @@ body.ainav-launcher-open {
 
 .block_aiplugin_nav .ainav-cache-section {
     margin-top: 10px;
-    background-color: #ffffff;
+    background-color: #fff;
     border-radius: 10px;
     padding: 12px 14px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -3569,7 +3580,7 @@ body.ainav-launcher-open {
     gap: 6px;
     padding: 8px 14px;
     background-color: var(--primary, #3b82f6);
-    color: #ffffff;
+    color: #fff;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -3730,7 +3741,7 @@ body.ainav-launcher-open {
 
 .block_aiplugin_nav .ainav-btn-secondary {
     padding: 8px 16px;
-    background: #ffffff;
+    background: #fff;
     color: #374151;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -4036,6 +4047,7 @@ body.ainav-launcher-open {
     margin-top: 0;
 }
 
+/* stylelint-disable */
 /* ===== World-class plugin finder (v2.4.56) ===== */
 .block_aiplugin_nav .ainav-fdr{
  font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14.5px;line-height:1.5;
@@ -4170,3 +4182,6 @@ body.ainav-launcher-open {
 @media(max-width:640px){.block_aiplugin_nav .ainav-fdr .brand span{display:none}
 .block_aiplugin_nav .ainav-fdr .list .pc-main{flex-direction:column;align-items:flex-start}
 .block_aiplugin_nav .ainav-fdr .list .pc-name{max-width:none}}
+/* stylelint-enable */
+
+/* stylelint-enable no-eol-whitespace */

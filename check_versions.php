@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,23 +12,23 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * block_aiplugin_nav file.
  *
  * @package    block_aiplugin_nav
  * @copyright  2026 LMS-Labs
- * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 // Server-side proxy for plugin version checking.
 // Tries multiple endpoints in order — resilient to DNS/firewall issues on the Moodle server.
 // Called by block_aiplugin_nav.php JS as fallback attempt #2 (after direct browser call fails).
 //
-// FIX-ENDPOINT-ORDER (v2.4.16): Replit URL moved to position #1 because lms-labs.com is
-// Unreachable from Vultr-hosted Moodle servers (datacenter IP blocking). essaygraderai.app
-// (old legacy domain) removed — no longer operational. Timeout reduced from 10s to 5s per
+// FIX-ENDPOINT-ORDER (v2.4.16): Replit URL moved to position #1 because lms-labs.com is.
+// Unreachable from Vultr-hosted Moodle servers (datacenter IP blocking). essaygraderai.app.
+// (old legacy domain) removed — no longer operational. Timeout reduced from 10s to 5s per.
 // Endpoint so total worst-case wait drops from 30s to 10s.
 
 define('AJAX_SCRIPT', true);
@@ -59,16 +59,16 @@ foreach ($endpoints as $url) {
     $httpcode = isset($info['http_code']) ? (int)$info['http_code'] : 0;
 
     if ($response !== false && $httpcode === 200) {
-        // Validate it looks like our expected JSON before passing through
+        // Validate it looks like our expected JSON before passing through.
         $decoded = json_decode($response, true);
         if (isset($decoded['success']) && $decoded['success'] && isset($decoded['plugins'])) {
             echo $response;
             exit;
         }
     }
-    // This endpoint failed — try next
+    // This endpoint failed — try next.
 }
 
-// All endpoints failed
+// All endpoints failed.
 http_response_code(502);
 echo json_encode(['success' => false, 'error' => 'all_endpoints_failed']);

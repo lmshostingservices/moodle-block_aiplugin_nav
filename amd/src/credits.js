@@ -6,7 +6,7 @@
  * @copyright  2025 Essay Grader AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax'], function (Ajax) {
+define(['core/ajax'], function(Ajax) {
 
     /**
      * Return CSS color class for a given credit amount.
@@ -46,7 +46,7 @@ define(['core/ajax'], function (Ajax) {
      * @param {string} credits
      */
     function updateDOM(credits) {
-        var cls  = colorClass(credits);
+        var cls = colorClass(credits);
         var text = displayValue(credits);
 
         // Top bar display.
@@ -54,15 +54,15 @@ define(['core/ajax'], function (Ajax) {
         if (display) {
             var span = display.querySelector('.ainav-credits-total');
             if (span) {
-                span.className   = 'ainav-credits-total ' + cls;
+                span.className = 'ainav-credits-total ' + cls;
                 span.textContent = text + ' credits';
             }
             display.style.display = '';
         }
 
         // Badge next to the Buy Credits link.
-        document.querySelectorAll('.ainav-credits-badge').forEach(function (badge) {
-            badge.className   = 'ainav-credits-badge ' + cls;
+        document.querySelectorAll('.ainav-credits-badge').forEach(function(badge) {
+            badge.className = 'ainav-credits-badge ' + cls;
             badge.textContent = text;
             badge.style.display = '';
         });
@@ -72,16 +72,16 @@ define(['core/ajax'], function (Ajax) {
         /**
          * Initialise: fetch credits from the server asynchronously.
          */
-        init: function () {
+        init: function() {
             Ajax.call([{
                 methodname: 'block_aiplugin_nav_get_credits',
                 args: {},
-                done: function (response) {
+                done: function(response) {
                     if (response.success && response.credits !== '') {
                         updateDOM(response.credits);
                     }
                 },
-                fail: function () {
+                fail: function() {
                     // Silent fail  -  credits display simply stays hidden.
                 }
             }]);

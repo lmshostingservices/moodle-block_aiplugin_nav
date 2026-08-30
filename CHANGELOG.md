@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.71] - 2026-08-30
+
+### Changed
+- Re-cut the 2.4.70 private-component removal under a new immutable tag after
+  the earlier candidate failed the official Moodle Plugin CI workflow.
+- Applied behavior-preserving Moodle coding-standard, PHPDoc, AMD lint, and CSS
+  lint cleanup required by the managed release workflow.
+- The seven private Wombat Training Plan suite components remain removed from
+  Quicklinks actions, plugin management, and documentation links.
+- No database schema changes. Savepoint 2026083004.
+
 ## [2.4.70] - 2026-08-30
 
 ### Removed

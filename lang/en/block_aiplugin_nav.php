@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Language strings for AI Plugin Navigation block.
@@ -28,7 +28,7 @@ $string['aiplugin_nav:addinstance'] = 'Add a new AI Dashboard Quick Links block'
 $string['aiplugin_nav:myaddinstance'] = 'Add a new AI Dashboard Quick Links block to Dashboard';
 $string['privacy:metadata'] = 'The AI Plugin Navigation block does not store any personal data.';
 
-// Navigation labels
+// Navigation labels.
 $string['ai_reports'] = 'Reports';
 $string['ai_settings'] = 'Settings';
 $string['ai_manage'] = 'Manage';
@@ -93,7 +93,7 @@ $string['customreports'] = 'Custom reports';
 $string['deletecustomlinkconfirm'] = 'Delete the custom link “{$a}”?';
 $string['deletecustomreportconfirm'] = 'Delete the custom report “{$a}”?';
 
-// AI Tools Quick Access Section
+// AI Tools Quick Access Section.
 $string['ai_tools_section'] = 'AI Tools Quick Access';
 $string['ai_essay_grader'] = 'AI Essay Grader';
 $string['ai_essay_grader_access'] = 'Quiz → Results → Grades dropdown → Select AI Essay Grader';
@@ -131,7 +131,7 @@ $string['training_matrix'] = 'AI Training Matrix HCM';
 $string['training_matrix_access'] = 'Site Admin → Plugins → Local plugins → AI Training Matrix';
 $string['training_matrix_settings'] = 'AI Training Matrix Settings';
 
-// Site Quick Links Section
+// Site Quick Links Section.
 $string['site_quick_links'] = 'Site Quick Links';
 $string['site_admin'] = 'Site Administration';
 $string['manage_users'] = 'Manage Users';
@@ -147,7 +147,7 @@ $string['messages'] = 'Messages';
 $string['private_files'] = 'Private Files';
 $string['preferences'] = 'Preferences';
 
-// Create Link Modal
+// Create Link Modal.
 $string['create_link'] = 'Create Link';
 $string['edit_link'] = 'Edit';
 $string['update_link'] = 'Update link';
@@ -161,7 +161,7 @@ $string['save_link'] = 'Save Link';
 $string['delete_link'] = 'Delete';
 $string['cancel'] = 'Cancel';
 
-// Create Report Modal
+// Create Report Modal.
 $string['create_report'] = 'Add Report';
 $string['report_name'] = 'Report Name';
 $string['report_name_placeholder'] = 'Enter report name...';
@@ -169,7 +169,7 @@ $string['report_url'] = 'Report URL';
 $string['save_report'] = 'Save Report';
 $string['delete_report'] = 'Delete';
 
-// Plugin Management (v1.6.0)
+// Plugin Management (v1.6.0).
 $string['ai_plugins'] = 'AI Plugins';
 $string['ai_plugins_credit'] = 'AI Plugins (Credit-Based)';
 $string['blocks'] = 'Blocks (Free)';
@@ -191,7 +191,7 @@ $string['download_started'] = 'Download started. Install via Site Admin > Plugin
 $string['not_installed'] = 'Not Installed';
 $string['install_now'] = 'Install Now';
 
-// Auto-Update (v1.8.0)
+// Auto-Update (v1.8.0).
 $string['auto_update'] = 'Auto Update';
 $string['auto_update_all'] = 'Auto Update All';
 $string['auto_install'] = 'Install Plugin';
@@ -203,18 +203,18 @@ $string['upgrade_complete'] = 'Upgrade complete!';
 $string['upgrade_needed'] = 'Database upgrade needed. Click to continue.';
 $string['no_permission'] = 'You do not have permission to update plugins.';
 
-// Row Layout (v1.9.1)
+// Row Layout (v1.9.1).
 $string['view_docs'] = 'Docs';
 $string['docs'] = 'Docs';
 
-// Action Column (v2.1.5)
+// Action Column (v2.1.5).
 $string['download'] = 'Download';
 $string['purchase'] = 'Purchase';
 $string['go_to_plugin'] = 'Go to plugin';
 $string['installed'] = 'Installed';
 $string['settings'] = 'Settings';
 
-// Cache Purge (v2.0.0)
+// Cache Purge (v2.0.0).
 $string['purge_caches'] = 'Purge Caches';
 $string['purge_caches_btn'] = 'Purge All Caches';
 $string['purge_success'] = 'All caches have been purged successfully!';
@@ -244,7 +244,7 @@ $string['saturday'] = 'Saturday';
 $string['cache_management'] = 'Cache Management';
 $string['configure_schedule'] = 'Configure Schedule';
 
-// AI Tools Section Settings (v2.2.53)
+// AI Tools Section Settings (v2.2.53).
 $string['aitools_settings_header'] = 'AI Tools Quick Access Section';
 $string['aitools_settings_desc'] = 'Configure the display options for the AI Tools Quick Access section.';
 $string['aitools_collapsed_default'] = 'Collapse by default';

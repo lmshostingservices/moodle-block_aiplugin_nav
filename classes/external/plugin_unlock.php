@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * External function to unlock a credit-gated plugin.
@@ -73,9 +73,9 @@ class plugin_unlock extends external_api {
         $pluginid = $params['pluginid'];
 
         // Load AI Grader Central Config library.
-        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        if (file_exists($aiconfig_lib)) {
-            require_once($aiconfig_lib);
+        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($aiconfiglib)) {
+            require_once($aiconfiglib);
         }
 
         $siteid = '';
@@ -181,7 +181,7 @@ class plugin_unlock extends external_api {
         return new external_single_structure([
             'success'          => new external_value(PARAM_BOOL, 'Whether the unlock succeeded'),
             'alreadyunlocked'  => new external_value(PARAM_BOOL, 'True if plugin was already unlocked (no credits consumed)'),
-            'creditsconsumed'  => new external_value(PARAM_INT,  'Number of credits consumed (0 if already unlocked)'),
+            'creditsconsumed'  => new external_value(PARAM_INT, 'Number of credits consumed (0 if already unlocked)'),
             'remainingcredits' => new external_value(PARAM_TEXT, 'Remaining credits balance, or empty string'),
             'message'          => new external_value(PARAM_TEXT, 'Informational message from server'),
             'error'            => new external_value(PARAM_TEXT, 'Error message, or empty string on success'),

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * External functions and service definitions for AI Plugin Navigation block.
@@ -24,40 +24,40 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
-    'block_aiplugin_nav_save_custom_link' => array(
+$functions = [
+    'block_aiplugin_nav_save_custom_link' => [
         'classname'     => 'block_aiplugin_nav\external\custom_links',
         'methodname'    => 'save_custom_link',
         'description'   => 'Save a custom link for the user',
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true,
-    ),
-    'block_aiplugin_nav_delete_custom_link' => array(
+    ],
+    'block_aiplugin_nav_delete_custom_link' => [
         'classname'     => 'block_aiplugin_nav\external\custom_links',
         'methodname'    => 'delete_custom_link',
         'description'   => 'Delete a custom link for the user',
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true,
-    ),
-    'block_aiplugin_nav_save_custom_report' => array(
+    ],
+    'block_aiplugin_nav_save_custom_report' => [
         'classname'     => 'block_aiplugin_nav\external\custom_links',
         'methodname'    => 'save_custom_report',
         'description'   => 'Save a custom report for the user',
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true,
-    ),
-    'block_aiplugin_nav_delete_custom_report' => array(
+    ],
+    'block_aiplugin_nav_delete_custom_report' => [
         'classname'     => 'block_aiplugin_nav\external\custom_links',
         'methodname'    => 'delete_custom_report',
         'description'   => 'Delete a custom report for the user',
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true,
-    ),
-    'block_aiplugin_nav_auto_update_plugin' => array(
+    ],
+    'block_aiplugin_nav_auto_update_plugin' => [
         'classname'     => 'block_aiplugin_nav\external\plugin_updater',
         'methodname'    => 'auto_update_plugin',
         'description'   => 'Stage one explicitly reviewed, manifest-verified plugin update for Moodle upgrade',
@@ -65,8 +65,8 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_auto_install_plugin' => array(
+    ],
+    'block_aiplugin_nav_auto_install_plugin' => [
         'classname'     => 'block_aiplugin_nav\external\plugin_updater',
         'methodname'    => 'auto_install_plugin',
         'description'   => 'Auto-install a NEW plugin that is not yet installed',
@@ -74,8 +74,8 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_run_upgrade' => array(
+    ],
+    'block_aiplugin_nav_run_upgrade' => [
         'classname'     => 'block_aiplugin_nav\external\plugin_updater',
         'methodname'    => 'run_upgrade',
         'description'   => 'Run Moodle database upgrade after plugin update',
@@ -83,8 +83,8 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_purge_caches' => array(
+    ],
+    'block_aiplugin_nav_purge_caches' => [
         'classname'     => 'block_aiplugin_nav\external\purge_caches',
         'methodname'    => 'execute',
         'description'   => 'Purge all Moodle caches',
@@ -92,8 +92,8 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_get_purge_status' => array(
+    ],
+    'block_aiplugin_nav_get_purge_status' => [
         'classname'     => 'block_aiplugin_nav\external\get_purge_status',
         'methodname'    => 'execute',
         'description'   => 'Get cache purge status and schedule',
@@ -101,16 +101,16 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_get_credits' => array(
+    ],
+    'block_aiplugin_nav_get_credits' => [
         'classname'     => 'block_aiplugin_nav\external\get_credits',
         'methodname'    => 'execute',
         'description'   => 'Fetch credits balance from lms-labs.com (5-minute server-side cache)',
         'type'          => 'read',
         'ajax'          => true,
         'loginrequired' => true,
-    ),
-    'block_aiplugin_nav_save_purge_schedule' => array(
+    ],
+    'block_aiplugin_nav_save_purge_schedule' => [
         'classname'     => 'block_aiplugin_nav\external\save_purge_schedule',
         'methodname'    => 'execute',
         'description'   => 'Save cache purge schedule settings',
@@ -118,14 +118,15 @@ $functions = array(
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-    'block_aiplugin_nav_plugin_unlock' => array(
+    ],
+    'block_aiplugin_nav_plugin_unlock' => [
         'classname'     => 'block_aiplugin_nav\external\plugin_unlock',
         'methodname'    => 'execute',
-        'description'   => 'Unlock a credit-gated Time Saving Plugin by consuming the required credits via lms-labs.com/api/plugin-unlock',
+        'description'   => 'Unlock a credit-gated Time Saving Plugin by consuming the required credits '
+            . 'via lms-labs.com/api/plugin-unlock',
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
-    ),
-);
+    ],
+];

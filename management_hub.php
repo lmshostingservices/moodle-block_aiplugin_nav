@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Durable management hub for LMS Labs plugins and links.
@@ -30,7 +30,7 @@ require_login();
 
 $context = context_system::instance();
 $canmanage = has_capability('moodle/site:config', $context);
-$views = array('plugins', 'reports', 'updates', 'customlinks', 'help');
+$views = ['plugins', 'reports', 'updates', 'customlinks', 'help'];
 $view = optional_param('view', 'plugins', PARAM_ALPHA);
 $view = in_array($view, $views, true) ? $view : 'plugins';
 if ($view === 'updates' && !$canmanage) {
@@ -42,12 +42,12 @@ $filter = optional_param('filter', 'all', PARAM_ALPHANUMEXT);
 $selectedcomponent = optional_param('plugin', '', PARAM_COMPONENT);
 $baseurl = new moodle_url('/blocks/aiplugin_nav/management_hub.php');
 
-$stateparams = array('q' => $query, 'filter' => $filter);
+$stateparams = ['q' => $query, 'filter' => $filter];
 if ($selectedcomponent !== '') {
     $stateparams['plugin'] = $selectedcomponent;
 }
-$stateurl = static function (string $targetview, array $changes = array()) use ($baseurl, $stateparams): moodle_url {
-    $params = array_merge($stateparams, array('view' => $targetview), $changes);
+$stateurl = static function (string $targetview, array $changes = []) use ($baseurl, $stateparams): moodle_url {
+    $params = array_merge($stateparams, ['view' => $targetview], $changes);
     foreach ($params as $key => $value) {
         if ($value === null || $value === '') {
             unset($params[$key]);
@@ -62,29 +62,33 @@ if ($view === 'customlinks' && data_submitted() && optional_param('action', '', 
     $action = required_param('action', PARAM_ALPHA);
     $linksjson = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
     $links = json_decode($linksjson, true);
-    $links = is_array($links) ? array_values($links) : array();
+    $links = is_array($links) ? array_values($links) : [];
 
     if ($action === 'add') {
         $name = trim(required_param('name', PARAM_TEXT));
         $url = required_param('url', PARAM_URL);
         $scheme = core_text::strtolower((string)parse_url($url, PHP_URL_SCHEME));
-        if ($name === '' || !filter_var($url, FILTER_VALIDATE_URL) ||
-                !in_array($scheme, array('http', 'https'), true)) {
+        if (
+            $name === '' || !filter_var($url, FILTER_VALIDATE_URL) ||
+                !in_array($scheme, ['http', 'https'], true)
+        ) {
             throw new moodle_exception('invalidcustomlink', 'block_aiplugin_nav');
         }
         if (count($links) >= 20) {
             throw new moodle_exception('customlinklimit', 'block_aiplugin_nav');
         }
-        $links[] = array('name' => core_text::substr($name, 0, 50), 'url' => $url, 'icon' => 'link');
+        $links[] = ['name' => core_text::substr($name, 0, 50), 'url' => $url, 'icon' => 'link'];
         set_user_preference('block_aiplugin_nav_custom_links', json_encode($links), $USER->id);
     } else if ($action === 'edit') {
         $index = required_param('index', PARAM_INT);
         $name = trim(required_param('name', PARAM_TEXT));
         $url = required_param('url', PARAM_URL);
         $scheme = core_text::strtolower((string)parse_url($url, PHP_URL_SCHEME));
-        if (!array_key_exists($index, $links) || $name === '' ||
+        if (
+            !array_key_exists($index, $links) || $name === '' ||
                 !filter_var($url, FILTER_VALIDATE_URL) ||
-                !in_array($scheme, array('http', 'https'), true)) {
+                !in_array($scheme, ['http', 'https'], true)
+        ) {
             throw new moodle_exception('invalidcustomlink', 'block_aiplugin_nav');
         }
         $links[$index]['name'] = core_text::substr($name, 0, 50);
@@ -115,24 +119,26 @@ if ($view === 'reports' && data_submitted() && optional_param('action', '', PARA
     $action = required_param('action', PARAM_ALPHA);
     $reportsjson = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
     $customreports = json_decode($reportsjson, true);
-    $customreports = is_array($customreports) ? array_values($customreports) : array();
+    $customreports = is_array($customreports) ? array_values($customreports) : [];
 
     if ($action === 'addreport') {
         $name = trim(required_param('name', PARAM_TEXT));
         $url = required_param('url', PARAM_URL);
         $scheme = core_text::strtolower((string)parse_url($url, PHP_URL_SCHEME));
-        if ($name === '' || !filter_var($url, FILTER_VALIDATE_URL) ||
-                !in_array($scheme, array('http', 'https'), true)) {
+        if (
+            $name === '' || !filter_var($url, FILTER_VALIDATE_URL) ||
+                !in_array($scheme, ['http', 'https'], true)
+        ) {
             throw new moodle_exception('invalidcustomlink', 'block_aiplugin_nav');
         }
         if (count($customreports) >= 20) {
             throw new moodle_exception('customreportlimit', 'block_aiplugin_nav');
         }
-        $customreports[] = array(
+        $customreports[] = [
             'name' => core_text::substr($name, 0, 50),
             'url' => $url,
             'icon' => 'bar-chart',
-        );
+        ];
         set_user_preference(
             'block_aiplugin_nav_custom_reports',
             json_encode($customreports),
@@ -160,13 +166,13 @@ $PAGE->set_heading(get_string('managementhub', 'block_aiplugin_nav'));
 
 $manager = new block_aiplugin_nav();
 $master = $manager->get_master_plugin_registry();
-$catalogue = array();
+$catalogue = [];
 foreach ($manager->get_complete_plugin_registry() as $plugin) {
     $catalogue[$plugin['component']] = $plugin;
 }
 foreach ($master as $component => $plugin) {
     if (!isset($catalogue[$component])) {
-        $catalogue[$component] = array_merge($plugin, array('component' => $component));
+        $catalogue[$component] = array_merge($plugin, ['component' => $component]);
     } else {
         $catalogue[$component] = array_merge($plugin, $catalogue[$component]);
     }
@@ -186,18 +192,18 @@ $installedcount = count(array_filter($catalogue, static function (array $plugin)
 
 echo $OUTPUT->header();
 echo html_writer::start_div('block_aiplugin_nav');
-echo html_writer::start_tag('main', array('id' => 'ainav-management-hub', 'class' => 'ainav-hub'));
-echo html_writer::tag('p', get_string('managementhubintro', 'block_aiplugin_nav'), array('class' => 'ainav-hub-intro'));
+echo html_writer::start_tag('main', ['id' => 'ainav-management-hub', 'class' => 'ainav-hub']);
+echo html_writer::tag('p', get_string('managementhubintro', 'block_aiplugin_nav'), ['class' => 'ainav-hub-intro']);
 
-echo html_writer::start_tag('nav', array(
+echo html_writer::start_tag('nav', [
     'class' => 'ainav-hub-tabs',
     'aria-label' => get_string('hubviews', 'block_aiplugin_nav'),
-));
+]);
 foreach ($views as $tabview) {
     if ($tabview === 'updates' && !$canmanage) {
         continue;
     }
-    $attributes = array('class' => $tabview === $view ? 'active' : '');
+    $attributes = ['class' => $tabview === $view ? 'active' : ''];
     if ($tabview === $view) {
         $attributes['aria-current'] = 'page';
     }
@@ -210,54 +216,54 @@ foreach ($views as $tabview) {
 echo html_writer::end_tag('nav');
 
 if (in_array($view, $views, true)) {
-    echo html_writer::start_tag('form', array('method' => 'get', 'class' => 'ainav-hub-search'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => $view));
+    echo html_writer::start_tag('form', ['method' => 'get', 'class' => 'ainav-hub-search']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => $view]);
     if ($selectedcomponent !== '') {
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'plugin', 'value' => $selectedcomponent));
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'plugin', 'value' => $selectedcomponent]);
     }
-    echo html_writer::label(get_string('hubsearch', 'block_aiplugin_nav'), 'ainav-hub-q', false, array('class' => 'sr-only'));
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::label(get_string('hubsearch', 'block_aiplugin_nav'), 'ainav-hub-q', false, ['class' => 'sr-only']);
+    echo html_writer::empty_tag('input', [
         'type' => 'search',
         'id' => 'ainav-hub-q',
         'name' => 'q',
         'value' => $query,
         'placeholder' => get_string('hubsearchplaceholder', 'block_aiplugin_nav'),
-    ));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
-    echo html_writer::tag('button', get_string('search'), array('type' => 'submit', 'class' => 'btn btn-primary'));
+    ]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
+    echo html_writer::tag('button', get_string('search'), ['type' => 'submit', 'class' => 'btn btn-primary']);
     if ($query !== '') {
-        echo html_writer::link($stateurl($view, array('q' => null)), get_string('clear'), array('class' => 'btn btn-secondary'));
+        echo html_writer::link($stateurl($view, ['q' => null]), get_string('clear'), ['class' => 'btn btn-secondary']);
     }
     echo html_writer::end_tag('form');
 }
 
 if ($view === 'plugins') {
-    $categories = array();
+    $categories = [];
     foreach ($catalogue as $plugin) {
         $categories[$plugin['category'] ?? 'other'] = true;
     }
     ksort($categories);
-    echo html_writer::start_div('ainav-hub-filters', array('aria-label' => get_string('hubfilters', 'block_aiplugin_nav')));
-    foreach (array('all', 'installed', 'available') as $statusfilter) {
+    echo html_writer::start_div('ainav-hub-filters', ['aria-label' => get_string('hubfilters', 'block_aiplugin_nav')]);
+    foreach (['all', 'installed', 'available'] as $statusfilter) {
         echo html_writer::link(
-            $stateurl('plugins', array('filter' => $statusfilter, 'plugin' => null)),
+            $stateurl('plugins', ['filter' => $statusfilter, 'plugin' => null]),
             get_string('hubfilter' . $statusfilter, 'block_aiplugin_nav'),
-            array('class' => $filter === $statusfilter ? 'active' : '')
+            ['class' => $filter === $statusfilter ? 'active' : '']
         );
     }
     foreach (array_keys($categories) as $category) {
         echo html_writer::link(
-            $stateurl('plugins', array('filter' => $category, 'plugin' => null)),
+            $stateurl('plugins', ['filter' => $category, 'plugin' => null]),
             ucfirst(str_replace('_', ' ', $category)),
-            array('class' => $filter === $category ? 'active' : '')
+            ['class' => $filter === $category ? 'active' : '']
         );
     }
     echo html_writer::end_div();
 
     if ($selectedcomponent !== '' && isset($catalogue[$selectedcomponent])) {
         $plugin = $catalogue[$selectedcomponent];
-        echo html_writer::start_tag('section', array('class' => 'ainav-plugin-detail', 'aria-labelledby' => 'ainav-detail-title'));
-        echo html_writer::tag('h2', format_string($plugin['name']), array('id' => 'ainav-detail-title'));
+        echo html_writer::start_tag('section', ['class' => 'ainav-plugin-detail', 'aria-labelledby' => 'ainav-detail-title']);
+        echo html_writer::tag('h2', format_string($plugin['name']), ['id' => 'ainav-detail-title']);
         echo html_writer::tag('p', s($plugin['description'] ?? $plugin['component']));
         echo html_writer::start_div('ainav-plugin-meta');
         echo html_writer::tag('span', get_string(
@@ -297,27 +303,27 @@ if ($view === 'plugins') {
             }
             if ($plugin['component'] === 'local_rtocompliance') {
                 echo html_writer::link(
-                    new moodle_url('/admin/settings.php', array('section' => 'local_rtocompliance_certs')),
+                    new moodle_url('/admin/settings.php', ['section' => 'local_rtocompliance_certs']),
                     get_string('hubcertificatesettings', 'block_aiplugin_nav')
                 );
             }
-            if (in_array($plugin['component'], array('plagiarism_essayguard', 'plagiarism_docguard'), true)) {
+            if (in_array($plugin['component'], ['plagiarism_essayguard', 'plagiarism_docguard'], true)) {
                 echo html_writer::link(
-                    new moodle_url('/admin/settings.php', array('section' => 'manageplagiarismplugins')),
+                    new moodle_url('/admin/settings.php', ['section' => 'manageplagiarismplugins']),
                     get_string('hubmanageplagiarism', 'block_aiplugin_nav')
                 );
             }
         }
         $docsurl = $manager->get_plugin_docs_url($plugin['component']);
         if ($docsurl) {
-            echo html_writer::link($docsurl, get_string('docs', 'block_aiplugin_nav'), array(
+            echo html_writer::link($docsurl, get_string('docs', 'block_aiplugin_nav'), [
                 'target' => '_blank',
                 'rel' => 'noopener noreferrer',
-            ));
+            ]);
         }
         if ($canmanage && $plugin['is_installed']) {
             echo html_writer::link(
-                $stateurl('updates', array('plugin' => $plugin['component'])),
+                $stateurl('updates', ['plugin' => $plugin['component']]),
                 get_string('hubreviewstatus', 'block_aiplugin_nav')
             );
         }
@@ -326,13 +332,13 @@ if ($view === 'plugins') {
     }
 
     $results = array_filter($catalogue, static function (array $plugin) use ($query, $filter): bool {
-        $haystack = implode(' ', array(
+        $haystack = implode(' ', [
             $plugin['name'],
             $plugin['component'],
             $plugin['category'] ?? '',
             $plugin['description'] ?? '',
             $plugin['access'] ?? '',
-        ));
+        ]);
         if ($query !== '' && core_text::strpos(core_text::strtolower($haystack), core_text::strtolower($query)) === false) {
             return false;
         }
@@ -342,30 +348,30 @@ if ($view === 'plugins') {
         if ($filter === 'available' && $plugin['is_installed']) {
             return false;
         }
-        return in_array($filter, array('all', 'installed', 'available'), true)
+        return in_array($filter, ['all', 'installed', 'available'], true)
             || ($plugin['category'] ?? 'other') === $filter;
     });
-    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', count($results)), array(
+    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', count($results)), [
         'class' => 'ainav-result-count',
         'aria-live' => 'polite',
-    ));
+    ]);
     echo html_writer::start_div('ainav-plugin-list');
     foreach ($results as $plugin) {
         $status = get_string($plugin['is_installed'] ? 'installed' : 'not_installed', 'block_aiplugin_nav');
-        echo html_writer::start_tag('article', array('class' => 'ainav-plugin-summary'));
+        echo html_writer::start_tag('article', ['class' => 'ainav-plugin-summary']);
         echo html_writer::tag('h3', html_writer::link(
-            $stateurl('plugins', array('plugin' => $plugin['component'])),
+            $stateurl('plugins', ['plugin' => $plugin['component']]),
             format_string($plugin['name'])
         ));
-        echo html_writer::tag('p', s($plugin['component']), array('class' => 'ainav-component'));
-        echo html_writer::tag('span', $status, array(
+        echo html_writer::tag('p', s($plugin['component']), ['class' => 'ainav-component']);
+        echo html_writer::tag('span', $status, [
             'class' => 'ainav-status ' . ($plugin['is_installed'] ? 'is-installed' : 'is-available'),
-        ));
+        ]);
         echo html_writer::end_tag('article');
     }
     echo html_writer::end_div();
     if (empty($results)) {
-        echo html_writer::tag('p', get_string('hubemptyplugins', 'block_aiplugin_nav'), array('class' => 'alert alert-info'));
+        echo html_writer::tag('p', get_string('hubemptyplugins', 'block_aiplugin_nav'), ['class' => 'alert alert-info']);
     }
 } else if ($view === 'reports') {
     $reports = $manager->get_links_registry()['tools']['items'];
@@ -388,115 +394,115 @@ if ($view === 'plugins') {
         }
     );
     $reportcount = count($reports) + count($visiblecustomreports);
-    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', $reportcount), array(
+    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', $reportcount), [
         'class' => 'ainav-result-count',
         'aria-live' => 'polite',
-    ));
-    echo html_writer::start_tag('ul', array('class' => 'ainav-hub-directory'));
+    ]);
+    echo html_writer::start_tag('ul', ['class' => 'ainav-hub-directory']);
     foreach ($reports as $report) {
         echo html_writer::tag('li', html_writer::link($report['url'], format_string($report['name'])));
     }
     echo html_writer::end_tag('ul');
     if (!empty($visiblecustomreports)) {
         echo html_writer::tag('h3', get_string('customreports', 'block_aiplugin_nav'));
-        echo html_writer::start_tag('ul', array('class' => 'ainav-hub-directory'));
+        echo html_writer::start_tag('ul', ['class' => 'ainav-hub-directory']);
         foreach ($visiblecustomreports as $index => $report) {
-            $deleteurl = $stateurl('reports', array('confirmdeletereport' => $index));
+            $deleteurl = $stateurl('reports', ['confirmdeletereport' => $index]);
             echo html_writer::tag(
                 'li',
-                html_writer::link($report['url'], format_string($report['name']), array(
+                html_writer::link($report['url'], format_string($report['name']), [
                     'target' => '_blank',
                     'rel' => 'noopener noreferrer',
-                )) .
+                ]) .
                 html_writer::link(
                     $deleteurl,
                     get_string('delete_report', 'block_aiplugin_nav'),
-                    array('class' => 'btn btn-secondary')
+                    ['class' => 'btn btn-secondary']
                 )
             );
         }
         echo html_writer::end_tag('ul');
     }
     if ($reportcount === 0) {
-        echo html_writer::tag('p', get_string('hubemptyreports', 'block_aiplugin_nav'), array('class' => 'alert alert-info'));
+        echo html_writer::tag('p', get_string('hubemptyreports', 'block_aiplugin_nav'), ['class' => 'alert alert-info']);
     }
     $confirmdeletereport = optional_param('confirmdeletereport', -1, PARAM_INT);
     if (isset($allcustomreports[$confirmdeletereport])) {
         $report = $allcustomreports[$confirmdeletereport];
-        echo html_writer::start_tag('section', array(
+        echo html_writer::start_tag('section', [
             'class' => 'ainav-delete-confirmation',
             'aria-labelledby' => 'ainav-delete-report-title',
-        ));
+        ]);
         echo html_writer::tag(
             'h3',
             get_string('delete_report', 'block_aiplugin_nav'),
-            array('id' => 'ainav-delete-report-title')
+            ['id' => 'ainav-delete-report-title']
         );
         echo html_writer::tag(
             'p',
             get_string('deletecustomreportconfirm', 'block_aiplugin_nav', format_string($report['name']))
         );
-        echo html_writer::start_tag('form', array('method' => 'post'));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'reports'));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'action', 'value' => 'deletereport'));
-        echo html_writer::empty_tag('input', array(
+        echo html_writer::start_tag('form', ['method' => 'post']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'reports']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'deletereport']);
+        echo html_writer::empty_tag('input', [
             'type' => 'hidden',
             'name' => 'index',
             'value' => $confirmdeletereport,
-        ));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'q', 'value' => $query));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
+        ]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
         echo html_writer::tag(
             'button',
             get_string('delete_report', 'block_aiplugin_nav'),
-            array('type' => 'submit', 'class' => 'btn btn-danger')
+            ['type' => 'submit', 'class' => 'btn btn-danger']
         );
         echo ' ' . html_writer::link(
-            $stateurl('reports', array('confirmdeletereport' => null)),
+            $stateurl('reports', ['confirmdeletereport' => null]),
             get_string('cancel', 'block_aiplugin_nav'),
-            array('class' => 'btn btn-secondary')
+            ['class' => 'btn btn-secondary']
         );
         echo html_writer::end_tag('form');
         echo html_writer::end_tag('section');
     }
     echo html_writer::tag('h3', get_string('create_report', 'block_aiplugin_nav'));
-    echo html_writer::start_tag('form', array('method' => 'post', 'class' => 'ainav-custom-link-form'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'reports'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'action', 'value' => 'addreport'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'q', 'value' => $query));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
+    echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'ainav-custom-link-form']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'reports']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'addreport']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
     echo html_writer::label(get_string('report_name', 'block_aiplugin_nav'), 'ainav-report-name');
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::empty_tag('input', [
         'id' => 'ainav-report-name',
         'name' => 'name',
         'required' => 'required',
-    ));
+    ]);
     echo html_writer::label(get_string('report_url', 'block_aiplugin_nav'), 'ainav-report-url');
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::empty_tag('input', [
         'id' => 'ainav-report-url',
         'name' => 'url',
         'type' => 'url',
         'required' => 'required',
-    ));
-    echo html_writer::tag('button', get_string('save_report', 'block_aiplugin_nav'), array(
+    ]);
+    echo html_writer::tag('button', get_string('save_report', 'block_aiplugin_nav'), [
         'type' => 'submit',
         'class' => 'btn btn-primary',
-    ));
+    ]);
     echo html_writer::end_tag('form');
 } else if ($view === 'updates') {
     echo html_writer::tag('h2', get_string('hubviewupdates', 'block_aiplugin_nav'));
     echo html_writer::tag('p', get_string('updatesintro', 'block_aiplugin_nav'));
-    $updatefilter = in_array($filter, array('all', 'installed', 'available'), true) ? $filter : 'all';
-    echo html_writer::start_div('ainav-hub-filters', array(
+    $updatefilter = in_array($filter, ['all', 'installed', 'available'], true) ? $filter : 'all';
+    echo html_writer::start_div('ainav-hub-filters', [
         'aria-label' => get_string('hubfilters', 'block_aiplugin_nav'),
-    ));
-    foreach (array('all', 'installed', 'available') as $statusfilter) {
+    ]);
+    foreach (['all', 'installed', 'available'] as $statusfilter) {
         echo html_writer::link(
-            $stateurl('updates', array('filter' => $statusfilter)),
+            $stateurl('updates', ['filter' => $statusfilter]),
             get_string('hubfilter' . $statusfilter, 'block_aiplugin_nav'),
-            array('class' => $updatefilter === $statusfilter ? 'active' : '')
+            ['class' => $updatefilter === $statusfilter ? 'active' : '']
         );
     }
     echo html_writer::end_div();
@@ -540,50 +546,50 @@ if ($view === 'plugins') {
     echo html_writer::tag(
         'p',
         get_string('hubresultcount', 'block_aiplugin_nav', count($sitequicklinks) + count($links)),
-        array('class' => 'ainav-result-count', 'aria-live' => 'polite')
+        ['class' => 'ainav-result-count', 'aria-live' => 'polite']
     );
     if (!empty($sitequicklinks)) {
         echo html_writer::tag('h3', get_string('site_quick_links', 'block_aiplugin_nav'));
-        echo html_writer::start_tag('ul', array('class' => 'ainav-hub-directory'));
+        echo html_writer::start_tag('ul', ['class' => 'ainav-hub-directory']);
         foreach ($sitequicklinks as $link) {
             echo html_writer::tag(
                 'li',
                 html_writer::link($link['url'], format_string($link['name'])) .
-                html_writer::tag('span', format_string($link['groupname']), array('class' => 'ainav-component'))
+                html_writer::tag('span', format_string($link['groupname']), ['class' => 'ainav-component'])
             );
         }
         echo html_writer::end_tag('ul');
     }
     echo html_writer::tag('h3', get_string('customlinks', 'block_aiplugin_nav'));
-    echo html_writer::start_tag('ul', array('class' => 'ainav-hub-directory'));
+    echo html_writer::start_tag('ul', ['class' => 'ainav-hub-directory']);
     foreach ($links as $index => $link) {
-        $deleteurl = $stateurl('customlinks', array('confirmdelete' => $index));
-        $editurl = $stateurl('customlinks', array('editlink' => $index));
+        $deleteurl = $stateurl('customlinks', ['confirmdelete' => $index]);
+        $editurl = $stateurl('customlinks', ['editlink' => $index]);
         $controls = html_writer::start_div('ainav-directory-actions');
         $controls .= html_writer::link(
             $editurl,
             get_string('edit_link', 'block_aiplugin_nav'),
-            array('class' => 'btn btn-secondary')
+            ['class' => 'btn btn-secondary']
         );
-        foreach (array('moveup', 'movedown') as $moveaction) {
+        foreach (['moveup', 'movedown'] as $moveaction) {
             $disabled = ($moveaction === 'moveup' && $index === array_key_first($alllinks)) ||
                 ($moveaction === 'movedown' && $index === array_key_last($alllinks));
-            $controls .= html_writer::start_tag('form', array('method' => 'post'));
-            $controls .= html_writer::empty_tag('input', array(
+            $controls .= html_writer::start_tag('form', ['method' => 'post']);
+            $controls .= html_writer::empty_tag('input', [
                 'type' => 'hidden',
                 'name' => 'view',
                 'value' => 'customlinks',
-            ));
-            $controls .= html_writer::empty_tag('input', array(
+            ]);
+            $controls .= html_writer::empty_tag('input', [
                 'type' => 'hidden',
                 'name' => 'action',
                 'value' => $moveaction,
-            ));
-            $controls .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'index', 'value' => $index));
-            $controls .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-            $controls .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'q', 'value' => $query));
-            $controls .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
-            $buttonattributes = array('type' => 'submit', 'class' => 'btn btn-secondary');
+            ]);
+            $controls .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'index', 'value' => $index]);
+            $controls .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+            $controls .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+            $controls .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
+            $buttonattributes = ['type' => 'submit', 'class' => 'btn btn-secondary'];
             if ($disabled) {
                 $buttonattributes['disabled'] = 'disabled';
             }
@@ -597,35 +603,44 @@ if ($view === 'plugins') {
         $controls .= html_writer::link(
             $deleteurl,
             get_string('delete_link', 'block_aiplugin_nav'),
-            array('class' => 'btn btn-secondary')
+            ['class' => 'btn btn-secondary']
         );
         $controls .= html_writer::end_div();
-        echo html_writer::tag('li',
-            html_writer::link($link['url'], format_string($link['name']), array(
+        echo html_writer::tag(
+            'li',
+            html_writer::link($link['url'], format_string($link['name']), [
                 'target' => '_blank',
                 'rel' => 'noopener noreferrer',
-            )) . $controls
+            ]) . $controls
         );
     }
     echo html_writer::end_tag('ul');
     if (empty($links) && empty($sitequicklinks)) {
-        echo html_writer::tag('p', get_string('hubemptycustomlinks', 'block_aiplugin_nav'), array('class' => 'alert alert-info'));
+        echo html_writer::tag('p', get_string('hubemptycustomlinks', 'block_aiplugin_nav'), ['class' => 'alert alert-info']);
     }
     $confirmdelete = optional_param('confirmdelete', -1, PARAM_INT);
     if (isset($alllinks[$confirmdelete])) {
         $link = $alllinks[$confirmdelete];
-        echo html_writer::start_tag('section', array('class' => 'ainav-delete-confirmation', 'aria-labelledby' => 'ainav-delete-title'));
-        echo html_writer::tag('h3', get_string('delete_link', 'block_aiplugin_nav'), array('id' => 'ainav-delete-title'));
+        echo html_writer::start_tag('section', ['class' => 'ainav-delete-confirmation', 'aria-labelledby' => 'ainav-delete-title']);
+        echo html_writer::tag('h3', get_string('delete_link', 'block_aiplugin_nav'), ['id' => 'ainav-delete-title']);
         echo html_writer::tag('p', get_string('deletecustomlinkconfirm', 'block_aiplugin_nav', format_string($link['name'])));
-        echo html_writer::start_tag('form', array('method' => 'post'));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'customlinks'));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'action', 'value' => 'delete'));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'index', 'value' => $confirmdelete));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'q', 'value' => $query));
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
-        echo html_writer::tag('button', get_string('delete_link', 'block_aiplugin_nav'), array('type' => 'submit', 'class' => 'btn btn-danger'));
-        echo ' ' . html_writer::link($stateurl('customlinks'), get_string('cancel', 'block_aiplugin_nav'), array('class' => 'btn btn-secondary'));
+        echo html_writer::start_tag('form', ['method' => 'post']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'customlinks']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'delete']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'index', 'value' => $confirmdelete]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
+        echo html_writer::tag(
+            'button',
+            get_string('delete_link', 'block_aiplugin_nav'),
+            ['type' => 'submit', 'class' => 'btn btn-danger']
+        );
+        echo ' ' . html_writer::link(
+            $stateurl('customlinks'),
+            get_string('cancel', 'block_aiplugin_nav'),
+            ['class' => 'btn btn-secondary']
+        );
         echo html_writer::end_tag('form');
         echo html_writer::end_tag('section');
     }
@@ -637,73 +652,75 @@ if ($view === 'plugins') {
         'h3',
         get_string($editing ? 'edit_link' : 'create_link', 'block_aiplugin_nav')
     );
-    echo html_writer::start_tag('form', array('method' => 'post', 'class' => 'ainav-custom-link-form'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'view', 'value' => 'customlinks'));
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::start_tag('form', ['method' => 'post', 'class' => 'ainav-custom-link-form']);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'view', 'value' => 'customlinks']);
+    echo html_writer::empty_tag('input', [
         'type' => 'hidden',
         'name' => 'action',
         'value' => $editing ? 'edit' : 'add',
-    ));
+    ]);
     if ($editing) {
-        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'index', 'value' => $editlink));
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'index', 'value' => $editlink]);
     }
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'q', 'value' => $query));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'filter', 'value' => $filter));
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]);
     echo html_writer::label(get_string('link_name', 'block_aiplugin_nav'), 'ainav-link-name');
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::empty_tag('input', [
         'id' => 'ainav-link-name',
         'name' => 'name',
         'required' => 'required',
         'value' => $editname,
-    ));
+    ]);
     echo html_writer::label(get_string('link_url', 'block_aiplugin_nav'), 'ainav-link-url');
-    echo html_writer::empty_tag('input', array(
+    echo html_writer::empty_tag('input', [
         'id' => 'ainav-link-url',
         'name' => 'url',
         'type' => 'url',
         'required' => 'required',
         'value' => $editurl,
-    ));
-    echo html_writer::tag('button', get_string($editing ? 'update_link' : 'save_link', 'block_aiplugin_nav'), array(
+    ]);
+    echo html_writer::tag('button', get_string($editing ? 'update_link' : 'save_link', 'block_aiplugin_nav'), [
         'type' => 'submit',
         'class' => 'btn btn-primary',
-    ));
+    ]);
     if ($editing) {
         echo html_writer::link(
-            $stateurl('customlinks', array('editlink' => null)),
+            $stateurl('customlinks', ['editlink' => null]),
             get_string('cancel', 'block_aiplugin_nav'),
-            array('class' => 'btn btn-secondary')
+            ['class' => 'btn btn-secondary']
         );
     }
     echo html_writer::end_tag('form');
 } else {
     echo html_writer::tag('h2', get_string('hubviewhelp', 'block_aiplugin_nav'));
     echo html_writer::tag('p', get_string('helpintro', 'block_aiplugin_nav'));
-    $helpitems = array(
-        array('url' => 'https://lms-labs.com', 'label' => get_string('visit_website', 'block_aiplugin_nav')),
-        array('url' => 'https://lms-labs.com/pricing', 'label' => get_string('buy_credits', 'block_aiplugin_nav')),
-        array(
+    $helpitems = [
+        ['url' => 'https://lms-labs.com', 'label' => get_string('visit_website', 'block_aiplugin_nav')],
+        ['url' => 'https://lms-labs.com/pricing', 'label' => get_string('buy_credits', 'block_aiplugin_nav')],
+        [
             'url' => 'https://lms-labs.com/affiliate/signup',
             'label' => get_string('become_affiliate', 'block_aiplugin_nav'),
-        ),
-    );
-    if (isset($master['local_moodlesupport']) &&
-            $manager->is_plugin_installed('local', 'moodlesupport')) {
-        $helpitems[] = array(
+        ],
+    ];
+    if (
+        isset($master['local_moodlesupport']) &&
+            $manager->is_plugin_installed('local', 'moodlesupport')
+    ) {
+        $helpitems[] = [
             'url' => $CFG->wwwroot . $master['local_moodlesupport']['page_url'],
             'label' => get_string('ai_moodle_support', 'block_aiplugin_nav'),
             'internal' => true,
-        );
+        ];
     }
     $helpitems = array_filter($helpitems, static function (array $item) use ($query): bool {
         return $query === '' ||
             core_text::strpos(core_text::strtolower($item['label']), core_text::strtolower($query)) !== false;
     });
-    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', count($helpitems)), array(
+    echo html_writer::tag('p', get_string('hubresultcount', 'block_aiplugin_nav', count($helpitems)), [
         'class' => 'ainav-result-count',
         'aria-live' => 'polite',
-    ));
+    ]);
     echo html_writer::start_div('ainav-help-grid');
     foreach ($helpitems as $item) {
         $label = $item['label'];
@@ -714,18 +731,19 @@ if ($view === 'plugins') {
             );
             $PAGE->requires->js_call_amd('block_aiplugin_nav/credits', 'init');
         }
-        $attributes = !empty($item['internal']) ? array() : array(
+        $attributes = !empty($item['internal']) ? [] : [
             'target' => '_blank',
             'rel' => 'noopener noreferrer',
-        );
+        ];
         echo html_writer::link($item['url'], $label, $attributes);
     }
     echo html_writer::end_div();
     if (empty($helpitems)) {
-        echo html_writer::tag('p', get_string('hubemptyhelp', 'block_aiplugin_nav'), array('class' => 'alert alert-info'));
+        echo html_writer::tag('p', get_string('hubemptyhelp', 'block_aiplugin_nav'), ['class' => 'alert alert-info']);
     }
     echo html_writer::tag('h3', get_string('hubdiagnostics', 'block_aiplugin_nav'));
-    echo html_writer::tag('dl',
+    echo html_writer::tag(
+        'dl',
         html_writer::tag('dt', get_string('installed', 'block_aiplugin_nav')) .
         html_writer::tag('dd', (string)$installedcount) .
         html_writer::tag('dt', get_string('hubmoodleversion', 'block_aiplugin_nav')) .
