@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.83] - 2026-08-31
+
+### Removed
+- Removed stale public catalogue-shaped metadata and obsolete unlock aliases for
+  the retired private Wombat Training Plan suite.
+- No database schema changes. Savepoint 2026083016.
+
 ## [2.4.82] - 2026-08-31
 
 ### Changed
