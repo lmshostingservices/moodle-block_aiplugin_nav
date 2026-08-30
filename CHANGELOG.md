@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.77] - 2026-08-30
+
+### Changed
+- Diagnostic recut used to capture native Moodle Grunt outputs before the CI
+  wrapper restores its comparison backup.
+- No source behavior or database schema changes. Savepoint 2026083010.
+
 ## [2.4.76] - 2026-08-30
 
 ### Changed
