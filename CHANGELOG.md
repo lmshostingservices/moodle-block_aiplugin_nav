@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.84] - 2026-08-31
+
+### Removed
+- Removed the final retired-suite entries from protected live-test and CSS-audit
+  registries, plus inert registry comments from Quicklinks source.
+- No database schema changes. Savepoint 2026083017.
+
 ## [2.4.83] - 2026-08-31
 
 ### Removed

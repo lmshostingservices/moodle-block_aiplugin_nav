@@ -489,21 +489,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'navigation',
                 'category' => 'block',
             ],
-            // TESTING - Hidden until ready.
-            // 'block_trainingmatrix' => array(
-            // 'name' => 'My Training Progress',
-            // 'plugin_type' => 'block',
-            // 'plugin_name' => 'trainingmatrix',
-            // 'icon' => 'bar-chart-2',
-            // 'category' => 'block',
-            // ),
-            // 'block_trainingmatrix_teacher' => array(
-            // 'name' => 'Staff Training Dashboard',
-            // 'plugin_type' => 'block',
-            // 'plugin_name' => 'trainingmatrix_teacher',
-            // 'icon' => 'users-2',
-            // 'category' => 'block',
-            // ),
             'block_my_progress' => [
                 'name' => 'My Progress',
                 'plugin_type' => 'block',
@@ -531,16 +516,6 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'config',
             ],
             // ===== TIME SAVING PLUGINS (Admin) =====
-            // TESTING - Hidden until ready.
-            // 'local_trainingmatrix' => array(
-            // 'name' => 'AI Training Matrix HCM',
-            // 'plugin_type' => 'local',
-            // 'plugin_name' => 'trainingmatrix',
-            // 'settings_url' => '/admin/settings.php?section=local_trainingmatrix',
-            // 'page_url' => '/local/trainingmatrix/index.php',
-            // 'icon' => 'users-2',
-            // 'category' => 'admin',
-            // ),
             'local_groupmanager' => [
                 'name' => 'Groups Management',
                 'plugin_type' => 'local',
@@ -1593,17 +1568,6 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Site admin > Plugins > Local plugins > RPL Kit',
                 'goto_url' => '/local/rplkit/index.php',
             ],
-            // Array(
-            // 'name' => 'AI Training Matrix HCM',
-            // 'component' => 'local_trainingmatrix',
-            // 'plugin_type' => 'local',
-            // 'plugin_name' => 'trainingmatrix',
-            // 'icon' => 'users-2',
-            // 'category' => 'ai',
-            // 'description' => 'Human Capital Management for staff competency tracking. AI-powered competency generation (10 credits per position).',
-            // 'access' => 'Site admin > Plugins > Local plugins > AI Training Matrix',
-            // 'goto_url' => '/local/trainingmatrix/index.php',
-            // ),
             [
                 'name' => 'AI Support',
                 'component' => 'local_moodlesupport',
@@ -1680,29 +1644,6 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Teacher view of student progress across courses with search, filters, and per-student completion tracking.',
                 'access' => 'Dashboard > Add block > My Students Progress',
             ],
-            // TESTING - Hidden until ready.
-            // Array(
-            // 'name' => 'My Training Progress',
-            // 'component' => 'block_trainingmatrix',
-            // 'plugin_type' => 'block',
-            // 'plugin_name' => 'trainingmatrix',
-            // 'icon' => 'users-2',
-            // 'category' => 'block',
-            // 'group' => 'AI Training Matrix HCM',
-            // 'description' => 'Staff training progress with compliance ring, required competencies, and action items.',
-            // 'access' => 'Dashboard > Add block > My Training Progress',
-            // ),
-            // Array(
-            // 'name' => 'Staff Training Dashboard',
-            // 'component' => 'block_trainingmatrix_teacher',
-            // 'plugin_type' => 'block',
-            // 'plugin_name' => 'trainingmatrix_teacher',
-            // 'icon' => 'users-2',
-            // 'category' => 'block',
-            // 'group' => 'AI Training Matrix HCM',
-            // 'description' => 'Manager view of staff compliance, expiring competencies, and staff needing attention.',
-            // 'access' => 'Dashboard > Add block > Staff Training Dashboard',
-            // ),
             // Time Saving Plugins ($100 AUD one-time purchase).
             [
                 'name' => 'Quiz Access Rule',
