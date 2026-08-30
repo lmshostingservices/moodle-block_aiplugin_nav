@@ -2,19 +2,36 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.82] - 2026-08-31
+
+### Changed
+- Re-cut the Quicklinks private-suite removal after reconciling the concurrent
+  Marketplace entitlement release, so both changes ship together.
+- No database schema changes. Savepoint 2026083015.
+
 ## [2.4.81] - 2026-08-30
 
 ### Changed
-- Re-cut the exact reviewed Quicklinks private-suite removal through the
-  production pipeline after concurrent automation reserved 2.4.79 and 2.4.80.
-- No source behavior or database schema changes. Savepoint 2026083014.
+- Re-cut the reviewed Quicklinks private-suite removal through the production
+  pipeline after concurrent automation reserved 2.4.79 and 2.4.80.
+- No database schema changes. Savepoint 2026083014.
+
+## [2.4.80] - 2026-08-30
+
+### Changed
+- Re-cut the Marketplace entitlement release with complete PHPDoc for the new
+  full-component parameter required by official Moodle Plugin CI.
+- No runtime behavior or database schema changes. Savepoint 2026083013.
 
 ## [2.4.79] - 2026-08-30
 
-### Changed
-- Re-cut the exact reviewed Quicklinks private-suite removal because the
-  immutable 2.4.78 tag was created by the development release environment.
-- No source behavior or database schema changes. Savepoint 2026083012.
+### Fixed
+- Plugin unlock requests now include the full Moodle component and supplementary
+  site URL so paid Moodle Marketplace purchases can be recognised.
+- Marketplace entitlements display as no-credit unlocks rather than incorrectly
+  falling back to the plugin's normal credit price in the success message.
+- The entitlement source returned by LMS Labs is preserved for the block UI.
+- No database schema changes. Savepoint 2026083012.
 
 ## [2.4.78] - 2026-08-30
 

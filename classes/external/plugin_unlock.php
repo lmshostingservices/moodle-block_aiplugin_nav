@@ -50,6 +50,12 @@ class plugin_unlock extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters([
             'pluginid' => new external_value(PARAM_ALPHANUMEXT, 'Plugin short ID (e.g. groupmanager, essayguard)'),
+            'plugincomponent' => new external_value(
+                PARAM_COMPONENT,
+                'Full Moodle component (e.g. local_groupmanager)',
+                VALUE_DEFAULT,
+                ''
+            ),
         ]);
     }
 
@@ -57,20 +63,25 @@ class plugin_unlock extends external_api {
      * Unlock a plugin by consuming credits on lms-labs.com.
      *
      * @param string $pluginid Plugin short ID.
+     * @param string $plugincomponent Full Moodle component.
      * @return array Result with success flag, credits consumed, and remaining balance.
      */
-    public static function execute(string $pluginid) {
+    public static function execute(string $pluginid, string $plugincomponent = '') {
         global $CFG;
 
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('moodle/site:config', $context);
 
-        $params = self::validate_parameters(self::execute_parameters(), ['pluginid' => $pluginid]);
+        $params = self::validate_parameters(self::execute_parameters(), [
+            'pluginid' => $pluginid,
+            'plugincomponent' => $plugincomponent,
+        ]);
 
         // SESSION LOCK: Release before plugin-unlock API call (up to 15 s timeout).
         \core\session\manager::write_close();
         $pluginid = $params['pluginid'];
+        $plugincomponent = $params['plugincomponent'];
 
         // Load AI Grader Central Config library.
         $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
@@ -94,6 +105,7 @@ class plugin_unlock extends external_api {
                 'alreadyunlocked'  => false,
                 'creditsconsumed'  => 0,
                 'remainingcredits' => '',
+                'source'            => '',
                 'message'          => '',
                 'error'            => 'Site ID or API Key not configured. Please configure AI Grader Central Config first.',
             ];
@@ -102,8 +114,11 @@ class plugin_unlock extends external_api {
         // POST to plugin-unlock endpoint.
         $url     = 'https://lms-labs.com/api/plugin-unlock';
         $payload = json_encode([
-            'pluginId' => $pluginid,
-            'siteId'   => $siteid,
+            'pluginId'        => $pluginid,
+            'pluginComponent' => $plugincomponent,
+            'siteId'          => $siteid,
+            // Supplementary matching evidence only; authentication uses Site ID and API key.
+            'siteUrl'         => $CFG->wwwroot,
             'apiKey'   => $apikey,
         ]);
 
@@ -121,6 +136,7 @@ class plugin_unlock extends external_api {
                 'alreadyunlocked'  => false,
                 'creditsconsumed'  => 0,
                 'remainingcredits' => '',
+                'source'            => '',
                 'message'          => '',
                 'error'            => 'No response from server. Please try again.',
             ];
@@ -133,6 +149,7 @@ class plugin_unlock extends external_api {
                 'alreadyunlocked'  => false,
                 'creditsconsumed'  => 0,
                 'remainingcredits' => '',
+                'source'            => '',
                 'message'          => '',
                 'error'            => 'Invalid response from server.',
             ];
@@ -145,6 +162,7 @@ class plugin_unlock extends external_api {
                 'alreadyunlocked'  => false,
                 'creditsconsumed'  => 0,
                 'remainingcredits' => '',
+                'source'            => '',
                 'message'          => '',
                 'error'            => (string)($data['message'] ?? '') ?: (string)($data['error'] ?? ''),
             ];
@@ -154,6 +172,7 @@ class plugin_unlock extends external_api {
         $alreadyunlocked  = !empty($data['alreadyUnlocked']);
         $creditsconsumed  = (int) ($data['creditsConsumed'] ?? 0);
         $remainingcredits = isset($data['remainingCredits']) ? (string) $data['remainingCredits'] : '';
+        $source            = (string) ($data['entitlementSource'] ?? '');
         $message          = (string) ($data['message'] ?? '');
 
         // Invalidate the credits cache so the block re-fetches the updated balance.
@@ -167,6 +186,7 @@ class plugin_unlock extends external_api {
             'alreadyunlocked'  => $alreadyunlocked,
             'creditsconsumed'  => $creditsconsumed,
             'remainingcredits' => $remainingcredits,
+            'source'            => $source,
             'message'          => $message,
             'error'            => '',
         ];
@@ -183,6 +203,7 @@ class plugin_unlock extends external_api {
             'alreadyunlocked'  => new external_value(PARAM_BOOL, 'True if plugin was already unlocked (no credits consumed)'),
             'creditsconsumed'  => new external_value(PARAM_INT, 'Number of credits consumed (0 if already unlocked)'),
             'remainingcredits' => new external_value(PARAM_TEXT, 'Remaining credits balance, or empty string'),
+            'source'            => new external_value(PARAM_ALPHANUMEXT, 'Entitlement source: credits, marketplace, or grant'),
             'message'          => new external_value(PARAM_TEXT, 'Informational message from server'),
             'error'            => new external_value(PARAM_TEXT, 'Error message, or empty string on success'),
         ]);
