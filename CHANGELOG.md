@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.67] - 2026-08-30
+
+### Fixed
+- Added Course Recertification to the Quicklinks Settings, Manage, and Reports
+  dropdowns when `local_recertify` is installed.
+- Added Completion Auto-Suspend to the Quicklinks Settings, Manage, and Reports
+  dropdowns when `local_completionsuspend` is installed.
+- Links use each plugin's registered Moodle settings and management pages; the
+  Reports links open the recertification audit log and completion activity log.
+  No database schema changes. Savepoint 2026083000.
+
 ## [2.4.66] - 2026-08-24
 
 ### Changed

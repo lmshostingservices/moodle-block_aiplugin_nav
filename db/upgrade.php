@@ -91,5 +91,12 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026081209, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026083000) {
+        // v2.4.67: add Course Recertification and Completion Auto-Suspend to
+        // the Settings, Manage, and Reports Quicklinks registries.
+        // No DB schema changes.
+        upgrade_block_savepoint(true, 2026083000, 'aiplugin_nav');
+    }
+
     return true;
 }
