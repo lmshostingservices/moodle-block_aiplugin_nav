@@ -2266,7 +2266,6 @@ class block_aiplugin_nav extends block_base {
             // 'access' => get_string('training_matrix_access', 'block_aiplugin_nav'),
             // 'icon' => 'users-2',
             // 'plugin_type' => 'local',
-            // 'plugin_name' => 'trainingmatrix',
             // 'capability' => 'moodle/site:config',
             // ),
         ];
