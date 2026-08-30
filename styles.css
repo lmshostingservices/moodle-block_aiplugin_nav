@@ -153,7 +153,10 @@
     transform: translateY(-8px);
     transition: all 0.2s ease;
     z-index: 1000;
-    overflow: hidden;
+    max-height: calc(100vh - 32px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .block_aiplugin_nav .ainav-dropdown.is-open .ainav-dropdown-menu {

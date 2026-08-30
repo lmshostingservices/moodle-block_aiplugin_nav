@@ -4156,8 +4156,39 @@ FDR_JS;
                 $('.ainav-dropdown-trigger').on('click', function (e) {
                     e.stopPropagation();
                     var dropdown = $(this).closest('.ainav-dropdown');
+                    var menu = dropdown.find('.ainav-dropdown-menu').first();
+                    var willopen = !dropdown.hasClass('is-open');
                     $('.ainav-dropdown').not(dropdown).removeClass('is-open');
-                    dropdown.toggleClass('is-open');
+                    dropdown.toggleClass('is-open', willopen);
+
+                    if (willopen) {
+                        // Keep long menus inside the viewport. Settings and Manage can contain
+                        // dozens of installed plugins, so an unconstrained menu hides its lower
+                        // links below the screen with no way to reach them.
+                        menu.css({
+                            'top': 'calc(100% + 8px)',
+                            'bottom': 'auto',
+                            'max-height': '',
+                            'overflow-y': 'auto'
+                        });
+
+                        var triggerrect = this.getBoundingClientRect();
+                        var viewportmargin = 16;
+                        var menugap = 8;
+                        var spacebelow = window.innerHeight - triggerrect.bottom - menugap - viewportmargin;
+                        var spaceabove = triggerrect.top - menugap - viewportmargin;
+                        var openabove = spaceabove > spacebelow;
+                        var availableheight = openabove ? spaceabove : spacebelow;
+
+                        if (openabove) {
+                            menu.css({
+                                'top': 'auto',
+                                'bottom': 'calc(100% + 8px)'
+                            });
+                        }
+
+                        menu.css('max-height', Math.max(120, availableheight) + 'px');
+                    }
                 });
                 
                 // Close dropdowns when clicking outside

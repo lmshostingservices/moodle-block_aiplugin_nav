@@ -2,6 +2,16 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.68] - 2026-08-30
+
+### Fixed
+- Long Settings, Manage, and Reports dropdowns now open above or below the
+  trigger according to available viewport space.
+- Dropdown height is constrained to the visible viewport and excess entries
+  scroll vertically, so lower links such as Course Recertification and
+  Completion Auto-Suspend remain reachable.
+- No database schema changes. Savepoint 2026083001.
+
 ## [2.4.67] - 2026-08-30
 
 ### Fixed
