@@ -2,6 +2,18 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.72] - 2026-08-30
+
+### Changed
+- Re-cut the private Wombat Training Plan suite removal after the immutable
+  2.4.71 candidate exposed Moodle-context language ordering and one CSS lint
+  issue in the official workflow.
+- Ordered the existing language keys without changing their values and removed
+  an invalid trailing Stylelint directive without changing CSS declarations.
+- The seven private components remain absent from every Quicklinks action,
+  plugin-management, and documentation registry.
+- No database schema changes. Savepoint 2026083005.
+
 ## [2.4.71] - 2026-08-30
 
 ### Changed
