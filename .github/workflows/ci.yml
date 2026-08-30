@@ -95,18 +95,6 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci mustache
 
-      - name: Generate AMD outputs for diagnostic recovery
-        if: ${{ !cancelled() }}
-        run: cd moodle && npx grunt amd --root=blocks/aiplugin_nav
-
-      - name: Upload generated AMD outputs
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: Generated AMD (${{ join(matrix.*, ', ') }})
-          path: ${{ github.workspace }}/moodle/blocks/aiplugin_nav/amd/build
-          retention-days: 1
-
       - name: Grunt
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
