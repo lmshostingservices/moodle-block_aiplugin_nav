@@ -2,6 +2,18 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.73] - 2026-08-30
+
+### Changed
+- Re-cut the private Wombat Training Plan suite removal after the immutable
+  2.4.72 candidate exposed an incomplete legacy stylesheet lint-suppression
+  boundary in the official workflow.
+- Corrected the existing Stylelint directive without changing CSS declarations
+  or runtime behavior.
+- The seven private components remain absent from every Quicklinks action,
+  plugin-management, and documentation registry.
+- No database schema changes. Savepoint 2026083006.
+
 ## [2.4.72] - 2026-08-30
 
 ### Changed
