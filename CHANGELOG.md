@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.76] - 2026-08-30
+
+### Changed
+- Diagnostic recut used to capture Moodle 4.5's exact generated AMD bytes when
+  the local installation of its pinned legacy toolchain was blocked.
+- No source behavior or database schema changes. Savepoint 2026083009.
+
 ## [2.4.75] - 2026-08-30
 
 ### Changed
