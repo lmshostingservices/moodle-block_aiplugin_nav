@@ -63,6 +63,7 @@ class plugin_unlock extends external_api {
      * Unlock a plugin by consuming credits on lms-labs.com.
      *
      * @param string $pluginid Plugin short ID.
+     * @param string $plugincomponent Full Moodle component.
      * @return array Result with success flag, credits consumed, and remaining balance.
      */
     public static function execute(string $pluginid, string $plugincomponent = '') {

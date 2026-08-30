@@ -2,6 +2,13 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.80] - 2026-08-30
+
+### Changed
+- Re-cut the Marketplace entitlement release with complete PHPDoc for the new
+  full-component parameter required by official Moodle Plugin CI.
+- No runtime behavior or database schema changes. Savepoint 2026083013.
+
 ## [2.4.79] - 2026-08-30
 
 ### Fixed
