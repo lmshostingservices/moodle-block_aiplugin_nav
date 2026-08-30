@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.4.75] - 2026-08-30
+
+### Changed
+- Re-cut the private Wombat Training Plan suite removal after the immutable
+  2.4.74 candidate exposed stale AMD outputs in the official workflow.
+- Rebuilt AMD minified files and source maps with Moodle 4.5's official Rollup
+  toolchain and removed obsolete unminified build copies.
+- The seven private components remain absent from every Quicklinks action,
+  plugin-management, and documentation registry.
+- No database schema changes. Savepoint 2026083008.
+
 ## [2.4.74] - 2026-08-30
 
 ### Changed
