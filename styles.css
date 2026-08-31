@@ -4901,6 +4901,63 @@
     flex-wrap: wrap;
 }
 
+/* ---- "Check for updates" on the updates card, and its failed state ---- */
+.ainav2 .ainav2-recheck {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-radius: 8px;
+    padding: 6px 11px;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .12s ease, color .12s ease, background .12s ease;
+}
+.ainav2 .ainav2-recheck svg {
+    width: 13px;
+    height: 13px;
+}
+.ainav2 .ainav2-recheck:hover {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+}
+.ainav2 .ainav2-recheck:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+.ainav2 .ainav2-recheck[disabled] {
+    opacity: .6;
+    cursor: default;
+}
+.ainav2 .ainav2-recheck[disabled] svg {
+    animation: ainav2-spin .9s linear infinite;
+}
+@keyframes ainav2-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ainav2 .ainav2-recheck[disabled] svg {
+        animation: none;
+    }
+}
+/* A failed check is a warning, not a clean zero. */
+.ainav2 .ainav2-alert.ainav2-warnstate {
+    border-color: color-mix(in srgb, var(--warn) 40%, var(--line));
+    background: linear-gradient(180deg, var(--warn-soft), var(--surface));
+}
+.ainav2 .ainav2-alert.ainav2-warnstate .ainav2-anum {
+    color: var(--warn);
+}
+
 /* ---- install receipt: what the last unlocks actually cost ---- */
 .ainav2 .ainav2-spend {
     margin: 0 0 14px;

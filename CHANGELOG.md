@@ -2,6 +2,25 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.13] - 2026-08-30
+
+### Fixed
+- The update check compared numeric versions as plain integers, which is wrong for this plugin
+  family because it has used both the 10-digit (YYYYMMDDXX) and 13-digit (YYYYMMDDXXXXX)
+  schemes. Compared as integers a 13-digit 2026072400116 looks larger than a 10-digit
+  2026083053 despite being five weeks older, so on any site running 13-digit versions every
+  update was missed and the card still read zero. It now compares the eight-digit date prefix
+  first and then the trailing sequence, which is the algorithm the old UI used.
+
+### Added
+- A "Check for updates" button on the updates card, so the check can be re-run on demand
+  rather than only at page load. It reports the outcome: how many updates were found, that
+  everything is current, or that the server could not be reached.
+- The card no longer shows a bare zero before the check has run or after it has failed. It
+  distinguishes not yet checked, checking, check failed, and a genuine all-current result with
+  the time it was confirmed — a zero on a site that cannot reach the update server previously
+  read as good news. Savepoint 2026083054.
+
 ## [2.5.12] - 2026-08-30
 
 ### Fixed

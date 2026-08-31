@@ -48,6 +48,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var pstate = 'all';
     var pq = '';                   // Per-panel search term (Plugins/Settings/Manage/Reports).
 
+    var checkState = 'idle';       // 'idle' | 'checking' | 'done' | 'failed'.
+    var lastCheck = null;          // When the last successful check finished.
     var spend = [];                // Recent credit spends: [{n: name, c: credits, t: unixtime}].
     var faves = {};                // name -> true.
     var helpOn = true;
@@ -1830,14 +1832,73 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * display string. Plugins the server marks as anything other than ready are skipped:
      * a testing build must never join the update queue.
      */
-    function refreshUpdates() {
+    /**
+     * Compare two Moodle numeric versions.
+     *
+     * These are NOT safely comparable as plain integers. Moodle numerics here come in both
+     * the 10-digit (YYYYMMDDXX) and 13-digit (YYYYMMDDXXXXX) schemes, and this plugin family
+     * has used both. Compared numerically, a 13-digit 2026072400116 looks larger than a
+     * 10-digit 2026083053 even though it is five weeks older, so every update is missed.
+     * The date prefix is compared first, then the trailing sequence — the same algorithm the
+     * old UI used.
+     *
+     * @param {string|number} a Installed numeric version.
+     * @param {string|number} b Latest numeric version.
+     * @return {number} 1 if b is newer than a, -1 if older, 0 if equal or unparseable.
+     */
+    function cmpVersions(a, b) {
+        function parseV(v) {
+            var s = String(v === null || typeof v === 'undefined' ? '' : v).replace(/[^0-9]/g, '');
+            if (s.length < 8) {
+                return null;
+            }
+            return {d: s.slice(0, 8), seq: parseInt(s.slice(8) || '0', 10)};
+        }
+        var pa = parseV(a), pb = parseV(b);
+        if (!pa || !pb) {
+            return 0;
+        }
+        if (pb.d !== pa.d) {
+            return pb.d > pa.d ? 1 : -1;
+        }
+        if (pb.seq > pa.seq) {
+            return 1;
+        }
+        if (pa.seq > pb.seq) {
+            return -1;
+        }
+        return 0;
+    }
+
+    function refreshUpdates(manual) {
         if (!DATA.proxyurl || !DATA.isadmin) {
             return;
         }
+        if (checkState === 'checking') {
+            return;
+        }
+        checkState = 'checking';
+        if (manual) {
+            renderStrip();
+        }
         $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
+            .fail(function () {
+                // A failed check is not the same as "everything is current". Say so rather
+                // than leaving a zero on screen that looks like good news.
+                checkState = 'failed';
+                renderStrip();
+                if (manual) {
+                    showToast('Could not reach the update server. Try again shortly.');
+                }
+            })
             .done(function (data) {
                 var map = (data && data.plugins) || null;
                 if (!map) {
+                    checkState = 'failed';
+                    renderStrip();
+                    if (manual) {
+                        showToast('The update server returned nothing usable.');
+                    }
                     return;
                 }
                 var plugins = DATA.plugins || [];
@@ -1879,9 +1940,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     if (latest.status && latest.status !== 'ready') {
                         continue;
                     }
-                    var have = parseInt(p.versionint, 10);
-                    var newest = parseInt(latest.numericVersion, 10);
-                    if (!have || !newest || newest <= have) {
+                    if (cmpVersions(p.versionint, latest.numericVersion) !== 1) {
                         continue;
                     }
                     // An update with no download would fail the moment it was attempted.
@@ -1892,9 +1951,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     p.latestversion = latest.version || '';
                     changed = true;
                 }
-                if (!changed) {
-                    return;
-                }
                 var n = 0;
                 for (i = 0; i < plugins.length; i++) {
                     if (plugins[i].update) {
@@ -1903,12 +1959,18 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 }
                 DATA.counts = DATA.counts || {};
                 DATA.counts.updates = n;
+                checkState = 'done';
+                lastCheck = new Date();
                 // The Plugins card carries both the available total and the update count,
                 // and either may have moved — redraw it as well as the status strip.
                 renderCards();
                 renderStrip();
                 if (current) {
                     paint();
+                }
+                if (manual) {
+                    showToast(n === 0 ? 'All plugins are up to date.' :
+                        n + (n === 1 ? ' update available.' : ' updates available.'));
                 }
             });
     }
@@ -2526,6 +2588,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
         els.strip.addEventListener('click', function (e) {
             // The support card is a real link (see buildStrip) — let it navigate.
+            if (closestAttr(e.target, 'data-recheck')) {
+                refreshUpdates(true);
+                return;
+            }
             if (closestAttr(e.target, 'data-updateall')) {
                 updateAll();
             }
@@ -2788,7 +2854,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         renderStrip();
         renderSpend();
         renderProducts();
-        refreshUpdates();
+        refreshUpdates(false);
 
         wireEvents();
 
