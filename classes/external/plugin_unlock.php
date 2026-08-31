@@ -194,7 +194,11 @@ class plugin_unlock extends external_api {
         $source = (string) ($data['entitlementSource'] ?? $data['source'] ?? '');
 
         // Invalidate the credits cache so the block re-fetches the updated balance.
-        if (!$alreadyunlocked && $creditsconsumed > 0) {
+        // Any unlock that was not already in place may have moved the balance. The old
+        // guard also required creditsConsumed > 0, but the API never sends that field, so
+        // it was always false and the cache was never cleared — leaving the block showing
+        // a pre-unlock balance for up to five minutes after a customer spent credits.
+        if (!$alreadyunlocked) {
             set_config('credits_cache', '', 'block_aiplugin_nav');
             set_config('credits_cached_at', 0, 'block_aiplugin_nav');
         }

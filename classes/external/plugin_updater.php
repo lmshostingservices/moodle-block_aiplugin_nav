@@ -748,6 +748,30 @@ class plugin_updater extends external_api {
         // SESSION LOCK: Release before plugin upgrade process.
         \core\session\manager::write_close();
 
+        // A database upgrade run from an ordinary web request needs two guards that
+        // Moodle's own upgrade screen provides and a web service does not:
+        //
+        //  1. No execution time limit. Without this the request can be killed by PHP
+        //     part-way through a migration, leaving the schema half-applied. This is the
+        //     failure that actually damages a site.
+        //  2. An exclusive lock, so two admins clicking at the same moment cannot run
+        //     the same upgrade concurrently.
+        //
+        // Maintenance mode is deliberately NOT used. It would evict every learner and
+        // teacher for the duration, which on a live site mid-class is its own harm, and
+        // these are small plugin upgrades. The lock is released on every exit path,
+        // including on exception.
+        \core_php_time_limit::raise();
+
+        $lockfactory = \core\lock\lock_config::get_lock_factory('block_aiplugin_nav_upgrade');
+        $lock = $lockfactory->get_lock('run_upgrade', 10);
+        if (!$lock) {
+            return array(
+                'success' => false,
+                'message' => 'Another upgrade is already running on this site. Wait for it to finish, then try again.',
+            );
+        }
+
         try {
             // Check if upgrade is needed.
             $pluginman = \core_plugin_manager::instance();
@@ -772,6 +796,8 @@ class plugin_updater extends external_api {
                 'success' => false,
                 'message' => 'Upgrade error: ' . $e->getMessage(),
             );
+        } finally {
+            $lock->release();
         }
     }
 

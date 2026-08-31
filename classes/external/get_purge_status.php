@@ -82,6 +82,9 @@ class get_purge_status extends external_api {
             'schedule_enabled' => (bool) $scheduleenabled,
             'schedule_type' => $scheduletype ?: 'daily',
             'schedule_time' => $scheduletime ?: '03:00',
+            // The weekday is stored by save_purge_schedule() but was never returned, so a
+            // weekly schedule could be saved and then never read back correctly.
+            'schedule_day' => (int) get_config('block_aiplugin_nav', 'purge_schedule_day'),
         ];
     }
 
@@ -97,6 +100,7 @@ class get_purge_status extends external_api {
             'schedule_enabled' => new external_value(PARAM_BOOL, 'Whether scheduled purge is enabled'),
             'schedule_type' => new external_value(PARAM_TEXT, 'Schedule type (daily, weekly)'),
             'schedule_time' => new external_value(PARAM_TEXT, 'Scheduled time (HH:MM)'),
+            'schedule_day' => new external_value(PARAM_INT, 'Day of week for weekly (0=Sunday, 6=Saturday)'),
         ]);
     }
 }

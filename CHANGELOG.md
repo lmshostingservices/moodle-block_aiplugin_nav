@@ -2,6 +2,69 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.16] - 2026-08-30
+
+Findings from an adversarial review of the 2.5.x rewrite. All of these were shipped in earlier
+2.5.x releases.
+
+### Fixed
+- **The "Check for updates" button was never rendered.** The 2.5.13 change that added it failed
+  part-way through and the markup was never written to the file, leaving the state variable set,
+  nothing displaying it, and a click handler bound to an element that did not exist. The button
+  is there now, along with the states it was meant to bring: not yet checked, checking, check
+  failed, and all-current with the time it was confirmed. A zero on a site that cannot reach the
+  update server no longer reads as good news.
+- **Eight of the fifteen Moodle shortcuts rendered as a generic chain-link.** The payload emitted
+  icon names (layout-dashboard, graduation-cap, clipboard-check, calendar-icon, message-square,
+  settings-2, users-2, bar-chart-2) that do not exist in the UI's icon set, and the lookup falls
+  back silently. Dashboard, My courses, Grades, Calendar, Messages, Preferences, Cohorts and
+  Reports now have their own icons.
+- **Every Moodle shortcut opened in a new tab.** "External" was tested as "starts with http",
+  and core links are emitted as absolute wwwroot URLs, so the site's own Dashboard and Calendar
+  counted as external. A link is now external only if it is absolute and not under wwwroot.
+- **Update all reported success even when every download failed.** The per-plugin callback
+  ignored its result argument, so the database upgrade ran and the page reloaded with success
+  messaging regardless. It now counts successes and failures, names what failed, and refuses to
+  upgrade when nothing landed.
+- **A free install wrote its receipt line before the install was attempted**, so a failure still
+  left a receipt claiming the plugin was installed.
+- **The purge schedule widget was entirely dead.** The service returns schedule_enabled,
+  schedule_type, schedule_time, last_manual_purge and last_scheduled_purge; the JS read
+  enabled, freq, time, lastmanual and lastauto — every one undefined. It always showed "No
+  schedule" and "Manual never" however the site was configured. Field names now match, the
+  weekday is returned by the service so a weekly schedule round-trips, and the timestamps are
+  rendered as dates rather than raw epoch integers.
+- **The credits balance stayed stale for five minutes after an unlock.** The cache-invalidation
+  guard required creditsConsumed > 0, a field the API never sends, so it never fired.
+- **Relative Moodle paths in custom links were always rejected**, despite the dialog offering
+  them as an example. They are now resolved against wwwroot before validation.
+
+### Changed
+- The "monthly" purge frequency is no longer offered. The service treats anything that is not
+  weekly as daily, so choosing monthly stored one thing in config while the task ran another.
+- The Status filter is hidden on Settings and Reports. Both panels hardcode their state, so
+  "Configured" and "Live" were filters that could only ever return an empty list.
+- Starring an item in global search results now updates the star immediately.
+- The legacy credits module is no longer loaded alongside the new UI. It wrote to element ids
+  this shell never renders, so it did nothing but fire a second get_credits call on every page
+  load. Savepoint 2026083057.
+
+### Fixed
+- The one-click update kept its clean flow but gained the two protections Moodle's own
+  upgrade screen provides and a web service did not. Site maintenance mode was considered and
+  deliberately left out: it would evict every learner and teacher for the duration, which on a
+  live site mid-class is its own harm, and these are small plugin upgrades.
+  - **No execution time limit.** The database upgrade ran under PHP's default
+    max_execution_time, so a slow migration could be killed part-way through and leave the
+    schema half-applied. This is the failure that actually damages a site.
+  - **An exclusive lock**, so two admins clicking at the same moment cannot run the same
+    upgrade concurrently. A second caller is told to wait rather than proceeding.
+- A failed upgrade is no longer invisible. Previously any error was caught, returned, and then
+  discarded by a page reload, leaving a dashboard that looked healthy on a site whose database
+  was behind its code. The admin is now told what failed and taken to Moodle's own upgrade
+  screen to finish the job — the plugin files are already in place, so it completes cleanly.
+  Savepoint 2026083056.
+
 ## [2.5.13] - 2026-08-30
 
 ### Fixed

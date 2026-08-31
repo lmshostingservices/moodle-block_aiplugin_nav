@@ -49,7 +49,7 @@ class custom_links extends external_api {
      * Save a custom link.
      */
     public static function save_custom_link($name, $url, $icon) {
-        global $USER;
+        global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::save_custom_link_parameters(), array(
@@ -64,6 +64,13 @@ class custom_links extends external_api {
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
 
         // Validate URL
+        // Relative Moodle paths are accepted — the builder modal offers them explicitly —
+        // by resolving them against wwwroot before validation. Previously every relative
+        // path was rejected outright, so the advertised "/admin/settings.php?section=..."
+        // form always failed with an invalid URL error.
+        if (!empty($url) && substr($url, 0, 1) === '/') {
+            $url = $CFG->wwwroot . $url;
+        }
         if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
             throw new \moodle_exception('invalidurl', 'error');
         }
@@ -115,7 +122,7 @@ class custom_links extends external_api {
      * Delete a custom link.
      */
     public static function delete_custom_link($index) {
-        global $USER;
+        global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::delete_custom_link_parameters(), array(
@@ -162,7 +169,7 @@ class custom_links extends external_api {
      * Save a custom report.
      */
     public static function save_custom_report($name, $url, $icon) {
-        global $USER;
+        global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::save_custom_report_parameters(), array(
@@ -177,6 +184,13 @@ class custom_links extends external_api {
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
 
         // Validate URL
+        // Relative Moodle paths are accepted — the builder modal offers them explicitly —
+        // by resolving them against wwwroot before validation. Previously every relative
+        // path was rejected outright, so the advertised "/admin/settings.php?section=..."
+        // form always failed with an invalid URL error.
+        if (!empty($url) && substr($url, 0, 1) === '/') {
+            $url = $CFG->wwwroot . $url;
+        }
         if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
             throw new \moodle_exception('invalidurl', 'error');
         }
@@ -228,7 +242,7 @@ class custom_links extends external_api {
      * Delete a custom report.
      */
     public static function delete_custom_report($index) {
-        global $USER;
+        global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
         $params = self::validate_parameters(self::delete_custom_report_parameters(), array(

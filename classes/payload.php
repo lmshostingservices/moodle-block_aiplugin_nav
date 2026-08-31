@@ -724,17 +724,17 @@ class block_aiplugin_nav_payload {
 
         $links = [
             ['name' => get_string('dashboard', 'block_aiplugin_nav'),
-                'url' => $CFG->wwwroot . '/my/', 'icon' => 'layout-dashboard'],
+                'url' => $CFG->wwwroot . '/my/', 'icon' => 'home'],
             ['name' => get_string('my_courses', 'block_aiplugin_nav'),
-                'url' => $CFG->wwwroot . '/my/courses.php', 'icon' => 'graduation-cap'],
+                'url' => $CFG->wwwroot . '/my/courses.php', 'icon' => 'grad'],
             ['name' => get_string('my_profile', 'block_aiplugin_nav'),
                 'url' => $CFG->wwwroot . '/user/profile.php', 'icon' => 'user'],
             ['name' => get_string('grades', 'block_aiplugin_nav'),
-                'url' => $CFG->wwwroot . '/grade/report/overview/index.php', 'icon' => 'clipboard-check'],
+                'url' => $CFG->wwwroot . '/grade/report/overview/index.php', 'icon' => 'clipboard'],
             ['name' => get_string('calendar', 'block_aiplugin_nav'),
-                'url' => $CFG->wwwroot . '/calendar/view.php', 'icon' => 'calendar-icon'],
+                'url' => $CFG->wwwroot . '/calendar/view.php', 'icon' => 'calendar'],
             ['name' => get_string('messages', 'block_aiplugin_nav'),
-                'url' => $CFG->wwwroot . '/message/index.php', 'icon' => 'message-square'],
+                'url' => $CFG->wwwroot . '/message/index.php', 'icon' => 'chat'],
         ];
 
         // Badges are a site-level switch; do not offer the link when they are off.
@@ -746,7 +746,7 @@ class block_aiplugin_nav_payload {
         $links[] = ['name' => get_string('private_files', 'block_aiplugin_nav'),
             'url' => $CFG->wwwroot . '/user/files.php', 'icon' => 'folder'];
         $links[] = ['name' => get_string('preferences', 'block_aiplugin_nav'),
-            'url' => $CFG->wwwroot . '/user/preferences.php', 'icon' => 'settings-2'];
+            'url' => $CFG->wwwroot . '/user/preferences.php', 'icon' => 'cog'];
 
         if (!$isadmin) {
             return $links;
@@ -756,8 +756,8 @@ class block_aiplugin_nav_payload {
             ['name' => get_string('site_admin', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/search.php', 'icon' => 'sliders'],
             ['name' => get_string('manage_users', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/user.php', 'icon' => 'users'],
             ['name' => get_string('manage_courses', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/course/management.php', 'icon' => 'book'],
-            ['name' => get_string('cohorts', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/cohort/index.php', 'icon' => 'users-2'],
-            ['name' => get_string('reports', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/category.php?category=reports', 'icon' => 'bar-chart-2'],
+            ['name' => get_string('cohorts', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/cohort/index.php', 'icon' => 'group'],
+            ['name' => get_string('reports', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/category.php?category=reports', 'icon' => 'chart'],
             ['name' => get_string('themes', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/themeselector.php', 'icon' => 'palette'],
         ]);
     }

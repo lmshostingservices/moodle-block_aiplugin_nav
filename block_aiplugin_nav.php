@@ -1326,13 +1326,10 @@ class block_aiplugin_nav extends block_base {
         // user_preference_allow_ajax_update() route is deprecated and is not used.
         $PAGE->requires->js_call_amd('block_aiplugin_nav/ui', 'init');
 
-        $canseecredits = has_capability('moodle/site:config', context_system::instance())
-            || $this->user_has_role_shortname($USER->id, 'editingteacher')
-            || $this->user_has_role_shortname($USER->id, 'teacher')
-            || $this->user_has_role_shortname($USER->id, 'lmshsadmin');
-        if ($canseecredits) {
-            $PAGE->requires->js_call_amd('block_aiplugin_nav/credits', 'init');
-        }
+        // The credits module is not loaded alongside the new UI. It writes to
+        // #ainav-credits-placeholder and #ainav-credits-badge, legacy element ids this
+        // shell never renders, so it did nothing except fire a second get_credits web
+        // service call on every page load. The new UI fetches the balance itself.
 
         $this->content->text = $html;
 

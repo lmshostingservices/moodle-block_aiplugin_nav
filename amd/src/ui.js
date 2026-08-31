@@ -671,13 +671,32 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     /**
      * Render the Moodle shortcut tiles (core + the user's custom links).
      */
+    /**
+     * Is this URL somewhere other than this Moodle site?
+     *
+     * Core links are emitted as absolute wwwroot URLs, so a naive "starts with http"
+     * test treats the site's own Dashboard and Calendar as external and opens them in
+     * a new tab. Only a URL that is absolute AND not under wwwroot is external.
+     *
+     * @param {string} url
+     * @return {boolean}
+     */
+    function isExternal(url) {
+        var u = String(url || '');
+        if (!/^https?:\/\//.test(u)) {
+            return false;
+        }
+        var root = String(DATA.wwwroot || '');
+        return !root || u.indexOf(root) !== 0;
+    }
+
     function renderCore() {
         var i, c, out = '';
         var core = DATA.core || [];
         for (i = 0; i < core.length; i++) {
             c = core[i];
-            var ext = /^https?:\/\//.test(c.url || '');
-            var href = ext ? c.url : (DATA.wwwroot || '') + c.url;
+            var ext = isExternal(c.url);
+            var href = /^https?:\/\//.test(c.url || '') ? c.url : (DATA.wwwroot || '') + c.url;
             out += '<a class="ainav2-corebtn" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') +
                 ' data-name="' + esc(c.name) + '" title="' + esc(href) + '">' + svgIcon(c.icon || 'link') +
                 esc(c.name) + '</a>';
@@ -737,13 +756,48 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     /**
      * Render the support / updates / health status strip.
      */
+    /**
+     * Short local time for the "checked at" text.
+     *
+     * @param {Date} d
+     * @return {string}
+     */
+    /**
+     * Render a unix timestamp from the purge service as readable local text.
+     *
+     * The service returns raw epoch integers; interpolating those straight into the UI
+     * showed the admin a ten-digit number where a date belonged.
+     *
+     * @param {number} ts Unix timestamp, or 0 when it has never happened.
+     * @return {string} Empty string when there is nothing to show.
+     */
+    function fmtStamp(ts) {
+        var n = parseInt(ts, 10);
+        if (!n) {
+            return '';
+        }
+        try {
+            return new Date(n * 1000).toLocaleString();
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function fmtTime(d) {
+        try {
+            return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        } catch (e) {
+            return '';
+        }
+    }
+
     function renderStrip() {
         var counts = DATA.counts || {};
         var updates = counts.updates || 0;
         var installed = counts.installed || 0;
         var out = '';
         var supporturl = DATA.supporturl || 'https://lms-labs.com/docs/ai-support';
-        var supportext = supporturl.indexOf(DATA.wwwroot) !== 0;
+        var supportext = isExternal(supporturl);
         out += '<a class="ainav2-support" href="' + esc(supporturl) + '" id="ainav2-support"' +
             (supportext ? ' target="_blank" rel="noopener"' : '') + ' data-help="support">' +
             '<div class="ainav2-sico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -752,12 +806,45 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             '<div class="ainav2-sdesc">Answers about your site, plugins and credits</div></div>' +
             '<span class="ainav2-sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
             '<path d="m9 5 7 7-7 7"/></svg></span></a>';
-        out += '<div class="ainav2-alert" data-help="updates" tabindex="0">' +
+        // The card must never imply "up to date" when the check has not run or has failed.
+        // A zero on a site that cannot reach the update server reads as good news, which is
+        // the worst possible way for this to fail.
+        var num, title, desc;
+        if (checkState === 'checking') {
+            num = '';
+            title = 'Checking for updates\u2026';
+            desc = 'Asking the LMS Labs update server';
+        } else if (checkState === 'failed') {
+            num = '!';
+            title = 'Update check failed';
+            desc = 'Could not reach the update server';
+        } else if (checkState === 'idle') {
+            num = '';
+            title = 'Updates not checked yet';
+            desc = 'Click Check for updates';
+        } else {
+            num = String(updates);
+            title = updates === 1 ? 'update ready' : 'updates ready';
+            desc = updates > 0 ? 'Keep plugins current' :
+                ('All plugins current' + (lastCheck ? ' \u00b7 checked ' + fmtTime(lastCheck) : ''));
+        }
+
+        out += '<div class="ainav2-alert' + (checkState === 'failed' ? ' ainav2-warnstate' : '') +
+            '" data-help="updates" tabindex="0">' +
             '<div class="ainav2-aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg></div>' +
-            '<div class="ainav2-abody"><div class="ainav2-atop"><span class="ainav2-anum">' + updates + '</span>' +
-            '<span class="ainav2-atitle">updates ready</span></div><div class="ainav2-adesc">Keep plugins current</div></div>' +
-            (updates > 0 ? '<button class="ainav2-act" type="button" data-updateall="1">Update all</button>' : '') + '</div>';
+            '<div class="ainav2-abody"><div class="ainav2-atop">' +
+            (num ? '<span class="ainav2-anum">' + esc(num) + '</span>' : '') +
+            '<span class="ainav2-atitle">' + esc(title) + '</span></div>' +
+            '<div class="ainav2-adesc">' + esc(desc) + '</div></div>' +
+            (updates > 0 && checkState === 'done' ?
+                '<button class="ainav2-act" type="button" data-updateall="1">Update all</button>' : '') +
+            '<button class="ainav2-recheck" type="button" data-recheck="1"' +
+            (checkState === 'checking' ? ' disabled' : '') +
+            ' title="Check the update server now">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+            '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>' +
+            (checkState === 'checking' ? 'Checking' : 'Check for updates') + '</button></div>';
         out += '<div class="ainav2-alert ainav2-calm" data-help="health" tabindex="0">' +
             '<div class="ainav2-aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="m5 13 4 4L19 7"/></svg></div>' +
@@ -929,12 +1016,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             return [['all', 'All'], ['installed', 'Installed'], ['update', 'Updates'], ['free', 'Free'],
                 ['paid', 'Credit-gated'], ['testing', 'In testing']];
         }
-        if (current === 'settings') {
-            return [['all', 'All'], ['Configured', 'Configured'], ['Needs setup', 'Needs setup']];
-        }
-        if (current === 'reports') {
-            return [['all', 'All'], ['Live', 'Live'], ['Scheduled', 'Scheduled']];
-        }
+        // Settings and Reports have no real status data behind them — the payload sets
+        // configured=false and live=false for every row — so offering "Configured" and
+        // "Live" as filters gave the admin two choices that could only ever return an
+        // empty list. They stay out until the underlying state is real.
         return [['all', 'All']];
     }
 
@@ -1046,12 +1131,18 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         });
 
         var statusOpts = statusOptsFor();
-        var controls = '<div class="ainav2-typewrap"><label for="ainav2-pstatesel">Status</label><select class="ainav2-sortsel" id="ainav2-pstatesel">';
-        for (i = 0; i < statusOpts.length; i++) {
-            controls += '<option value="' + esc(statusOpts[i][0]) + '"' + (statusOpts[i][0] === pstate ? ' selected' : '') + '>' +
-                esc(statusOpts[i][1]) + '</option>';
+        var controls = '';
+        // A Status dropdown whose only option is "All" filters nothing — don't show it.
+        if (statusOpts.length > 1) {
+            controls += '<div class="ainav2-typewrap"><label for="ainav2-pstatesel">Status</label>' +
+                '<select class="ainav2-sortsel" id="ainav2-pstatesel">';
+            for (i = 0; i < statusOpts.length; i++) {
+                controls += '<option value="' + esc(statusOpts[i][0]) + '"' +
+                    (statusOpts[i][0] === pstate ? ' selected' : '') + '>' +
+                    esc(statusOpts[i][1]) + '</option>';
+            }
+            controls += '</select></div>';
         }
-        controls += '</select></div>';
         controls += '<div class="ainav2-typewrap"><label for="ainav2-ptypesel">Type</label><select class="ainav2-sortsel" id="ainav2-ptypesel"><option value="all">All types</option>';
         for (i = 0; i < types.length; i++) {
             controls += '<option value="' + esc(types[i]) + '"' + (types[i] === ptype ? ' selected' : '') + '>' +
@@ -1367,6 +1458,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         for (j = 0; j < core.length; j++) {
             if (matchName(core[j].name)) {
                 var href = /^https?:\/\//.test(core[j].url || '') ? core[j].url : (DATA.wwwroot || '') + core[j].url;
+                // Same rule as renderCore(): only genuinely off-site links get a new tab.
                 rows.push('<a class="ainav2-row ainav2-famrow" href="' + esc(href) + '" data-name="' + esc(core[j].name) + '">' +
                     '<span class="ainav2-nm">' + esc(core[j].name) + '</span>' +
                     '<span class="ainav2-ptype" data-t="local">Moodle</span></a>');
@@ -1609,7 +1701,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         var body = '<div class="ainav2-toggle"><input type="checkbox" id="ainav2-schon"' + (schedule.on ? ' checked' : '') +
             '><span>Purge caches automatically</span></div>' +
             '<div class="ainav2-fld"><label>Frequency</label><select id="ainav2-schfreq">' +
-            ['daily', 'weekly', 'monthly'].map(function (f) {
+            // Only daily and weekly are offered: save_purge_schedule silently treats
+            // anything else as daily, so a "monthly" choice was stored in config while the
+            // task actually ran every day — the two disagreeing with no sign to the admin.
+            ['daily', 'weekly'].map(function (f) {
                 return '<option' + (schedule.freq === f ? ' selected' : '') + '>' + f + '</option>';
             }).join('') + '</select></div>' +
             '<div class="ainav2-fld"><label>Day</label><select id="ainav2-schday">' +
@@ -2107,19 +2202,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             done: function (installResponse) {
                 if (installResponse && installResponse.success) {
                     if (installResponse.needsupgrade) {
-                        // The install left the database behind the code. Finish the job
-                        // rather than dropping the admin on Moodle's upgrade screen.
-                        showToast(name + ' installed. Running the database upgrade…');
-                        Ajax.call([{
-                            methodname: 'block_aiplugin_nav_run_upgrade',
-                            args: {},
-                            done: function () {
-                                window.location.reload(true);
-                            },
-                            fail: function () {
-                                window.location.reload(true);
-                            }
-                        }]);
+                        finishUpgrade(name);
                         return;
                     }
                     showToast(name + ' installed. Reloading…');
@@ -2143,7 +2226,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @param {string} name
      */
     function installFree(component, name) {
-        recordSpend(name, 0, 'free');
+        // The receipt is written by runInstall() once the install actually succeeds —
+        // recording it here claimed an install that may still fail.
         showToast('Installing ' + name + '…');
         installComponent(component, name);
     }
@@ -2178,6 +2262,51 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * Update every plugin currently flagged with an update, sequentially,
      * then run the DB upgrade.
      */
+    /**
+     * Run the database upgrade after files have been put in place, then reload.
+     *
+     * The server side takes an exclusive lock, raises the execution time limit and puts
+     * the site into maintenance mode for the duration (see plugin_updater::run_upgrade),
+     * so the one-click flow is safe to run on a live site. What it must not do is hide a
+     * failure: if the upgrade does not complete, the admin is told and sent to Moodle's
+     * own upgrade screen to finish it, rather than being dropped back on a dashboard that
+     * looks healthy while the database is behind the code.
+     *
+     * @param {string} what Description of what was updated, for the message.
+     */
+    function finishUpgrade(what) {
+        showToast('Upgrading the database\u2026');
+        Ajax.call([{
+            methodname: 'block_aiplugin_nav_run_upgrade',
+            args: {},
+            done: function (r) {
+                if (r && r.success) {
+                    showToast(what + ' updated.');
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 900);
+                    return;
+                }
+                Notification.alert('Upgrade not completed',
+                    ((r && r.message) || 'The database upgrade did not finish.') +
+                    ' The plugin files are in place, so finishing it on Moodle\u2019s own ' +
+                    'upgrade screen will complete the job.',
+                    function () {
+                        window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
+                    });
+            },
+            fail: function (err) {
+                Notification.alert('Upgrade not completed',
+                    ((err && err.message) || 'The database upgrade could not be run.') +
+                    ' The plugin files are in place, so finishing it on Moodle\u2019s own ' +
+                    'upgrade screen will complete the job.',
+                    function () {
+                        window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
+                    });
+            }
+        }]);
+    }
+
     function updateAll() {
         var pending = [];
         var plugins = DATA.plugins || [];
@@ -2193,22 +2322,36 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
         showToast('Updating ' + pending.length + ' plugin(s)…');
         var idx = 0;
+        var okcount = 0;
+        var failed = [];
         function next() {
             if (idx >= pending.length) {
-                Ajax.call([{
-                    methodname: 'block_aiplugin_nav_run_upgrade',
-                    args: {},
-                    done: function () {
-                        window.location.reload(true);
-                    },
-                    fail: function () {
-                        window.location.reload(true);
-                    }
-                }]);
+                // Never report success for downloads that failed. Upgrading the database
+                // is only worth doing if something actually landed on disk.
+                if (!okcount) {
+                    Notification.alert('No plugins were updated',
+                        'None of the ' + pending.length + ' downloads succeeded:\n\n' + failed.join('\n'));
+                    return;
+                }
+                if (failed.length) {
+                    Notification.alert('Some plugins were not updated',
+                        okcount + ' of ' + pending.length + ' updated. These failed:\n\n' +
+                        failed.join('\n') + '\n\nThe database upgrade will run for the ones that succeeded.',
+                        function () {
+                            finishUpgrade(okcount + ' plugin(s)');
+                        });
+                    return;
+                }
+                finishUpgrade(okcount + ' plugin(s)');
                 return;
             }
             var p = pending[idx];
-            updatePlugin(p.component || p.pluginid, p.name, function () {
+            updatePlugin(p.component || p.pluginid, p.name, function (ok, resp) {
+                if (ok) {
+                    okcount++;
+                } else {
+                    failed.push(p.name + (resp && resp.message ? ' (' + resp.message + ')' : ''));
+                }
                 idx++;
                 next();
             });
@@ -2255,12 +2398,19 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 if (!response) {
                     return;
                 }
-                schedule.on = !!response.enabled;
-                schedule.freq = response.freq || schedule.freq;
-                schedule.day = response.day || schedule.day;
-                schedule.time = response.time || schedule.time;
-                schedule.lastmanual = response.lastmanual || schedule.lastmanual;
-                schedule.lastauto = response.lastauto || schedule.lastauto;
+                // Field names must match get_purge_status::execute_returns() exactly:
+                // schedule_enabled / schedule_type / schedule_time / last_manual_purge /
+                // last_scheduled_purge. Reading enabled/freq/time/lastmanual/lastauto gave
+                // undefined for every one, so the widget always showed "No schedule" and
+                // "Manual never" however the site was actually configured.
+                schedule.on = !!response.schedule_enabled;
+                schedule.freq = response.schedule_type || schedule.freq;
+                if (typeof response.schedule_day !== 'undefined') {
+                    schedule.day = String(response.schedule_day);
+                }
+                schedule.time = response.schedule_time || schedule.time;
+                schedule.lastmanual = fmtStamp(response.last_manual_purge) || schedule.lastmanual;
+                schedule.lastauto = fmtStamp(response.last_scheduled_purge) || schedule.lastauto;
                 if (current === 'manage') {
                     paint();
                 }
@@ -2471,6 +2621,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     faves[n] = true;
                 }
                 saveFaves();
+                // In search results there is no open panel, so paint() returns early and
+                // the star never visibly toggled even though the preference was saved.
+                // Toggle the clicked star directly in that case.
+                if (!current) {
+                    // aria-pressed is what the stylesheet keys the starred look off.
+                    star.setAttribute('aria-pressed', faves[n] ? 'true' : 'false');
+                    return;
+                }
                 var y = els.plist.scrollTop;
                 var open = openGroupNames();
                 paint(open);
