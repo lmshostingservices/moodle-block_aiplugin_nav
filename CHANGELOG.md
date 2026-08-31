@@ -2,6 +2,31 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.18] - 2026-08-30
+
+### Fixed
+- "Unexpected token '<'" on update, properly this time. 2.5.17 silenced upgrade_noncore() and
+  wrapped it in an output buffer, and the error still occurred — because the problem is not a
+  flag. upgrade_noncore() calls upgrade_started(), which prints a page header and flushes, and
+  Moodle's upgrade machinery ends output buffers itself as it runs. Buffering around it cannot
+  help. That code is written to render a page, and a web service is not a page.
+  The block no longer calls run_upgrade at all. Once the plugin files are downloaded it hands
+  over to /admin/index.php, Moodle's own upgrade flow, which lists what changed, asks for
+  confirmation and reports errors properly. One extra click, and no failure dialog.
+  Savepoint 2026083059.
+
+## [2.5.17] - 2026-08-30
+
+### Fixed
+- Clicking Update produced "Unexpected token" and then dropped the admin on Moodle's plugin
+  upgrade screens. run_upgrade() called upgrade_noncore(true) — that parameter is Moodle's
+  verbose flag, so core printed HTML upgrade progress straight into what was supposed to be a
+  JSON web service response. The browser hit the markup before it reached the result and threw.
+  The upgrade itself completed and the 2.5.14 fallback correctly handed over to Moodle to
+  finish, so no site was left half-upgraded, but the error was alarming and unnecessary. The
+  upgrade now runs quietly, with any output core emits regardless discarded, so the response is
+  always valid JSON. Savepoint 2026083058.
+
 ## [2.5.16] - 2026-08-30
 
 Findings from an adversarial review of the 2.5.x rewrite. All of these were shipped in earlier

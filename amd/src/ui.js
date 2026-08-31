@@ -2263,48 +2263,26 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * then run the DB upgrade.
      */
     /**
-     * Run the database upgrade after files have been put in place, then reload.
+     * Files are on disk; hand the database upgrade to Moodle.
      *
-     * The server side takes an exclusive lock, raises the execution time limit and puts
-     * the site into maintenance mode for the duration (see plugin_updater::run_upgrade),
-     * so the one-click flow is safe to run on a live site. What it must not do is hide a
-     * failure: if the upgrade does not complete, the admin is told and sent to Moodle's
-     * own upgrade screen to finish it, rather than being dropped back on a dashboard that
-     * looks healthy while the database is behind the code.
+     * The block used to call run_upgrade() and finish the job itself, which read cleanly but
+     * cannot actually work: upgrade_noncore() calls upgrade_started(), which prints a page
+     * header and flushes output, and Moodle's upgrade machinery tears down output buffers as
+     * it goes. Whatever it printed landed in the middle of a JSON web service response, and
+     * the browser failed on it with "Unexpected token '<'" before it saw any result. Output
+     * buffering around the call does not help — core ends the buffer itself. That code is
+     * built to render a page, so it is given a page.
      *
-     * @param {string} what Description of what was updated, for the message.
+     * /admin/index.php is Moodle's own upgrade flow: it lists what changed, asks for
+     * confirmation, and reports errors properly. One extra click, and no more failure dialog.
+     *
+     * @param {string} what Description of what was downloaded, for the message.
      */
     function finishUpgrade(what) {
-        showToast('Upgrading the database\u2026');
-        Ajax.call([{
-            methodname: 'block_aiplugin_nav_run_upgrade',
-            args: {},
-            done: function (r) {
-                if (r && r.success) {
-                    showToast(what + ' updated.');
-                    setTimeout(function () {
-                        window.location.reload(true);
-                    }, 900);
-                    return;
-                }
-                Notification.alert('Upgrade not completed',
-                    ((r && r.message) || 'The database upgrade did not finish.') +
-                    ' The plugin files are in place, so finishing it on Moodle\u2019s own ' +
-                    'upgrade screen will complete the job.',
-                    function () {
-                        window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
-                    });
-            },
-            fail: function (err) {
-                Notification.alert('Upgrade not completed',
-                    ((err && err.message) || 'The database upgrade could not be run.') +
-                    ' The plugin files are in place, so finishing it on Moodle\u2019s own ' +
-                    'upgrade screen will complete the job.',
-                    function () {
-                        window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
-                    });
-            }
-        }]);
+        showToast(what + ' downloaded. Finishing in Moodle\u2019s upgrade screen\u2026');
+        setTimeout(function () {
+            window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
+        }, 900);
     }
 
     function updateAll() {

@@ -784,7 +784,18 @@ class plugin_updater extends external_api {
             }
 
             // Run the upgrade.
-            upgrade_noncore(true);
+            //
+            // The parameter is Moodle's "verbose" flag: passing true makes upgrade_noncore()
+            // PRINT HTML progress output. In a web service that output is prepended to the
+            // JSON response, and the browser fails on it with "Unexpected token '<'" before
+            // it ever sees the result. Run it quietly, and discard any output core emits
+            // anyway, so the response is always valid JSON.
+            ob_start();
+            try {
+                upgrade_noncore(false);
+            } finally {
+                ob_end_clean();
+            }
 
             return array(
                 'success' => true,
