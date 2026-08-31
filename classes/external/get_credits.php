@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * External service to fetch credits balance (with 5-minute cache).
@@ -59,15 +59,15 @@ class get_credits extends external_api {
         self::validate_context($context);
 
         // Soft role check — return empty success:false instead of throwing an exception.
-        // The block PHP already restricts the credits UI to admins/teachers; the web service must.
-        // Not throw here because any PHP exception causes the AJAX call to fail and.
+        // The block PHP already restricts the credits UI to admins/teachers; the web service must
+        // Not throw here because any PHP exception causes the AJAX call to fail and
         // Silently hides the credits display for everyone.
-        // Allowed: site admins, editing teachers, non-editing teachers, lmshsadmin, and any.
+        // Allowed: site admins, editing teachers, non-editing teachers, lmshsadmin, and any
         // User who has moodle/site:configview (covers custom admin roles that aren't full siteadmins).
-        $isallowed = is_siteadmin()
+        $is_allowed = is_siteadmin()
             || has_capability('moodle/site:configview', $context, $USER->id, false);
-        if (!$isallowed) {
-            $isallowed = $DB->record_exists_sql(
+        if (!$is_allowed) {
+            $is_allowed = $DB->record_exists_sql(
                 "SELECT ra.id
                    FROM {role_assignments} ra
                    JOIN {role} r ON r.id = ra.roleid
@@ -76,7 +76,7 @@ class get_credits extends external_api {
                 ['userid' => $USER->id]
             );
         }
-        if (!$isallowed) {
+        if (!$is_allowed) {
             return ['credits' => '', 'cached' => false, 'success' => false];
         }
 
@@ -99,9 +99,9 @@ class get_credits extends external_api {
         }
 
         // Load AI Grader Central Config library.
-        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        if (file_exists($aiconfiglib)) {
-            require_once($aiconfiglib);
+        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($aiconfig_lib)) {
+            require_once($aiconfig_lib);
         }
 
         $siteid = '';
@@ -118,9 +118,9 @@ class get_credits extends external_api {
             return ['credits' => '', 'cached' => false, 'success' => false];
         }
 
-        // Make API request — try endpoints in order (Replit first: always reachable from.
+        // Make API request — try endpoints in order (Replit first: always reachable from
         // Vultr/datacenter IPs; lms-labs.com second: may be blocked by datacenter firewall).
-        // FIX-ENDPOINT-ORDER (v2.4.17): same root cause as check_versions.php — lms-labs.com.
+        // FIX-ENDPOINT-ORDER (v2.4.17): same root cause as check_versions.php — lms-labs.com
         // Is unreachable from Vultr-hosted Moodle servers so credits never loaded.
         $query    = '?siteId=' . rawurlencode($siteid) . '&apiKey=' . rawurlencode($apikey);
         $endpoints = [

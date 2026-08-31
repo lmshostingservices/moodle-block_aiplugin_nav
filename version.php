@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,103 +12,29 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * AI Dashboard Quick Links v2.4.85 - Version information
+ * AI Dashboard Quick Links v2.5.1 - Version information
  *
- * v2.4.85: PRIVATE-SUITE-E2E-PURGE (31 Aug 2026) — Removed final retired-suite
- *          server E2E entries and inert Training Matrix short-ID metadata.
- *          No DB schema changes. Savepoint 2026083018.
+ * v2.5.1: FIX-LANG-STRINGS (30 Aug 2026) — Added the 85 hover-help language strings the new
+ *          payload requests (13 cards x badge, title, paragraphs, bullets and pro tip). Without
+ *          them Moodle logged an "Invalid get_string() identifier" debug notice per string on
+ *          every dashboard load and the help cards rendered placeholder text. Block behaviour
+ *          otherwise unchanged from v2.5.0. Savepoint 2026083003.
  *
- * v2.4.84: PRIVATE-SUITE-COMPLETE-PURGE (31 Aug 2026) — Removed final retired
- *          suite entries from protected operational registries and inert
- *          Quicklinks registry comments. No DB schema changes.
- *          Savepoint 2026083017.
- *
- * v2.4.83: PRIVATE-SUITE-PUBLIC-CLEANUP (31 Aug 2026) — Removed stale public
- *          catalogue-shaped metadata and obsolete unlock aliases for the
- *          retired private Wombat Training Plan suite. No DB schema changes.
- *          Savepoint 2026083016.
- *
- * v2.4.82: QUICKLINKS-MERGED-RELEASE (31 Aug 2026) — Re-cut the private-suite
- *          removal after reconciling the concurrent Marketplace entitlement
- *          release, so both changes ship together. No DB schema changes.
- *          Savepoint 2026083015.
- *
- * v2.4.81: LIVE-PIPELINE-RECUT (30 Aug 2026) — Re-cut the reviewed
- *          Quicklinks private-suite removal through the production pipeline
- *          after concurrent automation reserved v2.4.79 and v2.4.80.
- *          No DB schema changes. Savepoint 2026083014.
- *
- * v2.4.80: MARKETPLACE-ENTITLEMENTS-CI (30 Aug 2026) — Re-cut the
- *          Marketplace entitlement release with complete execute() PHPDoc for
- *          official Moodle Plugin CI. No behavior or DB schema changes.
- *          Savepoint 2026083013.
- *
- * v2.4.79: MARKETPLACE-ENTITLEMENTS (30 Aug 2026) — Paid Moodle
- *          Marketplace purchases unlock without consuming AI credits; the
- *          full component and entitlement source are preserved end-to-end.
- *          No DB schema changes. Savepoint 2026083012.
- *
- * v2.4.78: QUICKLINKS-PRIVATE-SUITE-REMOVAL (30 Aug 2026) — Final
- *          reviewed release removing the seven private Wombat Training Plan
- *          suite components, with exact Moodle 4.5-generated AMD outputs.
- *          No DB schema changes. Savepoint 2026083011.
- *
- * v2.4.77: AMD-CI-DIAGNOSTIC-RECUT-2 (30 Aug 2026) — Diagnostic recut
- *          to capture native Moodle Grunt outputs before the CI wrapper
- *          restores its backup. No source behavior or DB schema changes.
- *          Savepoint 2026083010.
- *
- * v2.4.76: AMD-CI-DIAGNOSTIC-RECUT (30 Aug 2026) — Diagnostic recut to
- *          capture Moodle 4.5's exact generated AMD bytes after local legacy
- *          dependency installation was blocked. No source behavior or DB
- *          schema changes. Savepoint 2026083009.
- *
- * v2.4.75: CI-COMPLIANT-RECUT-5 (30 Aug 2026) — Rebuilt AMD outputs with
- *          Moodle 4.5's official Rollup toolchain and removed obsolete
- *          unminified build copies exposed by the immutable v2.4.74 tag.
- *          No runtime behavior or DB schema changes. Savepoint 2026083008.
- *
- * v2.4.74: CI-COMPLIANT-RECUT-4 (30 Aug 2026) — Removed a redundant
- *          nested Stylelint-disable directive exposed by the immutable
- *          v2.4.73 tag. CSS declarations and runtime behavior are unchanged.
- *          No DB schema changes. Savepoint 2026083007.
- *
- * v2.4.73: CI-COMPLIANT-RECUT-3 (30 Aug 2026) — Corrected the existing
- *          legacy stylesheet lint-suppression boundary exposed by the
- *          immutable v2.4.72 tag. CSS declarations and runtime behavior
- *          are unchanged. No DB schema changes. Savepoint 2026083006.
- *
- * v2.4.72: CI-COMPLIANT-RECUT-2 (30 Aug 2026) — Re-cut the private
- *          Wombat Training Plan suite removal after the immutable v2.4.71
- *          tag exposed Moodle-context language ordering and one CSS lint
- *          issue. Language values and CSS declarations are unchanged.
- *          No DB schema changes. Savepoint 2026083005.
- *
- * v2.4.71: CI-COMPLIANT-RECUT (30 Aug 2026) — Re-cut the removal of the
- *          seven private Wombat Training Plan suite components after the
- *          immutable v2.4.70 tag failed official Moodle Plugin CI. Applied
- *          behavior-preserving Moodle PHP, PHPDoc, AMD, and CSS compliance
- *          cleanup required by the managed release workflow.
- *          No DB schema changes. Savepoint 2026083004.
- *
- * v2.4.70: REMOVE-PRIVATE-WOMBAT-SUITE (30 Aug 2026) — Released the
- *          existing registry cleanup that removes the seven client-specific
- *          Training Matrix, Training Pathways, Training Plan, and Prerequisite
- *          2 components from Quicklinks actions and plugin management.
- *          No DB schema changes. Savepoint 2026083003.
-// Release metadata strings are intentionally kept verbatim.
-// phpcs:disable moodle.Files.LineLength
- *
- * v2.4.69: MANAGEMENT-HUB (30 Aug 2026) — Added a durable, searchable,
- *          URL-addressable Management Hub for plugins, reports, updates,
- *          custom links, help, credits and plugin action details. Replaced the
- *          dashboard mini-application with a compact launcher and status
- *          summary while preserving update APIs, custom reports, cache
- *          management, site quick links and bulk-update behaviour. Custom links
- *          can be edited and reordered. No DB schema changes. Savepoint 2026083002.
+ * v2.5.0: NEW-UI (30 Aug 2026) — Replaced the three dropdowns and the plugin grid with a
+ *          card-and-panel interface that never leaves the block. Home view: four nav cards
+ *          (Plugins / Settings / Manage / Reports), Moodle shortcut tiles with a custom-link
+ *          builder, credit traffic light, global search, status strip and product cards.
+ *          Each panel shares one layout: category chips, Status and Type filters, sort,
+ *          saved layouts, collapsed category accordions and one row component carrying a
+ *          colour-coded type pill, docs link, state chip and action.
+ *          New: classes/payload.php builds a JSON payload from the existing registries;
+ *          amd/src/ui.js renders the interface; styles.css gains an .ainav2-scoped section.
+ *          Nine block methods changed from private to public so the payload can read the
+ *          registries rather than duplicating them. Legacy UI retained as
+ *          get_content_legacy() for rollback. No DB changes. Savepoint 2026083002.
  *
  * v2.4.68: VIEWPORT-SAFE-DROPDOWNS (30 Aug 2026) — Long Settings, Manage,
  *          and Reports menus now open toward the side with the most available
@@ -332,11 +258,11 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_aiplugin_nav';
 // 10-DIGIT MARKETPLACE SCHEME: $plugin->version is YYYYMMDDXX (10 digits).
-$plugin->version = 2026083018;  // YYYYMMDDXX (10-digit, matches release pipeline) — 31 Aug 2026. v2.4.85.
-$plugin->release = 'v2.4.85';
-$plugin->release_prev = '2.4.84';
+$plugin->version = 2026083053;  // YYYYMMDDXX (10-digit, matches release pipeline) — 30 Aug 2026. v2.5.12.
+$plugin->release = 'v2.5.12';
+$plugin->release_prev = '2.5.11';
 $plugin->requires  = 2022041900;
-$plugin->supported  = [400, 501];  // Moodle 4.0 to 5.1.
+$plugin->supported  = [400, 501];  // Moodle 4.0 to 5.1
 $plugin->maturity  = MATURITY_STABLE; // ADD-BEACON — local_beacon added to plugin registry. // SAVEPOINT-BUMP — serve latest zip with tiny_aipagetemplates in registry. // FIX-ENDPOINT-ORDER (v2.4.16): PHP proxy (check_versions.php) moved to position #1 in ainav_endpoints JS array so the browser never waits 10s for a blocked lms-labs.com direct call before trying the proxy. check_versions.php internal endpoint list reordered to Replit URL first (always reachable) then lms-labs.com; essaygraderai.app (legacy dead domain) removed from both lists; per-endpoint cURL timeout reduced from 10s to 5s. Total worst-case version-check wait drops from ~40s to ~10s for Vultr/datacenter-IP Moodle servers. No DB schema changes. Savepoint 2026072400116. // FIX-DOMAIN + FIX-LEGACY-ESSAYMAKER (v2.4.7): (1) All remaining lms-labs.com URLs replaced with lms-labs.com throughout block_aiplugin_nav.php — affects Visit Website, Pricing, affiliate, and all /docs/* links. (2) local_essaymaker added to master plugin registry so sites with the old legacy plugin installed (pre-rename) will see "AI Quiz Maker (Legacy — update to fix)" with update available, allowing auto-update to v3.16.89 which carries correct namespace local_essaymaker in its class files, resolving the fatal "Cannot declare class local_aiquizmaker\hook\before_footer_html_generation because the name is already in use" PHP crash. No DB schema changes. Savepoint 2026072300107. // REBRAND-LMS-LABS (v2.4.2): Rebranded all references from lms-labs.com to lms-labs.com. Visit Website button now links to https://lms-labs.com. All docs URLs, API endpoints, and lang strings updated to lms-labs.com domain. No DB schema changes. // ADD-TRAININGPLAN (v2.3.98): Added block_trainingplan (Training Plan) to Time Saving Plugins utility grid (category=utility, credits_required=5000, icon=calendar-clock, goto_url=/admin/settings.php?section=block_trainingplan). Added calendar-clock SVG to get_icon_svg() icon map. Added block_trainingplan to get_plugin_docs_url() pointing to /docs/training-plan. No DB schema changes. // ADD-SMARTWORKBOOK-COMPLETE-REGISTRY (v2.3.97): Added mod_smartworkbook (AI Smart Workbook) to get_complete_plugin_registry(). Plugin was present in get_master_plugin_registry() and get_ai_tools_registry() but absent from get_complete_plugin_registry(), so it never appeared in the admin Plugin Manager panel and could not be downloaded from the QuickLinks block. No DB schema changes. // ADD-SMARTWORKBOOK (v2.3.95): Added mod_smartworkbook (AI Smart Workbook) to master plugin registry, complete plugin grid, and docs URL map — appears in AI Plugins section. No DB schema changes. Savepoint 2026070900095. // ADD-AILOGIN (v2.3.92): Added local_ailogin (AI Login Designer) to master plugin registry (Settings + Manage dropdowns), complete plugin grid, and docs URL map. No DB schema changes. Savepoint 2026070800092. // FIX-QUIZACCESS-DOCS-URL (v2.3.91): quizaccess_aigrader docs link in get_plugin_docs_url() was pointing to /docs/ai-grader (the main AI Essay Grader page) instead of /docs/quiz-access-rule. No DB changes. Savepoint 2026070300091. // FIX-GET-CREDITS-GLOBALS (v2.3.90): classes/external/get_credits.php was missing global $DB, $USER declarations — execute() only declared global $CFG. When a non-siteadmin (e.g. lmshsadmin) called the web service, $DB->record_exists_sql() on a null variable threw a PHP exception, causing the AJAX call to fail silently and the credits badge to stay blank. Fix: added global $DB, $USER to execute(). Also expanded role-check to cover moodle/site:configview capability (catches custom admin roles) and added lmshostingadmin and manager shortnames to the hardcoded list. No DB schema changes. Savepoint 2026070300090. // SHOW-CREDITS-LMSHSADMIN (v2.3.89): Credit balance badge now also visible to lmshsadmin role (LMS Hosting Admin). Both block_aiplugin_nav.php (badge placeholder) and classes/external/get_credits.php (web service role check) updated. No DB changes. Savepoint 2026063000089. // SHOW-CREDITS-TEACHERS (v2.3.88): Credit balance badge now visible to editing teachers and non-editing teachers, not just site admins. Both block_aiplugin_nav.php (badge placeholder + AMD loader) and classes/external/get_credits.php (web service gate) updated. No DB changes. Savepoint 2026063000088. // ADD-UPDATE-POPUP (v2.3.83): Added full-screen plugin update popup to QuickLinks block. Clicking "Check for Updates" now shows a modal popup matching the lms-labs.com admin panel: orange gradient header listing each outdated plugin with installed vs latest version (old→new), or green gradient "All Plugins Up to Date" when everything is current. Popup has X close button, backdrop-click dismiss, "Check for Updates" re-run button, and "Got It"/"Perfect, Thanks!" confirm button. No DB changes. Savepoint 2026062600084. // FIX-PHP-PARSE (v2.3.82): Escaped three unescaped double-quote characters inside the js_amd_inline PHP double-quoted string that caused a PHP ParseError ("unexpected identifier up") on Moodle upgrade. Affected lines were JS comments containing "up to date" — bare " closed the PHP string prematurely. No DB changes. Savepoint 2026062200082. // FIX-UPTODATE-TOAST (v2.3.81): Added in-block "All plugins are up to date" toast. Toast renders inside .ainav-container on the Moodle dashboard so the message appears within the block — not on lms-labs.com. Accent colour uses var(--primary) inherited from the Moodle theme primary colour rather than a hardcoded value. Auto-dismisses after 5 s; manual close button included. No DB changes. Savepoint 2026062000081. // RENAME-AI-SLIDE-FLOW (v2.3.80): Renamed mod_productexplainer from 'AI Product Explainer' to 'AI Slide Flow' in master plugin registry, complete plugin grid, quick access links, and lang strings. No DB changes. Savepoint 2026061300080. // FIX-WORKSHOPS-CALENDAR-ICON (v2.3.79): Added missing 'calendar' key to get_icon_svg() lookup table. Workshop Scheduler quick-link rows were showing a blank icon because the registry uses icon='calendar' but only 'calendar-icon' existed in the SVG map. No DB schema changes. Savepoint 2026061200079. // REMOVE-DUPE-CREDITS (v2.3.78): Removed standalone credits badge from header bar — credit count now shown only inside the Buy Credits button. Fixed ainav-bar/ainav-sections/ainav-external flex-wrap: nowrap so the header always renders on a single line. Tightened gap (16px→12px) and padding (12px 20px→10px 16px). No DB changes. Savepoint 2026061200078. // ADD-WORKSHOPS-PRODUCTEXPLAINER (v2.3.76): Added Workshop Scheduler (local_workshops) and AI Product Explainer (mod_productexplainer) to master plugin registry, complete plugin grid, quick access links, docs URL table, and lang strings. No DB changes. // RENAME-CV-SCORM (v2.3.75): Updated plugin display name for local_chirpvoice from 'AI Voiceover (Chirp HD)' to 'AI SCORM Voiceover' in both registry entries (master plugin registry and complete plugin grid). No DB changes. // FIX-CV-DOCS-LINK (v2.3.74): // FIX-CV-DOCS-LINK (v2.3.74): Added local_chirpvoice to get_plugin_docs_url() lookup table. AI Voiceover (Chirp HD) card in the Plugin Manager was missing the Docs button because local_chirpvoice was not in the docs_urls array. URL: https://lms-labs.com/docs/ai-voiceover. No DB changes. // FIX-CV-COMPLETE-REGISTRY (v2.3.73): Added local_chirpvoice (AI Voiceover Chirp HD) to get_complete_plugin_registry() so it appears in the AI Plugins grid regardless of installation status. Was previously only in get_master_plugin_registry() (settings/nav links) but missing from the plugin management grid. No DB changes. // ADD-CV-QUICKLINKS (v2.3.72): Added local_chirpvoice (AI Voiceover Chirp HD) to master plugin registry. Appears in AI Plugins grid and Settings dropdown when installed. No DB changes; // SAVEPOINT-BUMP v2.3.71: no-op savepoint marker for clean upgrade path. No DB schema changes.; // FIX-MAP-ICON (v2.3.70): Added missing 'map' SVG to get_icon_svg() icon table. Training Pathways quick-link row was showing a blank icon space because 'map' was not in the lookup array (only 'map-pin' was). No DB schema changes. Savepoint 2026060200070.
 // ADD-TRAININGPATHWAYS (v2.3.69): Added Training Pathways (local_trainingpathways) to the plugin registry (settings cog → /admin/settings.php?section=local_trainingpathways, page → /local/trainingpathways/manage.php, icon=map), the Time Saving Plugins marketplace grid (category=utility, goto_url=/local/trainingpathways/manage.php), and the docs URL map. No DB schema changes. Savepoint 2026060200069.
 // ADD-DOWNALERT (v2.3.67): Added local_downalert (Site Down Alert) to the plugin registry under Time Saving Plugins (category: admin) with settings_url and report_url pointing to the new report.php health dashboard. Report now appears in the Reports dropdown; settings appears in the Settings dropdown. Free — no AI credits required. No DB schema changes. Savepoint 2026052900067. (v2.3.66): Removed settings_url from paygw_paddle registry entry. Paddle has no single admin settings page — API keys are at Site admin > Plugins > Payment gateways > Manage payment gateways; payment prices are per-course. The broken link to /admin/settings.php?section=paymentgatewaypaddle no longer appears in the quicklinks Settings dropdown. No DB changes. Savepoint 2026052900066.

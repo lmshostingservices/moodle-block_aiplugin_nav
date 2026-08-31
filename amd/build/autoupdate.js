@@ -154,7 +154,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function ($, Aj
                 args: {
                     component: component,
                     downloadurl: downloadUrl,
-                    expectedsha256: (function (v) { var t = String(v || ''); return /^[a-fA-F0-9]{64}$/.test(t) ? t : ''; }($btn.data('sha256')))
+                    expectedsha256: $btn.data('sha256') || ''
                 }
             }])[0].done(function (response) {
                 if (response.success) {
@@ -233,7 +233,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function ($, Aj
                     args: {
                         component: component,
                         downloadurl: downloadUrl,
-                        expectedsha256: (function (v) { var t = String(v || ''); return /^[a-fA-F0-9]{64}$/.test(t) ? t : ''; }($btn.data('sha256')))
+                        expectedsha256: $btn.data('sha256') || ''
                     }
                 }])[0].done(function (response) {
                     completed++;
