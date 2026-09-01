@@ -2,6 +2,48 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.21] - 2026-09-01
+
+Pipeline-correctness and layout release.
+
+### Fixed
+- **The status cards rendered their text one character per line** on live sites. Every
+  multi-column row used a fixed column count with viewport media queries, but the block sits in a
+  dashboard column far narrower than the window, so the breakpoints never fired. The card then
+  squeezed its description to 0px between a fixed icon and two nowrap buttons. The rows now use
+  `repeat(auto-fit, minmax(...))` and size from their own width, and the status card wraps its
+  buttons onto a second line instead of crushing the text. Verified in headless Chromium at
+  380/520/715/900/1100/1400px: no horizontal overflow and no crushed text at any width.
+- **`amd/build/ui.min.js` was a copy of the source, not minified output** — it shared a git blob
+  SHA with `amd/src/ui.js`. It is now genuine Moodle 4.5 core grunt output (rollup + babel +
+  terser) and regeneration is idempotent. The stray unminified `amd/build/ui.js` was removed;
+  Moodle core ships no such file.
+
+### Changed
+- The whole plugin now passes the real `moodle-plugin-ci` 4.5.11 on Moodle 4.5 / PHP 8.3:
+  `phplint`, `phpcs --max-warnings 0`, `phpdoc --max-warnings 0`, `validate`, `savepoints`,
+  `mustache`, `phpmd`, `grunt --max-lint-warnings 0` and `phpunit` all pass.
+- `attendance_report.php` no longer interleaves PHP and HTML. Its template region is compiled to
+  `echo` statements so the file has a single `<?php` and no closing tag, which is what
+  `moodle.Commenting.MissingDocblock.File` requires. Output proved byte-identical to the previous
+  template on both the populated and the empty-data path.
+- `lang/en/block_aiplugin_nav.php`: 295 keys sorted, section comments removed, duplicate `docs`
+  key dropped. All keys and values verified unchanged.
+- `defined('MOODLE_INTERNAL') || die();` removed where the sniff reports it unnecessary, with
+  class docblocks added to match.
+- `global $PAGE` replaced with `$this->page` in the block class; empty `catch` blocks now call
+  `debugging()`.
+- ESLint taken to zero, including eight `complexity` warnings, by splitting functions rather than
+  suppressing rules. String content verified unchanged by AST comparison throughout.
+
+### Removed
+- ~204 lines of commented-out registry entries. The eight that the release pipeline's
+  cross-plugin completeness check requires (`mod_aiquiz`, `assignfeedback_aipdf`,
+  `quizaccess_webcamproctor`, `mod_practicalassessment`, `mod_aivideoconf`,
+  `mod_bigbluebuttonbn`, `mod_recordingsbn`, `report_performanceintel`) are now real
+  registry entries carrying `'status' => 'testing'`, so they are visible to the pipeline but
+  still dropped from the block's catalogue unless the site already runs one.
+
 ## [2.5.20] - 2026-08-31
 
 Coding-standard release. No functional change: every string literal in the plugin was verified

@@ -36,10 +36,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Builds the JSON payload the block's JavaScript renders from.
+ *
+ * @package    block_aiplugin_nav
+ * @copyright  2025 Essay Grader AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class block_aiplugin_nav_payload {
-    // =====================================================================================
     // CATEGORY MAPPING — 21 legacy category values (from get_complete_plugin_registry() /
     // get_master_plugin_registry()) mapped onto the 7 new contract categories
     // (assess, content, media, rto, access, training, site).
@@ -53,50 +57,50 @@ class block_aiplugin_nav_payload {
     // majority (a handful of plugins), a component-level override is used instead — see
     // CATEGORY_OVERRIDES. Legacy values with no live registry example (ai, ai_credit, admin)
     // are given a defensible default and flagged in payload_notes.md.
-    // =====================================================================================.
+    /** @var array Legacy category value => the contract's seven display categories. */
     const CATEGORY_MAP = [
         // AI plugin categories.
-        'ai'            => 'assess',   // No live entries (commented-out testing stubs only);
+        'ai'            => 'assess', // No live entries (commented-out testing stubs only);
                                         // Those stubs were themselves mostly quiz/mod grading
                                         // plugins, so 'assess' is the closest default.
-        'ai_grading'    => 'assess',   // AI Essay Grader, AI Quiz Maker, AI Knowledge Check,
+        'ai_grading'    => 'assess', // AI Essay Grader, AI Quiz Maker, AI Knowledge Check,
                                         // AI Mapping, Assignment Benchmarks, AI Quiz Remedial
                                         // Learning — all land in mockup's "assess" group.
-        'ai_content'    => 'content',  // AI Content Creator, AI Learning Activities, Slides,
+        'ai_content'    => 'content', // AI Content Creator, AI Learning Activities, Slides,
                                         // AI Course Information, AI Slide Flow, AI Smart
                                         // Workbook, AI Course Format — all in "content".
-        'ai_media'      => 'media',    // AI Video Activity, AI Slideshow, AI SCORM Voiceover.
-        'ai_rto'        => 'rto',      // AI RTO Compliance, RTO Compliance Dashboard, RPL Kit.
-        'ai_ux'         => 'site',     // AI Verify ID, AI Support, AI Login Designer — all
+        'ai_media'      => 'media', // AI Video Activity, AI Slideshow, AI SCORM Voiceover.
+        'ai_rto'        => 'rto', // AI RTO Compliance, RTO Compliance Dashboard, RPL Kit.
+        'ai_ux'         => 'site', // AI Verify ID, AI Support, AI Login Designer — all
                                         // Three sit in the mockup's Plugins "site" group.
                                         // NOTE: the mockup's *Settings* row for AI Verify ID
                                         // tags it 'access' instead — a genuine inconsistency
                                         // in the mockup itself. We follow the Plugins-panel
                                         // (GROUPS) placement as primary. See payload_notes.md.
-        'ai_credit'     => 'assess',   // No live entries (legacy generic "credit gated AI"
+        'ai_credit'     => 'assess', // No live entries (legacy generic "credit gated AI"
                                         // Catch-all used only by commented-out stubs, which
                                         // spanned assess/content/media/rto). Defaulted to
                                         // 'assess' as the single most common case.
         // Non-AI / general categories.
-        'block'         => 'site',     // AI Dashboard Quick Links, My Progress -> "site" group.
-        'enrolment'     => 'access',   // Groups Management, Course Prerequisite, Group
+        'block'         => 'site', // AI Dashboard Quick Links, My Progress -> "site" group.
+        'enrolment'     => 'access', // Groups Management, Course Prerequisite, Group
                                         // Membership Limit, Payment Unlock Assignment, Quiz
                                         // Access Rule, Groups Availability Condition.
         'training'      => 'training', // Training Pathways, Training Plan, Workshop
                                         // Scheduler, Attendance -> "training" group.
-        'branding'      => 'site',     // Change Site Font, Cohort Branding, LMS Home Page.
-        'comms'         => 'site',     // Site Down Alert, Student Email Manager/Auth.
-        'media_storage' => 'media',    // Video Compress, SCORM Compress, Media Optimiser.
-        'security'      => 'site',     // Course Version Control, Simple 2FA & SSO.
-        'integrity'     => 'assess',   // Essay Guard, DocGuard -> mockup's "assess" group.
-        'utility'       => 'site',     // No live entries (commented-out Speed/BigBlueButton
+        'branding'      => 'site', // Change Site Font, Cohort Branding, LMS Home Page.
+        'comms'         => 'site', // Site Down Alert, Student Email Manager/Auth.
+        'media_storage' => 'media', // Video Compress, SCORM Compress, Media Optimiser.
+        'security'      => 'site', // Course Version Control, Simple 2FA & SSO.
+        'integrity'     => 'assess', // Essay Guard, DocGuard -> mockup's "assess" group.
+        'utility'       => 'site', // No live entries (commented-out Speed/BigBlueButton
                                         // Stubs). Defaulted to 'site' as the general bucket.
-        'reporting'     => 'site',     // Beacon — Reports & Analytics.
-        'payments'      => 'site',     // Paddle Payment Gateway.
-        'config'        => 'site',     // AI Grader Central Config.
-        'admin'         => 'site',     // No live entries (commented-out AI Training Matrix
+        'reporting'     => 'site', // Beacon — Reports & Analytics.
+        'payments'      => 'site', // Paddle Payment Gateway.
+        'config'        => 'site', // AI Grader Central Config.
+        'admin'         => 'site', // No live entries (commented-out AI Training Matrix
                                         // Stub only). Defaulted to 'site'.
-        'other'         => 'site',     // Catch-all for the ~14 stub/placeholder components
+        'other'         => 'site', // Catch-all for the ~14 stub/placeholder components
                                         // Added late to get_complete_plugin_registry() with
                                         // generic descriptions. Individually confirmed
                                         // exceptions are listed in CATEGORY_OVERRIDES.
@@ -123,13 +127,12 @@ class block_aiplugin_nav_payload {
         'enrol_prereq2'                 => 'access',
     ];
 
-    // =====================================================================================
     // PLUGIN TYPE MAPPING — Moodle plugin_type values used in the registries, mapped onto
     // the contract's `ptypes` keys (mod, block, quizaccess, assignfeedback, availability,
     // enrol, format, local, theme, auth, paygw, plagiarism). Direct 1:1 matches pass through
     // unchanged; the remainder are cross-referenced against the mockup's GROUPS array, which
     // tags each plugin row with the ptype used for the coloured type pill.
-    // =====================================================================================.
+    /** @var array Moodle plugin_type value => the contract's `ptypes` key. */
     const PTYPE_MAP = [
         'mod'          => 'mod',
         'block'        => 'block',
@@ -335,12 +338,15 @@ class block_aiplugin_nav_payload {
         ];
     }
 
-    // =====================================================================================
     // Fixed contract vocabularies (categories / catorder / ptypes). Labels are user-facing
     // UI chrome, so they are routed through get_string(). See TODO_LANG list in
     // payload_notes.md for the exact keys/fallback English needed in lang/en/block_aiplugin_nav.php.
-    // =====================================================================================.
 
+    /**
+     * The display label for each contract category.
+     *
+     * @return array Category key => translated label.
+     */
     private static function get_categories(): array {
         return [
             'assess'   => get_string('ainav2_cat_assess', 'block_aiplugin_nav'),
@@ -353,10 +359,20 @@ class block_aiplugin_nav_payload {
         ];
     }
 
+    /**
+     * The order the categories are shown in.
+     *
+     * @return array Category keys, in display order.
+     */
     private static function get_catorder(): array {
         return ['assess', 'content', 'media', 'rto', 'access', 'training', 'site'];
     }
 
+    /**
+     * The display label for each plugin type pill.
+     *
+     * @return array Ptype key => translated label.
+     */
     private static function get_ptypes(): array {
         return [
             'mod'            => get_string('ainav2_ptype_mod', 'block_aiplugin_nav'),
@@ -374,10 +390,15 @@ class block_aiplugin_nav_payload {
         ];
     }
 
-    // =====================================================================================
     // Category / ptype / docs resolution helpers.
-    // =====================================================================================.
 
+    /**
+     * Map a registry entry onto one of the seven contract categories.
+     *
+     * @param string $component The frankenstyle component name.
+     * @param string $legacycategory The category recorded in the legacy registry.
+     * @return string The contract category key.
+     */
     private static function resolve_category(string $component, string $legacycategory): string {
         if (isset(self::CATEGORY_OVERRIDES[$component])) {
             return self::CATEGORY_OVERRIDES[$component];
@@ -385,6 +406,13 @@ class block_aiplugin_nav_payload {
         return self::CATEGORY_MAP[$legacycategory] ?? 'site';
     }
 
+    /**
+     * Map a Moodle plugin type onto one of the contract's ptype keys.
+     *
+     * @param string $component The frankenstyle component name.
+     * @param string $plugintype The Moodle plugin type.
+     * @return string The contract ptype key.
+     */
     private static function resolve_ptype(string $component, string $plugintype): string {
         if (isset(self::PTYPE_OVERRIDES[$component])) {
             return self::PTYPE_OVERRIDES[$component];
@@ -395,6 +423,9 @@ class block_aiplugin_nav_payload {
     /**
      * Docs URL for a row by its display name. Returns null when there is no verified
      * slug for that exact name (the UI greys the pill in that case).
+     *
+     * @param string $name The row's display name.
+     * @return string|null The documentation URL, or null when there is no verified slug.
      */
     private static function docs_url_for(string $name): ?string {
         if (isset(self::DOCS_OVERRIDE[$name])) {
@@ -403,12 +434,18 @@ class block_aiplugin_nav_payload {
         return null;
     }
 
-    // =====================================================================================
-    // "plugins" array — built from get_complete_plugin_registry(), enriched with live
+    // The "plugins" array — built from get_complete_plugin_registry(), enriched with live
     // install/version/credit data from get_master_plugin_registry() + is_plugin_installed()
     // + get_plugin_version().
-    // =====================================================================================.
 
+    /**
+     * Build the Plugins panel rows, with live install, version and credit data.
+     *
+     * @param block_aiplugin_nav $block The block instance.
+     * @param array $completeregistry The complete plugin registry.
+     * @param array $masterregistry The master plugin registry.
+     * @return array The plugin row models.
+     */
     private static function build_plugins(block_aiplugin_nav $block, array $completeregistry, array $masterregistry): array {
         $out = [];
 
@@ -514,8 +551,12 @@ class block_aiplugin_nav_payload {
      * @param array|null $masterentry Matching entry from get_master_plugin_registry(), if any.
      * @return array{url: string, label: string}
      */
-    private static function resolve_action(string $plugintype, string $pluginname,
-            array $plugin, ?array $masterentry): array {
+    private static function resolve_action(
+        string $plugintype,
+        string $pluginname,
+        array $plugin,
+        ?array $masterentry
+    ): array {
 
         // Plugin types with no standalone page — they are used from inside a course,
         // an activity or another plugin's settings, never opened on their own.
@@ -574,12 +615,18 @@ class block_aiplugin_nav_payload {
         return $CFG->wwwroot . '/admin/settings.php?section=' . $section;
     }
 
-    // =====================================================================================
-    // "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
+    // The "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
     // filtered to installed plugins only (identical filtering logic to the existing
     // get_links_registry()).
-    // =====================================================================================.
 
+    /**
+     * Build the Settings, Manage and Reports panel rows for installed plugins.
+     *
+     * @param block_aiplugin_nav $block The block instance.
+     * @param array $masterregistry The master plugin registry.
+     * @param array $completeregistry The complete plugin registry.
+     * @return array The three row sets, keyed settings, manage and reports.
+     */
     private static function build_settings_manage_reports(
         block_aiplugin_nav $block,
         array $masterregistry,
@@ -652,8 +699,8 @@ class block_aiplugin_nav_payload {
         }
 
         usort($settings, fn($a, $b) => strcasecmp($a['name'], $b['name']));
-        usort($manage,   fn($a, $b) => strcasecmp($a['name'], $b['name']));
-        usort($reports,  fn($a, $b) => strcasecmp($a['name'], $b['name']));
+        usort($manage, fn($a, $b) => strcasecmp($a['name'], $b['name']));
+        usort($reports, fn($a, $b) => strcasecmp($a['name'], $b['name']));
 
         return ['settings' => $settings, 'manage' => $manage, 'reports' => $reports];
     }
@@ -708,20 +755,24 @@ class block_aiplugin_nav_payload {
         return 'https://lms-labs.com/docs/ai-support';
     }
 
-    // =====================================================================================
-    // "core" array — Moodle shortcuts, ported from get_site_links_registry().
+    // The "core" array — Moodle shortcuts, ported from get_site_links_registry().
     //
     // Two groups, in the order the old block showed them:
-    //   'user'  — the personal destinations every logged-in user has (Dashboard, My
-    //             courses, Profile, Grades, Calendar, Messages, Badges, Private files,
-    //             Preferences). These are NOT admin-gated: a student sees this row.
-    //   'admin' — site administration destinations, appended for admins only.
+    // 'user'  — the personal destinations every logged-in user has (Dashboard, My
+    // courses, Profile, Grades, Calendar, Messages, Badges, Private files,
+    // Preferences). These are NOT admin-gated: a student sees this row.
+    // 'admin' — site administration destinations, appended for admins only.
     //
     // The personal links carry no capability requirement in core Moodle — every
     // authenticated user can reach them — so they are gated on being logged in rather
     // than on moodle/site:config. Guests get nothing.
-    // =====================================================================================.
 
+    /**
+     * Build the Moodle core shortcut links.
+     *
+     * @param bool $isadmin Whether the viewer is a site administrator.
+     * @return array The core link rows.
+     */
     private static function build_core_links(bool $isadmin): array {
         global $CFG;
 
@@ -775,9 +826,7 @@ class block_aiplugin_nav_payload {
         ]);
     }
 
-    // =====================================================================================
-    // "custom" array — the user's own custom links, ported from get_custom_links().
-    // =====================================================================================.
+    // The "custom" array — the user's own custom links, ported from get_custom_links().
 
     /**
      * The user's own report links, stored in the same shape as custom links.
@@ -804,6 +853,12 @@ class block_aiplugin_nav_payload {
         return $out;
     }
 
+    /**
+     * Build the viewer's own saved custom links.
+     *
+     * @param block_aiplugin_nav $block The block instance.
+     * @return array The custom link rows.
+     */
     private static function build_custom_links(block_aiplugin_nav $block): array {
         global $USER;
         $linksjson = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
@@ -823,13 +878,16 @@ class block_aiplugin_nav_payload {
         return $out;
     }
 
-    // =====================================================================================
-    // "products" array — LMS Labs' other products, ported from PRODUCTS in the mockup
+    // The "products" array — LMS Labs' other products, ported from PRODUCTS in the mockup
     // (fam cards). Names/urls/kinds/descriptions/prices/colours are hardcoded content
     // (identical treatment to plugin names/descriptions in the existing registries — see
     // get_complete_plugin_registry(), which is likewise not routed through get_string()).
-    // =====================================================================================.
 
+    /**
+     * Build the LMS Labs product links shown on the home view.
+     *
+     * @return array The product rows.
+     */
     private static function build_products(): array {
         return [
             [
@@ -893,13 +951,16 @@ class block_aiplugin_nav_payload {
         ];
     }
 
-    // =====================================================================================
-    // "help" array — the hover help cards, ported from HELP/TIPS in the mockup. Each card's
+    // The "help" array — the hover help cards, ported from HELP/TIPS in the mockup. Each card's
     // body/title/paragraphs/bullets/tip is user-facing UI copy, so every string is routed
     // through get_string(). See payload_notes.md for the full TODO_LANG key list with their
     // English fallback text (too long to repeat as inline comments here).
-    // =====================================================================================.
 
+    /**
+     * Build the hover help card copy.
+     *
+     * @return array The help cards, keyed by the data-help attribute value.
+     */
     private static function build_help(): array {
         // Key => [paragraph count, bullet count].
         $cards = [
@@ -939,13 +1000,6 @@ class block_aiplugin_nav_payload {
         return $help;
     }
 
-    // =====================================================================================
     // Ported private helpers from block_aiplugin_nav.php (minimum logic only — see class
     // docblock for why these are duplicated rather than reflected into).
-    // =====================================================================================.
-
-
-
-
-
 }

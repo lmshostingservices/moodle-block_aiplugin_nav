@@ -22,8 +22,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * The AI Dashboard Quick Links block.
+ *
+ * Renders the dashboard shell and hands the client-side UI its JSON payload.
+ *
+ * @package    block_aiplugin_nav
+ * @copyright  2025 Essay Grader AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class block_aiplugin_nav extends block_base {
     /**
      * Initialize the block.
@@ -55,6 +62,10 @@ class block_aiplugin_nav extends block_base {
     /**
      * Check if plugin is installed.
      * Static cache prevents repeated get_plugin_list() calls for the same type.
+     *
+     * @param string $plugintype The Moodle plugin type, e.g. mod or block.
+     * @param string $pluginname The plugin's short name.
+     * @return bool True when the plugin is present on this site.
      */
     public function is_plugin_installed($plugintype, $pluginname) {
         static $pluginlists = [];
@@ -95,7 +106,7 @@ class block_aiplugin_nav extends block_base {
      */
     public function get_master_plugin_registry() {
         return [
-            // ===== AI PLUGINS (Credit-Based) =====
+            // AI PLUGINS (Credit-Based).
             // Note: Plugins with only Site ID/API Key don't have settings_url
             // As those credentials come from AI Grader Central Config.
             'quiz_aigrader' => [
@@ -162,23 +173,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'layers',
                 'category' => 'ai_content',
             ],
-            // TESTING - Hidden until ready
-            // 'mod_aiquiz' => array(
-            //     'name' => 'AI Quiz',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aiquiz',
-            //     'settings_url' => '/admin/settings.php?section=modsettingaiquiz',
-            //     'icon' => 'help-circle',
-            //     'category' => 'ai_credit',
-            // ),
-            // TESTING - Hidden until ready
-            // 'mod_practicalassessment' => array(
-            //     'name' => 'AI Practical Assessment',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'practicalassessment',
-            //     'icon' => 'clipboard-check',
-            //     'category' => 'ai_credit',
-            // ),.
             'mod_learningmapping' => [
                 'name' => 'AI Mapping',
                 'plugin_type' => 'mod',
@@ -211,22 +205,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'user-check',
                 'category' => 'ai_ux',
             ],
-            // TESTING - Hidden until ready
-            // 'quizaccess_webcamproctor' => array(
-            //     'name' => 'AI Webcam Proctoring',
-            //     'plugin_type' => 'quizaccess',
-            //     'plugin_name' => 'webcamproctor',
-            //     'report_url' => '/mod/quiz/accessrule/webcamproctor/report.php',
-            //     'icon' => 'video',
-            //     'category' => 'ai_credit',
-            // ),
-            // 'mod_aivideoconf' => array(
-            //     'name' => 'AI Video Conference',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aivideoconf',
-            //     'icon' => 'video-cam',
-            //     'category' => 'ai_credit',
-            // ),.
             'mod_aivideoactivity' => [
                 'name' => 'AI Video Activity',
                 'plugin_type' => 'mod',
@@ -288,7 +266,7 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'file-check-2',
                 'category' => 'ai_rto',
             ],
-            // ===== BLOCKS =====.
+            // BLOCKS.
             'block_aigrader_dashboard' => [
                 'name' => 'AI Grader Dashboard',
                 'plugin_type' => 'block',
@@ -305,21 +283,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'navigation',
                 'category' => 'block',
             ],
-            // TESTING - Hidden until ready
-            // 'block_trainingmatrix' => array(
-            //     'name' => 'My Training Progress',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'bar-chart-2',
-            //     'category' => 'block',
-            // ),
-            // 'block_trainingmatrix_teacher' => array(
-            //     'name' => 'Staff Training Dashboard',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix_teacher',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
-            // ),.
             'block_my_progress' => [
                 'name' => 'My Progress',
                 'plugin_type' => 'block',
@@ -336,7 +299,7 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'users',
                 'category' => 'block',
             ],
-            // ===== CENTRAL CONFIG =====.
+            // CENTRAL CONFIG.
             'local_aiconfig' => [
                 'name' => 'AI Grader Central Config',
                 'plugin_type' => 'local',
@@ -346,17 +309,7 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'settings',
                 'category' => 'config',
             ],
-            // ===== TIME SAVING PLUGINS (Admin) =====
-            // TESTING - Hidden until ready
-            // 'local_trainingmatrix' => array(
-            //     'name' => 'AI Training Matrix HCM',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'settings_url' => '/admin/settings.php?section=local_trainingmatrix',
-            //     'page_url' => '/local/trainingmatrix/index.php',
-            //     'icon' => 'users-2',
-            //     'category' => 'admin',
-            // ),.
+            // TIME SAVING PLUGINS (Admin).
             'local_groupmanager' => [
                 'name' => 'Groups Management',
                 'plugin_type' => 'local',
@@ -648,25 +601,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'users',
                 'category' => 'training',
             ],
-            // TESTING - Hidden until ready
-            // 'assignfeedback_aipdf' => array(
-            //     'name' => 'AI PDF Assignment Grader',
-            //     'plugin_type' => 'assignfeedback',
-            //     'plugin_name' => 'aipdf',
-            //     'settings_url' => '/admin/settings.php?section=assignfeedback_aipdf',
-            //     'icon' => 'file-text',
-            //     'category' => 'ai_credit',
-            // ),
-            // TESTING - Hidden until ready
-            // 'report_performanceintel' => array(
-            //     'name' => 'Speed (Performance Intelligence)',
-            //     'plugin_type' => 'report',
-            //     'plugin_name' => 'performanceintel',
-            //     'settings_url' => '/admin/settings.php?section=report_performanceintel',
-            //     'page_url' => '/report/performanceintel/index.php',
-            //     'icon' => 'zap',
-            //     'category' => 'utility',
-            // ),.
             'local_beacon' => [
                 'name' => 'Beacon — Reports & Analytics',
                 'plugin_type' => 'local',
@@ -695,13 +629,13 @@ class block_aiplugin_nav extends block_base {
      * @return string Placeholder or fallback color.
      */
     public function get_theme_primary_color() {
-        global $PAGE, $CFG;
+        global $CFG;
 
         $defaultcolor = '#3b82f6';
 
         // Method 1: Try using theme_config::load() for Moodle 4.x/5.x.
         try {
-            $themeconfig = \theme_config::load($PAGE->theme->name);
+            $themeconfig = \theme_config::load($this->page->theme->name);
             if (!empty($themeconfig->settings->brandcolor)) {
                 return $themeconfig->settings->brandcolor;
             }
@@ -712,11 +646,11 @@ class block_aiplugin_nav extends block_base {
                 return $themeconfig->settings->primary;
             }
         } catch (Exception $e) {
-            // Fall through.
+            debugging($e->getMessage(), DEBUG_DEVELOPER);
         }
 
         // Method 2: Try get_config for current theme.
-        $themename = !empty($PAGE->theme->name) ? $PAGE->theme->name : '';
+        $themename = !empty($this->page->theme->name) ? $this->page->theme->name : '';
         if (!empty($themename)) {
             $brandcolor = get_config('theme_' . $themename, 'brandcolor');
             if (!empty($brandcolor)) {
@@ -741,7 +675,7 @@ class block_aiplugin_nav extends block_base {
                     }
                 }
             } catch (Exception $e) {
-                // Fall through.
+                debugging($e->getMessage(), DEBUG_DEVELOPER);
             }
         }
 
@@ -760,7 +694,7 @@ class block_aiplugin_nav extends block_base {
      * Build the block content.
      */
     public function get_content() {
-        global $CFG, $PAGE, $USER;
+        global $CFG, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -790,7 +724,7 @@ class block_aiplugin_nav extends block_base {
         // install receipt) are declared in lib.php via block_aiplugin_nav_user_preferences(),
         // which is what lets core_user/repository write them. The old
         // user_preference_allow_ajax_update() route is deprecated and is not used.
-        $PAGE->requires->js_call_amd('block_aiplugin_nav/ui', 'init');
+        $this->page->requires->js_call_amd('block_aiplugin_nav/ui', 'init');
 
         // The credits module is not loaded alongside the new UI. It writes to
         // #ainav-credits-placeholder and #ainav-credits-badge, legacy element ids this
@@ -967,30 +901,6 @@ class block_aiplugin_nav extends block_base {
                     '-marks submissions against your answer key; teacher reviews and approves before grades post to the gradebook.',
                 'access' => 'Course > Add activity > AI Smart Workbook',
             ],
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'AI Quiz',
-            //     'component' => 'mod_aiquiz',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aiquiz',
-            //     'icon' => 'help-circle',
-            //     'category' => 'ai',
-            //     'description' => 'AI-powered quiz activity with 5 question types, webcam proctoring, security features, and
-            //     detailed analytics.',
-            //     'access' => 'Course > Add activity > AI Quiz',
-            // ),
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'AI Practical Assessment',
-            //     'component' => 'mod_practicalassessment',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'practicalassessment',
-            //     'icon' => 'clipboard-check',
-            //     'category' => 'ai',
-            //     'description' => 'Workplace practical assessments with skills checklists, supervisor verification, and competency
-            //     mapping.',
-            //     'access' => 'Course > Add activity > AI Practical Assessment',
-            // ),.
             [
                 'name' => 'AI Verify ID',
                 'component' => 'mod_verifyid',
@@ -1001,27 +911,6 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'AI-powered identity verification using face comparison with configurable similarity thresholds.',
                 'access' => 'Course > Add activity > AI Verify ID',
             ],
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'AI Webcam Proctoring',
-            //     'component' => 'quizaccess_webcamproctor',
-            //     'plugin_type' => 'quizaccess',
-            //     'plugin_name' => 'webcamproctor',
-            //     'icon' => 'eye',
-            //     'category' => 'ai',
-            //     'description' => 'Webcam monitoring during quizzes with periodic photo capture for exam integrity.',
-            //     'access' => 'Quiz > Settings > Extra restrictions',
-            // ),
-            // Array(
-            //     'name' => 'AI Video Conference',
-            //     'component' => 'mod_aivideoconf',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'aivideoconf',
-            //     'icon' => 'video-cam',
-            //     'category' => 'ai',
-            //     'description' => 'HD video conferencing with AI transcription, session recording, and attendance tracking.',
-            //     'access' => 'Course > Add activity > AI Video Conference',
-            // ),.
             [
                 'name' => 'AI RTO Compliance',
                 'component' => 'local_rtocompliance',
@@ -1052,18 +941,6 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Site admin > Plugins > Local plugins > RPL Kit',
                 'goto_url' => '/local/rplkit/index.php',
             ],
-            // Array(
-            //     'name' => 'AI Training Matrix HCM',
-            //     'component' => 'local_trainingmatrix',
-            //     'plugin_type' => 'local',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'users-2',
-            //     'category' => 'ai',
-            //     'description' => 'Human Capital Management for staff competency tracking. AI-powered competency generation (10
-            //     credits per position).',
-            //     'access' => 'Site admin > Plugins > Local plugins > AI Training Matrix',
-            //     'goto_url' => '/local/trainingmatrix/index.php',
-            // ),.
             [
                 'name' => 'AI Support',
                 'component' => 'local_moodlesupport',
@@ -1089,19 +966,6 @@ class block_aiplugin_nav extends block_base {
                 'access' => 'Site admin > Plugins > Local plugins > Beacon',
                 'goto_url' => '/local/beacon/index.php',
             ],
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'Speed',
-            //     'component' => 'report_performanceintel',
-            //     'plugin_type' => 'report',
-            //     'plugin_name' => 'performanceintel',
-            //     'icon' => 'zap',
-            //     'category' => 'utility',
-            //     'description' => 'Performance Intelligence for real-time monitoring of user experience, bottleneck
-            //     identification, and actionable fixes.',
-            //     'access' => 'Site admin > Reports > Speed (Performance Intelligence)',
-            //     'goto_url' => '/report/performanceintel/index.php',
-            // ),
             // Blocks.
             [
                 'name' => 'AI Grader Dashboard',
@@ -1144,29 +1008,6 @@ class block_aiplugin_nav extends block_base {
                     'n tracking.',
                 'access' => 'Dashboard > Add block > My Students Progress',
             ],
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'My Training Progress',
-            //     'component' => 'block_trainingmatrix',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
-            //     'group' => 'AI Training Matrix HCM',
-            //     'description' => 'Staff training progress with compliance ring, required competencies, and action items.',
-            //     'access' => 'Dashboard > Add block > My Training Progress',
-            // ),
-            // Array(
-            //     'name' => 'Staff Training Dashboard',
-            //     'component' => 'block_trainingmatrix_teacher',
-            //     'plugin_type' => 'block',
-            //     'plugin_name' => 'trainingmatrix_teacher',
-            //     'icon' => 'users-2',
-            //     'category' => 'block',
-            //     'group' => 'AI Training Matrix HCM',
-            //     'description' => 'Manager view of staff compliance, expiring competencies, and staff needing attention.',
-            //     'access' => 'Dashboard > Add block > Staff Training Dashboard',
-            // ),
             // Time Saving Plugins ($100 AUD one-time purchase).
             [
                 'name' => 'Quiz Access Rule',
@@ -1521,40 +1362,6 @@ class block_aiplugin_nav extends block_base {
                     'ied in real-time via IMAP. Works alongside Student Email Manager.',
                 'access' => 'Site admin > Plugins > Authentication > Student Email IMAP Auth',
             ],
-            // TESTING — BigBlueButton and Recordings hidden until fully tested.
-            // Array(
-            //     'name' => 'BigBlueButton (Moodle 4.x)',
-            //     'component' => 'mod_bigbluebuttonbn',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'bigbluebuttonbn',
-            //     'icon' => 'video',
-            //     'category' => 'utility',
-            //     'description' => 'HD video conferencing with breakout rooms, polling, and session recording. Moodle 4.x
-            //     compatible build.',
-            //     'access' => 'Course > Add activity > BigBlueButton',
-            // ),
-            // Array(
-            //     'name' => 'BigBlueButton Recordings (Moodle 4.x)',
-            //     'component' => 'mod_recordingsbn',
-            //     'plugin_type' => 'mod',
-            //     'plugin_name' => 'recordingsbn',
-            //     'icon' => 'play-circle',
-            //     'category' => 'utility',
-            //     'description' => 'Companion plugin for BigBlueButton. Browse, manage, and share session recordings within Moodle
-            //     courses.',
-            //     'access' => 'Course > Add activity > BigBlueButton Recordings',
-            // ),
-            // TESTING - Hidden until ready
-            // Array(
-            //     'name' => 'AI PDF Assignment Grader',
-            //     'component' => 'assignfeedback_aipdf',
-            //     'plugin_type' => 'assignfeedback',
-            //     'plugin_name' => 'aipdf',
-            //     'icon' => 'file-text',
-            //     'category' => 'ai',
-            //     'description' => 'AI-powered PDF assignment grading with rubric-based feedback and inline annotations.',
-            //     'access' => 'Assignment > Feedback types > AI PDF Grader',
-            // ),.
             [
                 'name' => 'Workshop Attendance Condition',
                 'component' => 'availability_workshopattendance',
@@ -1715,6 +1522,103 @@ class block_aiplugin_nav extends block_base {
                 'description' => 'Wilkinson Coutts Question Behaviour.',
                 'access' => 'Site admin > Plugins',
             ],
+            // Testing-stage builds. They stay in the registry so the release pipeline's
+            // cross-plugin completeness check can see them, but carry 'status' => 'testing'
+            // so payload.php drops them from the catalogue unless the site already runs one
+            // (see block_aiplugin_nav_payload::is_testing_stage).
+            [
+                'name' => 'AI Quiz',
+                'component' => 'mod_aiquiz',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'aiquiz',
+                'icon' => 'help-circle',
+                'category' => 'ai',
+                'description' => 'AI-powered quiz activity with 5 question types, webcam proctoring, security features, and ' .
+                'detailed analytics.',
+                'access' => 'Course > Add activity > AI Quiz',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'AI PDF Assignment Grader',
+                'component' => 'assignfeedback_aipdf',
+                'plugin_type' => 'assignfeedback',
+                'plugin_name' => 'aipdf',
+                'icon' => 'file-text',
+                'category' => 'ai',
+                'description' => 'AI-powered PDF assignment grading with rubric-based feedback and inline annotations.',
+                'access' => 'Assignment > Feedback types > AI PDF Grader',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'AI Webcam Proctoring',
+                'component' => 'quizaccess_webcamproctor',
+                'plugin_type' => 'quizaccess',
+                'plugin_name' => 'webcamproctor',
+                'icon' => 'eye',
+                'category' => 'ai',
+                'description' => 'Webcam monitoring during quizzes with periodic photo capture for exam integrity.',
+                'access' => 'Quiz > Settings > Extra restrictions',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'AI Practical Assessment',
+                'component' => 'mod_practicalassessment',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'practicalassessment',
+                'icon' => 'clipboard-check',
+                'category' => 'ai',
+                'description' => 'Workplace practical assessments with skills checklists, supervisor verification, and ' .
+                'competency mapping.',
+                'access' => 'Course > Add activity > AI Practical Assessment',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'AI Video Conference',
+                'component' => 'mod_aivideoconf',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'aivideoconf',
+                'icon' => 'video-cam',
+                'category' => 'ai',
+                'description' => 'HD video conferencing with AI transcription, session recording, and attendance tracking.',
+                'access' => 'Course > Add activity > AI Video Conference',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'BigBlueButton (Moodle 4.x)',
+                'component' => 'mod_bigbluebuttonbn',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'bigbluebuttonbn',
+                'icon' => 'video',
+                'category' => 'utility',
+                'description' => 'HD video conferencing with breakout rooms, polling, and session recording. Moodle 4.x ' .
+                'compatible build.',
+                'access' => 'Course > Add activity > BigBlueButton',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'BigBlueButton Recordings (Moodle 4.x)',
+                'component' => 'mod_recordingsbn',
+                'plugin_type' => 'mod',
+                'plugin_name' => 'recordingsbn',
+                'icon' => 'play-circle',
+                'category' => 'utility',
+                'description' => 'Companion plugin for BigBlueButton. Browse, manage, and share session recordings within ' .
+                'Moodle courses.',
+                'access' => 'Course > Add activity > BigBlueButton Recordings',
+                'status' => 'testing',
+            ],
+            [
+                'name' => 'Speed',
+                'component' => 'report_performanceintel',
+                'plugin_type' => 'report',
+                'plugin_name' => 'performanceintel',
+                'icon' => 'zap',
+                'category' => 'utility',
+                'description' => 'Performance Intelligence for real-time monitoring of user experience, bottleneck ' .
+                'identification, and actionable fixes.',
+                'access' => 'Site admin > Reports > Speed (Performance Intelligence)',
+                'status' => 'testing',
+            ],
         ];
     }
 
@@ -1763,16 +1667,23 @@ class block_aiplugin_nav extends block_base {
 
     /**
      * Get installed plugin version from version.php.
+     *
+     * @param string $plugintype The Moodle plugin type, e.g. mod or block.
+     * @param string $pluginname The plugin's short name.
+     * @return string The release string, or an empty string when not installed.
      */
     public function get_plugin_version($plugintype, $pluginname) {
         return $this->get_plugin_version_data($plugintype, $pluginname)['release'];
     }
 
+    /**
+     * Get the installed numeric version of a plugin from its version.php.
+     *
+     * @param string $plugintype The Moodle plugin type, e.g. mod or block.
+     * @param string $pluginname The plugin's short name.
+     * @return string|int The numeric version, or an empty string when not installed.
+     */
     public function get_plugin_numeric_version($plugintype, $pluginname) {
         return $this->get_plugin_version_data($plugintype, $pluginname)['version'];
     }
-
-    /**
-     * Render a single plugin card with status label, update/install button, and beautiful tooltip.
-     */
 }

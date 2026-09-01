@@ -33,6 +33,13 @@ use external_function_parameters;
 use external_value;
 use external_single_structure;
 
+/**
+ * External services for the block's user-defined links and reports.
+ *
+ * @package    block_aiplugin_nav
+ * @copyright  2025 Essay Grader AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class custom_links extends external_api {
     /**
      * Returns description of save_custom_link parameters.
@@ -47,6 +54,11 @@ class custom_links extends external_api {
 
     /**
      * Save a custom link.
+     *
+     * @param string $name The link's display name.
+     * @param string $url The link's target URL.
+     * @param string $icon The icon name to show beside it.
+     * @return array The web service result.
      */
     public static function save_custom_link($name, $url, $icon) {
         global $USER, $CFG;
@@ -120,6 +132,9 @@ class custom_links extends external_api {
 
     /**
      * Delete a custom link.
+     *
+     * @param int $index The zero-based position of the link to delete.
+     * @return array The web service result.
      */
     public static function delete_custom_link($index) {
         global $USER, $CFG;
@@ -167,6 +182,11 @@ class custom_links extends external_api {
 
     /**
      * Save a custom report.
+     *
+     * @param string $name The report's display name.
+     * @param string $url The report's target URL.
+     * @param string $icon The icon name to show beside it.
+     * @return array The web service result.
      */
     public static function save_custom_report($name, $url, $icon) {
         global $USER, $CFG;
@@ -240,6 +260,9 @@ class custom_links extends external_api {
 
     /**
      * Delete a custom report.
+     *
+     * @param int $index The zero-based position of the report to delete.
+     * @return array The web service result.
      */
     public static function delete_custom_report($index) {
         global $USER, $CFG;

@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Declare the user preferences this block writes from JavaScript.
  *
@@ -42,19 +40,19 @@ function block_aiplugin_nav_user_preferences(): array {
     return [
         // JSON array of favourited item names.
         'block_aiplugin_nav_faves' => [
-            'type'               => PARAM_RAW, // pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
+            'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
             'null'               => NULL_NOT_ALLOWED,
             'default'            => '[]',
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
         // JSON object of saved per-panel layouts: filters, sort and open categories.
         'block_aiplugin_nav_layout' => [
-            'type'               => PARAM_RAW, // pipeline-ignore: PARAM_RAW — JSON object, json_decode()'d on read.
+            'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON object, json_decode()'d on read.
             'null'               => NULL_NOT_ALLOWED,
             'default'            => '{}',
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
-        // "1" or "0" — whether the hover help cards are shown.
+        // Flag "1" or "0" — whether the hover help cards are shown.
         'block_aiplugin_nav_help' => [
             'type'               => PARAM_INT,
             'null'               => NULL_NOT_ALLOWED,
@@ -63,7 +61,7 @@ function block_aiplugin_nav_user_preferences(): array {
         ],
         // JSON array of recent installs and what each cost, for the install receipt.
         'block_aiplugin_nav_spend' => [
-            'type'               => PARAM_RAW, // pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
+            'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
             'null'               => NULL_NOT_ALLOWED,
             'default'            => '[]',
             'permissioncallback' => [core_user::class, 'is_current_user'],

@@ -37,10 +37,10 @@ if (!array_key_exists('attendance', core_component::get_plugin_list('mod'))) {
     throw new moodle_exception('pluginnotinstalled', 'error', '', 'mod_attendance');
 }
 
-// ── Filters ────────────────────────────────────────────────────────────────.
+// Filters.
 $filtercourseid = optional_param('courseid', 0, PARAM_INT);
 $filterfromstr = optional_param('from_str', '', PARAM_ALPHANUMEXT);
-$filtertostr   = optional_param('to_str',   '', PARAM_ALPHANUMEXT);
+$filtertostr   = optional_param('to_str', '', PARAM_ALPHANUMEXT);
 $export          = optional_param('export', '', PARAM_ALPHA);
 $filterfrom     = 0;
 $filterto       = 0;
@@ -55,7 +55,7 @@ if ($filtertostr && preg_match('/^\d{4}-\d{2}-\d{2}$/', $filtertostr)) {
     $filterto = mktime(23, 59, 59, (int)$tm, (int)$td, (int)$ty);
 }
 
-// ── Session-level WHERE clause (date only — applied to LEFT JOINs on sessions) ─
+// Session-level WHERE clause (date only — applied to LEFT JOINs on sessions).
 // Kept separate from the course filter because sessions use LEFT JOIN; putting
 // The course filter here would accidentally exclude activities with no sessions.
 $sessionjoincond = '';
@@ -69,7 +69,7 @@ if ($filterto > 0) {
     $sessionparams['sto'] = $filterto;
 }
 
-// ── Combined WHERE clause (date + course) — used in summary stats and at-risk ─
+// Combined WHERE clause (date + course) — used in summary stats and at-risk.
 // All four summary stat queries JOIN attendance → course so both filters apply.
 $combinedwhere  = '1=1';
 $combinedparams = [];
@@ -86,15 +86,15 @@ if ($filtercourseid > 0) {
     $combinedparams['courseid'] = $filtercourseid;
 }
 
-// ── Activity-level WHERE clause (course filter for the activities breakdown) ──.
+// Activity-level WHERE clause (course filter for the activities breakdown).
 $activitywhere  = '';
-$activityparams = $sessionparams; // Date filter applied to session LEFT JOIN
+$activityparams = $sessionparams; // Date filter applied to session LEFT JOIN.
 if ($filtercourseid > 0) {
     $activitywhere                   = ' AND a.course = :act_courseid';
     $activityparams['act_courseid']  = $filtercourseid;
 }
 
-// ── Summary stats — ALL FOUR cards respect both date and course filters ──────.
+// Summary stats — ALL FOUR cards respect both date and course filters.
 
 // Total attendance activities.
 $totalactivities = $filtercourseid > 0
@@ -136,7 +136,7 @@ $overallrate = ($raterow && $raterow->total_logs > 0)
     ? min(100.0, round((float)$raterow->avg_grade * 100, 1))
     : null;
 
-// ── Course list for filter dropdown ─────────────────────────────────────────.
+// Course list for filter dropdown.
 $coursesall = $DB->get_records_sql(
     "SELECT DISTINCT c.id, c.fullname
        FROM {course} c
@@ -144,7 +144,7 @@ $coursesall = $DB->get_records_sql(
       ORDER BY c.fullname ASC"
 );
 
-// ── Pre-load all attendance course modules in ONE query (prevents N+1) ───────.
+// Pre-load all attendance course modules in ONE query (prevents N+1).
 $modid = $DB->get_field('modules', 'id', ['name' => 'attendance']);
 $cmmap = [];
 if ($modid) {
@@ -153,7 +153,7 @@ if ($modid) {
     }
 }
 
-// ── Per-activity breakdown table ─────────────────────────────────────────────
+// Per-activity breakdown table.
 // Rate: AVG(grade) per activity (NULL when no logs → shown as N/A in PHP).
 // ROUND() not used in SQL to avoid PostgreSQL NUMERIC cast issues.
 $activities = $DB->get_records_sql(
@@ -178,7 +178,7 @@ $activities = $DB->get_records_sql(
     $activityparams
 );
 
-// ── At-risk students (attendance below 80%) ──────────────────────────────────.
+// At-risk students (attendance below 80%).
 $atriskparams              = $combinedparams;
 $atriskparams['threshold'] = 80;
 $atriskstudents = $DB->get_records_sql(
@@ -199,11 +199,11 @@ $atriskstudents = $DB->get_records_sql(
      HAVING AVG(ast.grade) * 100 < :threshold
      ORDER BY AVG(ast.grade) ASC",
     $atriskparams,
-    0,   // Limitfrom — Moodle-compliant cross-DB row limiting
-    100  // Limitnum
+    0, // Limitfrom — Moodle-compliant cross-DB row limiting.
+    100  // Limitnum.
 );
 
-// ── Recent sessions (last 20) ────────────────────────────────────────────────.
+// Recent sessions (last 20).
 $recentwhereextra = $filtercourseid > 0 ? ' AND a.course = :rc_courseid' : '';
 $recentparams      = $sessionparams;
 if ($filtercourseid > 0) {
@@ -228,11 +228,11 @@ $recentsessions = $DB->get_records_sql(
      GROUP BY s.id, s.sessdate, a.name, c.fullname, c.id
      ORDER BY s.sessdate DESC",
     $recentparams,
-    0,   // Limitfrom
-    20   // Limitnum
+    0, // Limitfrom.
+    20   // Limitnum.
 );
 
-// ── CSV export ───────────────────────────────────────────────────────────────.
+// CSV export.
 if ($export === 'csv') {
     $filename = 'attendance_report_' . date('Y-m-d') . '.csv';
     header('Content-Type: text/csv; charset=utf-8');
@@ -284,7 +284,12 @@ if ($export === 'csv') {
     exit;
 }
 
-// ── Helper functions ─────────────────────────────────────────────────────────.
+/**
+ * Render one attendance percentage as a coloured badge.
+ *
+ * @param mixed $pctraw The raw percentage from the query, or null when unknown.
+ * @return string The badge markup.
+ */
 function attendance_pct_badge($pctraw) {
     if ($pctraw === null || $pctraw === '' || $pctraw === false) {
         return '<span class="atnrpt-badge atnrpt-badge-neutral">N/A</span>';
@@ -305,22 +310,21 @@ $csvurl = new moodle_url('/blocks/aiplugin_nav/attendance_report.php', [
 ]);
 $clearurl = new moodle_url('/blocks/aiplugin_nav/attendance_report.php');
 
-// ── Page setup ───────────────────────────────────────────────────────────────.
+// Page setup.
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/blocks/aiplugin_nav/attendance_report.php'));
 $PAGE->set_title('Attendance Report');
 $PAGE->set_heading('Attendance Report');
 $PAGE->set_pagelayout('admin');
 
-// ── Output ───────────────────────────────────────────────────────────────────.
+// Output.
 echo $OUTPUT->header();
-?>
-<style>
+echo '<style>
 .atnrpt-wrap {
     max-width: 1100px;
     margin: 0 auto;
     padding: 24px 16px 48px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;
 }
 .atnrpt-page-title {
     font-size: 22px;
@@ -514,60 +518,91 @@ echo $OUTPUT->header();
                 <span class="atnrpt-filter-label">Course</span>
                 <select name="courseid">
                     <option value="0">All courses</option>
-                    <?php foreach ($coursesall as $c): ?>
-                        <option value="<?php echo (int)$c->id; ?>" <?php echo ($filtercourseid == $c->id ? 'selected' : ''); ?>>
-                            <?php echo htmlspecialchars($c->fullname, ENT_QUOTES); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                    ';
+foreach ($coursesall as $c) :
+    echo '                        <option value="';
+    echo (int)$c->id;
+    echo '" ';
+    echo ($filtercourseid == $c->id ? 'selected' : '');
+    echo '>
+                            ';
+    echo htmlspecialchars($c->fullname, ENT_QUOTES);
+    echo '                        </option>
+                    ';
+endforeach;
+echo '                </select>
             </div>
             <div class="atnrpt-filter-group">
                 <span class="atnrpt-filter-label">From</span>
                 <input type="date" name="from_str"
-                    value="<?php echo htmlspecialchars($filterfromstr, ENT_QUOTES); ?>">
+                    value="';
+ echo htmlspecialchars($filterfromstr, ENT_QUOTES);
+echo '">
             </div>
             <div class="atnrpt-filter-group">
                 <span class="atnrpt-filter-label">To</span>
                 <input type="date" name="to_str"
-                    value="<?php echo htmlspecialchars($filtertostr, ENT_QUOTES); ?>">
+                    value="';
+ echo htmlspecialchars($filtertostr, ENT_QUOTES);
+echo '">
             </div>
             <button type="submit" class="atnrpt-filter-btn">Apply</button>
-            <?php if ($filtercourseid || $filterfrom || $filterto): ?>
-                <a href="<?php echo $clearurl->out(); ?>" class="atnrpt-clear-link">Clear filters</a>
-            <?php endif; ?>
-        </div>
+            ';
+if ($filtercourseid || $filterfrom || $filterto) :
+    echo '                <a href="';
+    echo $clearurl->out();
+    echo '" class="atnrpt-clear-link">Clear filters</a>
+            ';
+endif;
+echo '        </div>
     </form>
 
     <!-- Summary stats — respect both course and date filters -->
     <div class="atnrpt-stats">
         <div class="atnrpt-stat-card">
             <div class="atnrpt-stat-label">Activities</div>
-            <div class="atnrpt-stat-value"><?php echo (int)$totalactivities; ?></div>
+            <div class="atnrpt-stat-value">';
+ echo (int)$totalactivities;
+echo '</div>
         </div>
         <div class="atnrpt-stat-card">
             <div class="atnrpt-stat-label">Sessions</div>
-            <div class="atnrpt-stat-value"><?php echo (int)$totalsessions; ?></div>
+            <div class="atnrpt-stat-value">';
+ echo (int)$totalsessions;
+echo '</div>
         </div>
         <div class="atnrpt-stat-card">
             <div class="atnrpt-stat-label">Students Logged</div>
-            <div class="atnrpt-stat-value"><?php echo (int)$totalstudents; ?></div>
+            <div class="atnrpt-stat-value">';
+ echo (int)$totalstudents;
+echo '</div>
             <div class="atnrpt-stat-note">Students with at least one attendance record</div>
         </div>
         <div class="atnrpt-stat-card">
             <div class="atnrpt-stat-label">Overall Attendance</div>
-            <?php if ($overallrate !== null): ?>
-                <?php $ratecls = $overallrate >= 80 ? 'rate-good' : ($overallrate >= 60 ? 'rate-warn' : 'rate-poor'); ?>
-                <div class="atnrpt-stat-value <?php echo $ratecls; ?>"><?php echo number_format($overallrate, 1); ?>%</div>
-            <?php else: ?>
-                <div class="atnrpt-stat-value" style="font-size:18px;color:#94a3b8;">No data</div>
-            <?php endif; ?>
-        </div>
+            ';
+if ($overallrate !== null) :
+    echo '                ';
+    $ratecls = $overallrate >= 80 ? 'rate-good' : ($overallrate >= 60 ? 'rate-warn' : 'rate-poor');
+    echo '                <div class="atnrpt-stat-value ';
+    echo $ratecls;
+    echo '">';
+    echo number_format($overallrate, 1);
+    echo '%</div>
+            ';
+else :
+     echo '                <div class="atnrpt-stat-value" style="font-size:18px;color:#94a3b8;">No data</div>
+            ';
+endif;
+ echo '        </div>
     </div>
 
     <!-- Per-activity breakdown -->
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
         <div class="atnrpt-section-title" style="margin:0;">Activities by Course</div>
-        <a href="<?php echo $csvurl->out(); ?>" class="atnrpt-csv-btn">
+        <a href="';
+ echo $csvurl->out();
+ echo '" class="atnrpt-csv-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -578,10 +613,12 @@ echo $OUTPUT->header();
         </a>
     </div>
     <div class="atnrpt-table-wrap">
-        <?php if (empty($activities)): ?>
-            <div class="atnrpt-empty">No attendance activities found.</div>
-        <?php else: ?>
-            <table class="atnrpt-table">
+        ';
+if (empty($activities)) :
+    echo '            <div class="atnrpt-empty">No attendance activities found.</div>
+        ';
+else :
+     echo '            <table class="atnrpt-table">
                 <thead>
                     <tr>
                         <th>Course</th>
@@ -594,68 +631,101 @@ echo $OUTPUT->header();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($activities as $act): ?>
-                        <?php
-                            // CM looked up from pre-loaded map — no per-row DB query.
-                            $cm         = $cmmap[(int)$act->id] ?? null;
-                            $cmurl     = $cm ? ($CFG->wwwroot . '/mod/attendance/view.php?id=' . $cm->id)   : null;
-                            $reporturl = $cm ? ($CFG->wwwroot . '/mod/attendance/report.php?id=' . $cm->id) : null;
-                        ?>
-                        <tr>
+                    ';
+    foreach ($activities as $act) :
+        echo '                        ';
+                           // CM looked up from pre-loaded map — no per-row DB query.
+                           $cm         = $cmmap[(int)$act->id] ?? null;
+                           $cmurl     = $cm ? ($CFG->wwwroot . '/mod/attendance/view.php?id=' . $cm->id) : null;
+                           $reporturl = $cm ? ($CFG->wwwroot . '/mod/attendance/report.php?id=' . $cm->id) : null;
+
+        echo '                        <tr>
                             <td>
                                 <a class="course-link"
-                                   href="<?php echo $CFG->wwwroot; ?>/course/view.php?id=<?php echo (int)$act->course_id; ?>">
-                                    <?php echo htmlspecialchars($act->course_name, ENT_QUOTES); ?>
-                                </a>
+                                   href="';
+        echo $CFG->wwwroot;
+        echo '/course/view.php?id=';
+        echo (int)$act->course_id;
+        echo '">
+                                    ';
+        echo htmlspecialchars($act->course_name, ENT_QUOTES);
+        echo '                                </a>
                             </td>
-                            <td><?php echo htmlspecialchars($act->activity_name, ENT_QUOTES); ?></td>
-                            <td><?php echo (int)$act->session_count; ?></td>
-                            <td><?php echo (int)$act->student_count; ?></td>
-                            <td><?php echo attendance_pct_badge($act->attendance_pct_raw); ?></td>
+                            <td>';
+        echo htmlspecialchars($act->activity_name, ENT_QUOTES);
+        echo '</td>
+                            <td>';
+        echo (int)$act->session_count;
+        echo '</td>
+                            <td>';
+        echo (int)$act->student_count;
+        echo '</td>
+                            <td>';
+        echo attendance_pct_badge($act->attendance_pct_raw);
+        echo '</td>
                             <td>
-                                <?php if ($act->last_session): ?>
-                                    <?php echo userdate((int)$act->last_session, get_string('strftimedate', 'langconfig')); ?>
-                                <?php else: ?>
-                                    <span class="text-muted">—</span>
-                                <?php endif; ?>
-                            </td>
+                                ';
+        if ($act->last_session) :
+            echo '                                    ';
+            echo userdate((int)$act->last_session, get_string('strftimedate', 'langconfig'));
+            echo '                                ';
+        else :
+             echo '                                    <span class="text-muted">—</span>
+                                ';
+        endif;
+         echo '                            </td>
                             <td>
-                                <?php if ($reporturl): ?>
-                                    <a href="<?php echo htmlspecialchars($reporturl, ENT_QUOTES); ?>"
+                                ';
+        if ($reporturl) :
+            echo '                                    <a href="';
+            echo htmlspecialchars($reporturl, ENT_QUOTES);
+            echo '"
                                        class="course-link" style="font-size:12px;">View report</a>
-                                <?php else: ?>
-                                    <span class="text-muted">—</span>
-                                <?php endif; ?>
-                            </td>
+                                ';
+        else :
+             echo '                                    <span class="text-muted">—</span>
+                                ';
+        endif;
+         echo '                            </td>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                    ';
+    endforeach;
+     echo '                </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        ';
+endif;
+ echo '    </div>
 
     <!-- At-risk students -->
     <div class="atnrpt-section-title">At-Risk Students</div>
     <p class="atnrpt-section-subtitle">Students with overall attendance below 80% based on current filters.</p>
-    <?php if (!empty($atriskstudents)): ?>
-        <div class="atnrpt-atrisk-banner">
+    ';
+if (!empty($atriskstudents)) :
+    echo '        <div class="atnrpt-atrisk-banner">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-            <?php echo count($atriskstudents); ?> student<?php echo count($atriskstudents) !== 1 ? 's' : ''; ?>
-            below 80% attendance threshold — contact for intervention.
+            ';
+    echo count($atriskstudents);
+    echo ' student';
+    echo count($atriskstudents) !== 1 ? 's' : '';
+    echo '            below 80% attendance threshold — contact for intervention.
         </div>
-    <?php endif; ?>
-    <div class="atnrpt-table-wrap">
-        <?php if (empty($atriskstudents)): ?>
-            <div class="atnrpt-empty">
-                <?php echo $totalstudents > 0 ? 'All tracked students are above 80% a' .
-                    'ttendance.' : 'No attendance data found for current filters.'; ?>
-            </div>
-        <?php else: ?>
-            <table class="atnrpt-table">
+    ';
+endif;
+ echo '    <div class="atnrpt-table-wrap">
+        ';
+if (empty($atriskstudents)) :
+    echo '            <div class="atnrpt-empty">
+                ';
+    echo $totalstudents > 0 ? 'All tracked students are above 80% a' .
+                   'ttendance.' : 'No attendance data found for current filters.';
+    echo '            </div>
+        ';
+else :
+     echo '            <table class="atnrpt-table">
                 <thead>
                     <tr>
                         <th>Student</th>
@@ -665,34 +735,52 @@ echo $OUTPUT->header();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($atriskstudents as $stu): ?>
-                        <tr>
+                    ';
+    foreach ($atriskstudents as $stu) :
+        echo '                        <tr>
                             <td>
                                 <a class="course-link"
-                                   href="<?php echo $CFG->wwwroot; ?>/user/view.php?id=<?php echo (int)$stu->id; ?>">
-                                    <?php echo htmlspecialchars(fullname($stu), ENT_QUOTES); ?>
-                                </a>
+                                   href="';
+        echo $CFG->wwwroot;
+        echo '/user/view.php?id=';
+        echo (int)$stu->id;
+        echo '">
+                                    ';
+        echo htmlspecialchars(fullname($stu), ENT_QUOTES);
+        echo '                                </a>
                             </td>
-                            <td><a href="mailto:<?php echo htmlspecialchars($stu->email, ENT_QUOTES); ?>"
+                            <td><a href="mailto:';
+        echo htmlspecialchars($stu->email, ENT_QUOTES);
+        echo '"
                                    style="color:#64748b;font-size:12px;">
-                                <?php echo htmlspecialchars($stu->email, ENT_QUOTES); ?></a>
+                                ';
+        echo htmlspecialchars($stu->email, ENT_QUOTES);
+        echo '</a>
                             </td>
-                            <td><?php echo (int)$stu->total_logs; ?></td>
-                            <td><?php echo attendance_pct_badge($stu->attendance_pct_raw); ?></td>
+                            <td>';
+        echo (int)$stu->total_logs;
+        echo '</td>
+                            <td>';
+        echo attendance_pct_badge($stu->attendance_pct_raw);
+        echo '</td>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                    ';
+    endforeach;
+     echo '                </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        ';
+endif;
+ echo '    </div>
 
     <!-- Recent sessions -->
     <div class="atnrpt-section-title">Recent Sessions (last 20)</div>
     <div class="atnrpt-table-wrap">
-        <?php if (empty($recentsessions)): ?>
-            <div class="atnrpt-empty">No sessions found.</div>
-        <?php else: ?>
-            <table class="atnrpt-table">
+        ';
+if (empty($recentsessions)) :
+    echo '            <div class="atnrpt-empty">No sessions found.</div>
+        ';
+else :
+     echo '            <table class="atnrpt-table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -703,27 +791,43 @@ echo $OUTPUT->header();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($recentsessions as $sess): ?>
-                        <tr>
+                    ';
+    foreach ($recentsessions as $sess) :
+        echo '                        <tr>
                             <td style="white-space:nowrap;">
-                                <?php echo userdate((int)$sess->sessdate, get_string('strftimedate', 'langconfig')); ?>
-                            </td>
+                                ';
+        echo userdate((int)$sess->sessdate, get_string('strftimedate', 'langconfig'));
+        echo '                            </td>
                             <td>
                                 <a class="course-link"
-                                   href="<?php echo $CFG->wwwroot; ?>/course/view.php?id=<?php echo (int)$sess->course_id; ?>">
-                                    <?php echo htmlspecialchars($sess->course_name, ENT_QUOTES); ?>
-                                </a>
+                                   href="';
+        echo $CFG->wwwroot;
+        echo '/course/view.php?id=';
+        echo (int)$sess->course_id;
+        echo '">
+                                    ';
+        echo htmlspecialchars($sess->course_name, ENT_QUOTES);
+        echo '                                </a>
                             </td>
-                            <td><?php echo htmlspecialchars($sess->activity_name, ENT_QUOTES); ?></td>
-                            <td><?php echo (int)$sess->log_count; ?></td>
-                            <td><?php echo attendance_pct_badge($sess->attendance_pct_raw); ?></td>
+                            <td>';
+        echo htmlspecialchars($sess->activity_name, ENT_QUOTES);
+        echo '</td>
+                            <td>';
+        echo (int)$sess->log_count;
+        echo '</td>
+                            <td>';
+        echo attendance_pct_badge($sess->attendance_pct_raw);
+        echo '</td>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                    ';
+    endforeach;
+     echo '                </tbody>
             </table>
-        <?php endif; ?>
-    </div>
+        ';
+endif;
+ echo '    </div>
 
 </div>
 
-<?php echo $OUTPUT->footer(); ?>
+';
+ echo $OUTPUT->footer();

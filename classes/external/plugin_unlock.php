@@ -61,6 +61,7 @@ class plugin_unlock extends external_api {
      * Unlock a plugin by consuming credits on lms-labs.com.
      *
      * @param string $pluginid Plugin short ID.
+     * @param string $component The frankenstyle component name, for Marketplace entitlements.
      * @return array Result with success flag, credits consumed, and remaining balance.
      */
     public static function execute(string $pluginid, string $component = '') {
@@ -70,8 +71,10 @@ class plugin_unlock extends external_api {
         self::validate_context($context);
         require_capability('moodle/site:config', $context);
 
-        $params = self::validate_parameters(self::execute_parameters(),
-            ['pluginid' => $pluginid, 'component' => $component]);
+        $params = self::validate_parameters(
+            self::execute_parameters(),
+            ['pluginid' => $pluginid, 'component' => $component]
+        );
 
         // SESSION LOCK: Release before plugin-unlock API call (up to 15 s timeout).
         \core\session\manager::write_close();
@@ -174,8 +177,8 @@ class plugin_unlock extends external_api {
         // Successfully unlocked (or already unlocked).
         //
         // The API's actual response shape (confirmed with the LMS Labs server, 30 Aug 2026):
-        //   new unlock      -> success, message, downloadUrl, remainingCredits
-        //   already unlocked-> success, alreadyUnlocked, message, downloadUrl
+        // new unlock      -> success, message, downloadUrl, remainingCredits
+        // already unlocked-> success, alreadyUnlocked, message, downloadUrl
         // There is no creditsConsumed field on either path. Earlier code read one and
         // defaulted it to 0, so every unlock reported as costing nothing. The amount
         // actually deducted is therefore derived by the caller from the balance before
@@ -224,7 +227,7 @@ class plugin_unlock extends external_api {
         return new external_single_structure([
             'success'          => new external_value(PARAM_BOOL, 'Whether the unlock succeeded'),
             'alreadyunlocked'  => new external_value(PARAM_BOOL, 'True if plugin was already unlocked (no credits consumed)'),
-            'creditsconsumed'  => new external_value(PARAM_INT,  'Number of credits consumed (0 if already unlocked)'),
+            'creditsconsumed'  => new external_value(PARAM_INT, 'Number of credits consumed (0 if already unlocked)'),
             'remainingcredits' => new external_value(PARAM_TEXT, 'Remaining credits balance, or empty string'),
             'message'          => new external_value(PARAM_TEXT, 'Informational message from server'),
             'source'           => new external_value(PARAM_TEXT, 'Entitlement source reported by the API, e.g. marketplace; empty' .

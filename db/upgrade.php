@@ -22,8 +22,12 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Run the block's database upgrade steps.
+ *
+ * @param int $oldversion The version the site is upgrading from.
+ * @return bool True on success.
+ */
 function xmldb_block_aiplugin_nav_upgrade($oldversion) {
     if ($oldversion < 2026081100) {
         // BASELINE-10DIGIT (v2.4.50): Collapsed savepoint for sites upgrading

@@ -62,13 +62,15 @@ class get_purge_status extends external_api {
         // Get last manual purge.
         $lastmanual = $DB->get_record_sql(
             "SELECT * FROM {block_aiplugin_nav_purge} WHERE purge_type = 'manual' ORDER BY purged_at DESC",
-            null, IGNORE_MULTIPLE
+            null,
+            IGNORE_MULTIPLE
         );
 
         // Get last scheduled purge.
         $lastscheduled = $DB->get_record_sql(
             "SELECT * FROM {block_aiplugin_nav_purge} WHERE purge_type = 'scheduled' ORDER BY purged_at DESC",
-            null, IGNORE_MULTIPLE
+            null,
+            IGNORE_MULTIPLE
         );
 
         // Get schedule settings.

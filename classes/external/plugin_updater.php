@@ -34,6 +34,13 @@ use external_value;
 use external_single_structure;
 use context_system;
 
+/**
+ * External services that download, install and upgrade plugins for this block.
+ *
+ * @package    block_aiplugin_nav
+ * @copyright  2025 Essay Grader AI
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class plugin_updater extends external_api {
     /**
      * Returns description of auto_update_plugin parameters.
@@ -49,6 +56,9 @@ class plugin_updater extends external_api {
 
     /**
      * Recursively delete a directory.
+     *
+     * @param string $dir The directory to remove.
+     * @return bool True when the directory was removed.
      */
     private static function delete_directory($dir) {
         if (!is_dir($dir)) {
@@ -68,6 +78,10 @@ class plugin_updater extends external_api {
 
     /**
      * Recursively copy a directory.
+     *
+     * @param string $src The directory to copy from.
+     * @param string $dst The directory to copy to.
+     * @return bool True when every file copied successfully.
      */
     private static function copy_directory($src, $dst) {
         if (!is_dir($src)) {
@@ -104,18 +118,30 @@ class plugin_updater extends external_api {
     /**
      * Check every entry name in a ZIP for path-traversal sequences.
      * Returns true if any entry is unsafe (zip-slip guard).
+     *
+     * @param \ZipArchive $zip The opened archive to inspect.
+     * @return bool True when any entry name is unsafe.
      */
     private static function zip_has_unsafe_paths(\ZipArchive $zip): bool {
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $norm = str_replace('\\', '/', (string)$zip->getNameIndex($i));
-            if ($norm === '') continue;
-            if ($norm[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $norm)) return true;
+            if ($norm === '') {
+                continue;
+            }
+            if ($norm[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $norm)) {
+                return true;
+            }
         }
         return false;
     }
 
     /**
      * Auto-update a plugin by downloading and installing it.
+     *
+     * @param string $component The frankenstyle component name.
+     * @param string $downloadurl The URL of the plugin ZIP.
+     * @param string|null $expectedsha256 The expected SHA-256 of the ZIP, when known.
+     * @return array The web service result.
      */
     public static function auto_update_plugin($component, $downloadurl, $expectedsha256 = null) {
         global $CFG;
@@ -250,7 +276,7 @@ class plugin_updater extends external_api {
             }
 
             // Determine plugin type and directory.
-            list($type, $name) = \core_component::normalize_component($component);
+            [$type, $name] = \core_component::normalize_component($component);
             $plugintypes = \core_component::get_plugin_types();
 
             if (!isset($plugintypes[$type])) {
@@ -294,7 +320,8 @@ class plugin_updater extends external_api {
             }
 
             if (self::zip_has_unsafe_paths($zip)) {
-                $zip->close(); @unlink($zipfile);
+                $zip->close();
+                @unlink($zipfile);
                 return ['success' => false, 'message' => 'ZIP contains unsafe paths (zip-slip) — refusing to extract'];
             }
 
@@ -343,7 +370,7 @@ class plugin_updater extends external_api {
                     // all functional files (version.php, classes/, etc.) are correctly
                     // replaced, so Moodle runs the new code after the DB upgrade.
                     if (self::copy_directory($sourcedir, $plugindir)) {
-                        $overwritefallback = true; // copy already done — skip block below
+                        $overwritefallback = true; // Copy already done — skip the block below.
                     } else {
                         // Even overwrite failed — restore from backup and give up.
                         if ($backupdir && is_dir($backupdir)) {
@@ -395,8 +422,10 @@ class plugin_updater extends external_api {
             // Prevents a ZIP for plugin_a being silently installed under plugin_b's directory.
             $versionphpcontent = @file_get_contents($plugindir . '/version.php');
             if ($versionphpcontent !== false) {
-                if (!preg_match('/\$plugin->component\s*=\s*[\'"]([^\'"]+)[\'"]/', $versionphpcontent, $compmatches)
-                        || $compmatches[1] !== $component) {
+                if (
+                    !preg_match('/\$plugin->component\s*=\s*[\'"]([^\'"]+)[\'"]/', $versionphpcontent, $compmatches)
+                        || $compmatches[1] !== $component
+                ) {
                     $foundcomponent = isset($compmatches[1]) ? $compmatches[1] : 'unknown';
                     self::delete_directory($plugindir);
                     if ($backupdir && is_dir($backupdir)) {
@@ -430,7 +459,6 @@ class plugin_updater extends external_api {
                 'message' => 'Plugin files updated. Click "Run Database Upgrade" to complete.',
                 'needsupgrade' => true,
             ];
-
         } catch (\Exception $e) {
             // Clean up any temp files created before the exception.
             if (isset($extractdir) && is_dir($extractdir)) {
@@ -473,6 +501,11 @@ class plugin_updater extends external_api {
     /**
      * Auto-install a NEW plugin by downloading and extracting it.
      * Unlike auto_update_plugin, this works for plugins not yet installed.
+     *
+     * @param string $component The frankenstyle component name.
+     * @param string $downloadurl The URL of the plugin ZIP.
+     * @param string|null $expectedsha256 The expected SHA-256 of the ZIP, when known.
+     * @return array The web service result.
      */
     public static function auto_install_plugin($component, $downloadurl, $expectedsha256 = null) {
         global $CFG;
@@ -512,7 +545,7 @@ class plugin_updater extends external_api {
 
         try {
             // Determine plugin type and directory from component name.
-            list($type, $name) = \core_component::normalize_component($component);
+            [$type, $name] = \core_component::normalize_component($component);
             $plugintypes = \core_component::get_plugin_types();
 
             if (!isset($plugintypes[$type])) {
@@ -634,7 +667,8 @@ class plugin_updater extends external_api {
             }
 
             if (self::zip_has_unsafe_paths($zip)) {
-                $zip->close(); @unlink($zipfile);
+                $zip->close();
+                @unlink($zipfile);
                 return ['success' => false, 'message' => 'ZIP contains unsafe paths (zip-slip) — refusing to extract'];
             }
 
@@ -681,9 +715,11 @@ class plugin_updater extends external_api {
 
             // Verify the installed plugin's component matches what was requested.
             $vp = @file_get_contents($plugindir . '/version.php');
-            if ($vp === false
+            if (
+                $vp === false
                     || !preg_match('/\$plugin->component\s*=\s*[\'"]([^\'"]+)[\'"]/', $vp, $m)
-                    || $m[1] !== $component) {
+                    || $m[1] !== $component
+            ) {
                 $found = $m[1] ?? 'unknown';
                 self::delete_directory($plugindir);
                 self::delete_directory($extractdir);
@@ -709,7 +745,6 @@ class plugin_updater extends external_api {
                 'message' => 'Plugin installed successfully! Click "Run Database Upgrade" to complete.',
                 'needsupgrade' => true,
             ];
-
         } catch (\Exception $e) {
             // Clean up any temp files created before the exception.
             if (isset($extractdir) && is_dir($extractdir)) {
@@ -763,11 +798,11 @@ class plugin_updater extends external_api {
         // A database upgrade run from an ordinary web request needs two guards that
         // Moodle's own upgrade screen provides and a web service does not:
         //
-        //  1. No execution time limit. Without this the request can be killed by PHP
-        //     part-way through a migration, leaving the schema half-applied. This is the
-        //     failure that actually damages a site.
-        //  2. An exclusive lock, so two admins clicking at the same moment cannot run
-        //     the same upgrade concurrently.
+        // 1. No execution time limit. Without this the request can be killed by PHP
+        // part-way through a migration, leaving the schema half-applied. This is the
+        // failure that actually damages a site.
+        // 2. An exclusive lock, so two admins clicking at the same moment cannot run
+        // the same upgrade concurrently.
         //
         // Maintenance mode is deliberately NOT used. It would evict every learner and
         // teacher for the duration, which on a live site mid-class is its own harm, and
@@ -813,7 +848,6 @@ class plugin_updater extends external_api {
                 'success' => true,
                 'message' => 'Upgrade completed successfully.',
             ];
-
         } catch (\Exception $e) {
             return [
                 'success' => false,

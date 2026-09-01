@@ -24,8 +24,6 @@
 
 namespace block_aiplugin_nav\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Scheduled task to purge all caches.
  */

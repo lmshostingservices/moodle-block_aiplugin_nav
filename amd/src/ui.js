@@ -140,7 +140,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         try {
             // Core_user/repository is the supported route. Its predecessor,
             // M.util.set_user_preference, goes through an endpoint whose whitelist
-            // function (user_preference_allow_ajax_update) is deprecated. The four
+            // helper, user_preference_allow_ajax_update(), is deprecated. The four
             // preferences this block writes are declared in lib.php via
             // block_aiplugin_nav_user_preferences(), which is what authorises them here.
             if (UserRepository && UserRepository.setUserPreference) {
@@ -183,66 +183,46 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     }
 
     /**
+     * Decode a preference value that may arrive already decoded or as a JSON string.
+     *
+     * @param {*} raw The raw preference value from the payload.
+     * @return {*} The decoded value, or null when it is absent or malformed.
+     */
+    function parsePref(raw) {
+        try {
+            return typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
      * Load preference-backed state from the payload, falling back to
      * sensible defaults when the payload does not carry it.
      */
     function loadPrefsFromPayload() {
-        var i, 
-arr;
+        var i;
+        var prefs = DATA.prefs || {};
 
         faves = {};
-        try {
-            arr = (DATA.prefs && DATA.prefs.faves) || DATA.faves || null;
-            if (typeof arr === 'string') {
-                arr = JSON.parse(arr);
+        var arr = parsePref(prefs.faves || DATA.faves || null);
+        if (Array.isArray(arr)) {
+            for (i = 0; i < arr.length; i++) {
+                faves[arr[i]] = true;
             }
-            if (Array.isArray(arr)) {
-                for (i = 0; i < arr.length; i++) {
-                    faves[arr[i]] = true;
-                }
-            }
-        } catch (e) {
-            faves = {};
         }
 
-        spend = [];
-        try {
-            var sp = (DATA.prefs && DATA.prefs.spend) || null;
-            if (typeof sp === 'string') {
-                sp = JSON.parse(sp);
-            }
-            if (Array.isArray(sp)) {
-                spend = sp;
-            }
-        } catch (e) {
-            spend = [];
-        }
+        var sp = parsePref(prefs.spend || null);
+        spend = Array.isArray(sp) ? sp : [];
 
-        layouts = {};
-        try {
-            var lay = (DATA.prefs && DATA.prefs.layout) || DATA.layout || null;
-            if (typeof lay === 'string') {
-                lay = JSON.parse(lay);
-            }
-            if (lay && typeof lay === 'object') {
-                layouts = lay;
-            }
-        } catch (e) {
-            layouts = {};
-        }
+        var lay = parsePref(prefs.layout || DATA.layout || null);
+        layouts = (lay && typeof lay === 'object') ? lay : {};
 
-        helpOn = true;
-        try {
-            var h = (DATA.prefs && DATA.prefs.help);
-            if (h === undefined) {
-                h = DATA.help_pref;
-            }
-            if (h !== undefined && h !== null) {
-                helpOn = (String(h) === '1');
-            }
-        } catch (e) {
-            helpOn = true;
+        var h = prefs.help;
+        if (h === undefined) {
+            h = DATA.help_pref;
         }
+        helpOn = (h === undefined || h === null) ? true : (String(h) === '1');
     }
 
     /* ------------------------------------------------------------------ *
@@ -363,24 +343,38 @@ arr;
      * ------------------------------------------------------------------ */
 
     /**
+     * Build the row-model fields every panel shares.
+     *
+     * @param {Object} x One raw payload entry.
+     * @param {string} kind Row kind: plugin, link or report.
+     * @return {Object} The common row model.
+     */
+    function baseRow(x, kind) {
+        return {
+            name: x.name, cat: x.cat, ptype: x.ptype || 'local', desc: x.desc || '',
+            docs: x.docs || '', kind: kind
+        };
+    }
+
+    /**
      * Return the flat row-model array for a panel id.
      *
      * @param {string} id
      * @return {Array}
      */
     function datasetFor(id) {
-        var src, 
-out = [], 
-i, 
-x;
+        var src,
+out = [],
+i,
+x,
+row;
         if (id === 'plugins') {
             src = DATA.plugins || [];
             for (i = 0; i < src.length; i++) {
                 x = src[i];
-                out.push({
-                    name: x.name, cat: x.cat, ptype: x.ptype || 'local', desc: x.desc || '',
-                    docs: x.docs || '', kind: 'plugin', item: x
-                });
+                row = baseRow(x, 'plugin');
+                row.item = x;
+                out.push(row);
             }
             return out;
         }
@@ -388,10 +382,10 @@ x;
             src = DATA.settings || [];
             for (i = 0; i < src.length; i++) {
                 x = src[i];
-                out.push({
-                    name: x.name, cat: x.cat, ptype: x.ptype || 'local', desc: x.desc || '',
-                    docs: x.docs || '', url: x.url || '#', configured: !!x.configured, kind: 'link'
-                });
+                row = baseRow(x, 'link');
+                row.url = x.url || '#';
+                row.configured = !!x.configured;
+                out.push(row);
             }
             return out;
         }
@@ -399,21 +393,20 @@ x;
             src = DATA.manage || [];
             for (i = 0; i < src.length; i++) {
                 x = src[i];
-                out.push({
-                    name: x.name, cat: x.cat, ptype: x.ptype || 'local', desc: x.desc || '',
-                    docs: x.docs || '', url: x.url || '#', kind: 'link'
-                });
+                row = baseRow(x, 'link');
+                row.url = x.url || '#';
+                out.push(row);
             }
             return out;
         }
-        // Reports
+        // Reports.
         src = DATA.reports || [];
         for (i = 0; i < src.length; i++) {
             x = src[i];
-            out.push({
-                name: x.name, cat: x.cat, ptype: x.ptype || 'local', desc: x.desc || '',
-                docs: x.docs || '', url: x.url || '#', live: !!x.live, kind: 'report'
-            });
+            row = baseRow(x, 'report');
+            row.url = x.url || '#';
+            row.live = !!x.live;
+            out.push(row);
         }
         return out;
     }
@@ -713,8 +706,8 @@ x;
      * Render the Moodle shortcut row and the user's own custom links.
      */
     function renderCore() {
-        var i, 
-c, 
+        var i,
+c,
 out = '';
         var core = DATA.core || [];
         for (i = 0; i < core.length; i++) {
@@ -766,8 +759,8 @@ out = '';
             cards.push({id: 'reports', label: 'Reports', n: DATA.reports.length,
                 unit: 'reports', sub: 'View all reports', flag: ''});
         }
-        var i, 
-c, 
+        var i,
+c,
 out = '';
         for (i = 0; i < cards.length; i++) {
             c = cards[i];
@@ -854,8 +847,8 @@ out = '';
         // The card must never imply "up to date" when the check has not run or has failed.
         // A zero on a site that cannot reach the update server reads as good news, which is
         // the worst possible way for this to fail.
-        var num, 
-title, 
+        var num,
+title,
 desc;
         if (checkState === 'checking') {
             num = '';
@@ -906,8 +899,8 @@ desc;
      */
     function renderProducts() {
         var products = DATA.products || [];
-        var i, 
-p, 
+        var i,
+p,
 out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software</div>';
         for (i = 0; i < products.length; i++) {
             p = products[i];
@@ -1015,8 +1008,8 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
      * @return {string}
      */
     function chipsHTML(defs) {
-        var i, 
-d, 
+        var i,
+d,
 out = '<div class="ainav2-chips">';
         for (i = 0; i < defs.length; i++) {
             d = defs[i];
@@ -1044,7 +1037,7 @@ out = '<div class="ainav2-chips">';
      */
     function openGroupNames() {
         var nodes = els.plist.querySelectorAll('.ainav2-grp.ainav2-open .ainav2-grpname');
-        var out = [], 
+        var out = [],
 i;
         for (i = 0; i < nodes.length; i++) {
             out.push(nodes[i].textContent);
@@ -1062,9 +1055,9 @@ i;
             return;
         }
         var groups = els.plist.querySelectorAll('.ainav2-grp');
-        var i, 
-g, 
-head, 
+        var i,
+g,
+head,
 name;
         for (i = 0; i < groups.length; i++) {
             g = groups[i];
@@ -1132,6 +1125,157 @@ name;
     }
 
     /**
+     * Build the category chip definitions for the rows that survived filtering.
+     *
+     * @param {Array} base The filtered row models.
+     * @return {Array} Chip definitions in display order.
+     */
+    function chipDefs(base) {
+        var i,
+j;
+        var defs = [{k: 'all', l: 'All', n: base.length}];
+        var favCount = 0;
+        for (i = 0; i < base.length; i++) {
+            if (faves[base[i].name]) {
+                favCount++;
+            }
+        }
+        defs.push({k: 'fav', l: '★ Starred', n: favCount});
+        for (i = 0; i < CATORDER.length; i++) {
+            var c = CATORDER[i];
+            var n = 0;
+            for (j = 0; j < base.length; j++) {
+                if (base[j].cat === c) {
+                    n++;
+                }
+            }
+            if (n > 0) {
+                defs.push({k: c, l: CATS[c] || c, n: n});
+            }
+        }
+        return defs;
+    }
+
+    /**
+     * Collect the distinct plugin types present in a dataset, label-sorted.
+     *
+     * @param {Array} all The unfiltered row models.
+     * @return {Array} The distinct ptype values.
+     */
+    function typeList(all) {
+        var types = [];
+        var i;
+        for (i = 0; i < all.length; i++) {
+            if (types.indexOf(all[i].ptype) === -1) {
+                types.push(all[i].ptype);
+            }
+        }
+        types.sort(function(a, b) {
+            var la = PTYPES[a] || a,
+lb = PTYPES[b] || b;
+            if (la < lb) {
+                return -1;
+            }
+            return la > lb ? 1 : 0;
+        });
+        return types;
+    }
+
+    /**
+     * Build the Status and Type dropdowns for the panel toolbar.
+     *
+     * @param {Array} all The unfiltered row models.
+     * @return {string} The dropdown markup.
+     */
+    function filterControls(all) {
+        var types = typeList(all);
+        var statusOpts = statusOptsFor();
+        var controls = '';
+        var i;
+        // A Status dropdown whose only option is "All" filters nothing — don't show it.
+        if (statusOpts.length > 1) {
+            controls += '<div class="ainav2-typewrap"><label for="ainav2-pstatesel">Status</label>' +
+                '<select class="ainav2-sortsel" id="ainav2-pstatesel">';
+            for (i = 0; i < statusOpts.length; i++) {
+                controls += '<option value="' + esc(statusOpts[i][0]) + '"' +
+                    (statusOpts[i][0] === pstate ? ' selected' : '') + '>' +
+                    esc(statusOpts[i][1]) + '</option>';
+            }
+            controls += '</select></div>';
+        }
+        controls += '<div class="ainav2-typewrap"><label for="ainav2-ptypesel">Type</label><select class="ainav2-sortsel' +
+            '" id="aina' +
+            'v2-ptypesel"><option value="all">All types</option>';
+        for (i = 0; i < types.length; i++) {
+            controls += '<option value="' + esc(types[i]) + '"' + (types[i] === ptype ? ' selected' : '') + '>' +
+                esc(PTYPES[types[i]] || types[i]) + '</option>';
+        }
+        controls += '</select></div>';
+        return controls;
+    }
+
+    /**
+     * Write the toolbar markup, preserving the search caret across the rewrite.
+     *
+     * @param {string} toolbarHtml The markup to install.
+     */
+    function renderToolbar(toolbarHtml) {
+        // RenderPanel rewrites the whole toolbar, which would drop focus mid-typing.
+        // Remember where the caret was and put it back.
+        var act = document.activeElement;
+        var hadfocus = !!(act && act.id === 'ainav2-psearch');
+        var caret = hadfocus ? act.selectionStart : 0;
+        els.toolbar.innerHTML = toolbarHtml;
+        if (!hadfocus) {
+            return;
+        }
+        var qi = document.getElementById('ainav2-psearch');
+        if (qi) {
+            qi.focus();
+            try {
+                qi.setSelectionRange(caret, caret);
+            } catch (ignore) {
+                // Some browsers refuse setSelectionRange on type=search; harmless.
+            }
+        }
+    }
+
+    /**
+     * Build the grouped accordion markup for the visible rows.
+     *
+     * @param {Array} items The rows to display.
+     * @param {boolean} open Whether groups start expanded.
+     * @return {string} The accordion markup.
+     */
+    function groupBodyHTML(items, open) {
+        var body = '';
+        var i,
+k;
+        for (i = 0; i < CATORDER.length; i++) {
+            var cat = CATORDER[i];
+            var rows = [];
+            for (k = 0; k < items.length; k++) {
+                if (items[k].cat === cat) {
+                    rows.push(items[k]);
+                }
+            }
+            if (!rows.length) {
+                continue;
+            }
+            var rowsHtml = '';
+            for (k = 0; k < rows.length; k++) {
+                rowsHtml += rowHTML(rows[k]);
+            }
+            body += '<div class="ainav2-grp' + (open ? ' ainav2-open' : '') + '">' +
+                '<button class="ainav2-grphead" type="button" aria-expanded="' + open + '">' + CHEV +
+                '<span class="ainav2-grpname">' + esc(CATS[cat] || cat) + '</span>' +
+                '<span class="ainav2-count">' + rows.length + '</span></button>' +
+                '<div class="ainav2-grpbody">' + rowsHtml + '</div></div>';
+        }
+        return body;
+    }
+
+    /**
      * Render the current panel: chips, filters and grouped rows.
      */
     function renderPanel() {
@@ -1190,69 +1334,42 @@ name;
             }
         }
 
-        var defs = [{k: 'all', l: 'All', n: base.length}];
-        var favCount = 0;
-        for (i = 0; i < base.length; i++) {
-            if (faves[base[i].name]) {
-                favCount++;
-            }
-        }
-        defs.push({k: 'fav', l: '★ Starred', n: favCount});
-        for (i = 0; i < CATORDER.length; i++) {
-            var c = CATORDER[i];
-            var n = 0, 
-j;
-            for (j = 0; j < base.length; j++) {
-                if (base[j].cat === c) {
-                    n++;
-                }
-            }
-            if (n > 0) {
-                defs.push({k: c, l: CATS[c] || c, n: n});
-            }
-        }
-
-        var types = [];
-        for (i = 0; i < all.length; i++) {
-            if (types.indexOf(all[i].ptype) === -1) {
-                types.push(all[i].ptype);
-            }
-        }
-        types.sort(function(a, b) {
-            var la = PTYPES[a] || a, 
-lb = PTYPES[b] || b;
-            if (la < lb) {
-                return -1;
-            }
-            return la > lb ? 1 : 0;
-        });
-
-        var statusOpts = statusOptsFor();
-        var controls = '';
-        // A Status dropdown whose only option is "All" filters nothing — don't show it.
-        if (statusOpts.length > 1) {
-            controls += '<div class="ainav2-typewrap"><label for="ainav2-pstatesel">Status</label>' +
-                '<select class="ainav2-sortsel" id="ainav2-pstatesel">';
-            for (i = 0; i < statusOpts.length; i++) {
-                controls += '<option value="' + esc(statusOpts[i][0]) + '"' +
-                    (statusOpts[i][0] === pstate ? ' selected' : '') + '>' +
-                    esc(statusOpts[i][1]) + '</option>';
-            }
-            controls += '</select></div>';
-        }
-        controls += '<div class="ainav2-typewrap"><label for="ainav2-ptypesel">Type</label><select class="ainav2-sortsel' +
-            '" id="aina' +
-            'v2-ptypesel"><option value="all">All types</option>';
-        for (i = 0; i < types.length; i++) {
-            controls += '<option value="' + esc(types[i]) + '"' + (types[i] === ptype ? ' selected' : '') + '>' +
-                esc(PTYPES[types[i]] || types[i]) + '</option>';
-        }
-        controls += '</select></div>';
+        var defs = chipDefs(base);
+        var controls = filterControls(all);
 
         var dirty = filt !== 'all' || ptype !== 'all' || pstate !== 'all' || pq !== '';
 
-        var toolbarHtml = chipsHTML(defs);
-        toolbarHtml += '<div class="ainav2-subbar">' +
+        renderToolbar(chipsHTML(defs) + subbarHTML(controls, dirty));
+
+        var items = [];
+        for (i = 0; i < base.length; i++) {
+            if (filt === 'all' || (filt === 'fav' ? faves[base[i].name] : base[i].cat === filt)) {
+                items.push(base[i]);
+            }
+        }
+        if (sort === 'fav') {
+            items.sort(function(a, b) {
+                return (faves[b.name] ? 1 : 0) - (faves[a.name] ? 1 : 0);
+            });
+        }
+
+        els.plist.innerHTML = panelListHTML(groupBodyHTML(items, dirty));
+        els.pcount.textContent = items.length;
+        var resn = document.getElementById('ainav2-resn');
+        if (resn) {
+            resn.textContent = items.length + ' of ' + all.length;
+        }
+    }
+
+    /**
+     * Build the sub-toolbar: search box, filter dropdowns, sort and actions.
+     *
+     * @param {string} controls The Status and Type dropdown markup.
+     * @param {boolean} dirty Whether any filter is currently narrowing the list.
+     * @return {string} The sub-toolbar markup.
+     */
+    function subbarHTML(controls, dirty) {
+        return '<div class="ainav2-subbar">' +
             '<div class="ainav2-psearchwrap">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
@@ -1273,71 +1390,20 @@ lb = PTYPES[b] || b;
             (isSaved() ? 'Layout saved' : 'Save layout') + '</button>' +
             (current === 'plugins' ? '<button class="ainav2-bulk" type="button" data-updateall="1">Update all</button>' : '') +
             '</div>';
-        // RenderPanel rewrites the whole toolbar, which would drop focus mid-typing.
-        // Remember where the caret was and put it back.
-        var act = document.activeElement;
-        var hadfocus = !!(act && act.id === 'ainav2-psearch');
-        var caret = hadfocus ? act.selectionStart : 0;
-        els.toolbar.innerHTML = toolbarHtml;
-        if (hadfocus) {
-            var qi = document.getElementById('ainav2-psearch');
-            if (qi) {
-                qi.focus();
-                try {
-                    qi.setSelectionRange(caret, caret);
-                } catch (ignore) {
-                    // Some browsers refuse setSelectionRange on type=search; harmless.
-                }
-            }
-        }
+    }
 
-        var items = [];
-        for (i = 0; i < base.length; i++) {
-            if (filt === 'all' || (filt === 'fav' ? faves[base[i].name] : base[i].cat === filt)) {
-                items.push(base[i]);
-            }
-        }
-        if (sort === 'fav') {
-            items.sort(function(a, b) {
-                return (faves[b.name] ? 1 : 0) - (faves[a.name] ? 1 : 0);
-            });
-        }
-
-        var open = dirty;
-        var body = '';
-        for (i = 0; i < CATORDER.length; i++) {
-            var cat = CATORDER[i];
-            var rows = [];
-            var k;
-            for (k = 0; k < items.length; k++) {
-                if (items[k].cat === cat) {
-                    rows.push(items[k]);
-                }
-            }
-            if (!rows.length) {
-                continue;
-            }
-            var rowsHtml = '';
-            for (k = 0; k < rows.length; k++) {
-                rowsHtml += rowHTML(rows[k]);
-            }
-            body += '<div class="ainav2-grp' + (open ? ' ainav2-open' : '') + '">' +
-                '<button class="ainav2-grphead" type="button" aria-expanded="' + open + '">' + CHEV +
-                '<span class="ainav2-grpname">' + esc(CATS[cat] || cat) + '</span>' +
-                '<span class="ainav2-count">' + rows.length + '</span></button>' +
-                '<div class="ainav2-grpbody">' + rowsHtml + '</div></div>';
-        }
-
-        els.plist.innerHTML = (body || emptyHTML(pq ?
+    /**
+     * Wrap the grouped rows with the empty-state and the panel-specific extra blocks.
+     *
+     * @param {string} body The grouped accordion markup, empty when nothing matched.
+     * @return {string} The full panel list markup.
+     */
+    function panelListHTML(body) {
+        return (body || emptyHTML(pq ?
             'Nothing here matches \u201c' + pq + '\u201d.' : 'Nothing matches these filters.')) +
             (current === 'manage' ? maintenanceHTML() : '') +
             (current === 'reports' ? customBlockHTML('report') : '') +
             (current === 'manage' ? customBlockHTML('link') : '');
-        els.pcount.textContent = items.length;
-        var resn = document.getElementById('ainav2-resn');
-        if (resn) {
-            resn.textContent = items.length + ' of ' + all.length;
-        }
     }
 
     /**
@@ -1462,8 +1528,8 @@ lb = PTYPES[b] || b;
     function customBlockHTML(kind) {
         var list = kind === 'link' ? customLinks : customReports;
         var label = kind === 'link' ? 'Your quick links' : 'Your reports';
-        var i, 
-c, 
+        var i,
+c,
 rows = '';
         for (i = 0; i < list.length; i++) {
             c = list[i];
@@ -1486,42 +1552,15 @@ rows = '';
      * ------------------------------------------------------------------ */
 
     /**
-     * Run the global search across all four datasets, core links and
-     * products, grouped by source.
+     * Add the Settings, Manage, Reports and Plugins result buckets.
      *
-     * @param {string} t
+     * @param {Function} matchName Predicate testing one name against the search term.
+     * @param {Array} buckets The bucket list to append to, in display order.
      */
-    function search(t) {
-        t = t.replace(/^\s+|\s+$/g, '').toLowerCase();
-        els.clearq.hidden = !t;
-        if (!t) {
-            if (current) {
-                paint();
-            } else {
-                goHome();
-            }
-            return;
-        }
-        current = null;
-        els.toolbar.innerHTML = '';
-
-        /**
-         * Does a name match the current global search term?
-         *
-         * @param {string} name
-         * @return {boolean}
-         */
-        function matchName(name) {
-            return name.toLowerCase().indexOf(t) !== -1;
-        }
-
-        var buckets = [];
-        var i, 
-rows;
-
-        rows = [];
-        var settings = DATA.settings || [], 
-j;
+    function searchPanelBuckets(matchName, buckets) {
+        var rows = [];
+        var j;
+        var settings = DATA.settings || [];
         for (j = 0; j < settings.length; j++) {
             if (matchName(settings[j].name)) {
                 rows.push(rowHTML({name: settings[j].name, cat: settings[j].cat, ptype: settings[j].ptype || 'local',
@@ -1556,8 +1595,17 @@ j;
         if (rows.length) {
             buckets.push(['Reports', rows]);
         }
+    }
 
-        rows = [];
+    /**
+     * Add the Plugins result bucket.
+     *
+     * @param {Function} matchName Predicate testing one name against the search term.
+     * @param {Array} buckets The bucket list to append to, in display order.
+     */
+    function searchPluginBucket(matchName, buckets) {
+        var rows = [];
+        var j;
         var plugins = DATA.plugins || [];
         for (j = 0; j < plugins.length; j++) {
             if (matchName(plugins[j].name)) {
@@ -1568,8 +1616,17 @@ j;
         if (rows.length) {
             buckets.push(['Plugins', rows]);
         }
+    }
 
-        rows = [];
+    /**
+     * Add the Moodle core-link and Our-products result buckets.
+     *
+     * @param {Function} matchName Predicate testing one name against the search term.
+     * @param {Array} buckets The bucket list to append to, in display order.
+     */
+    function searchLinkBuckets(matchName, buckets) {
+        var rows = [];
+        var j;
         var core = DATA.core || [];
         for (j = 0; j < core.length; j++) {
             if (matchName(core[j].name)) {
@@ -1598,6 +1655,43 @@ j;
         if (rows.length) {
             buckets.push(['Our products', rows]);
         }
+    }
+
+    /**
+     * Run the global search across all four datasets, core links and
+     * products, grouped by source.
+     *
+     * @param {string} t
+     */
+    function search(t) {
+        t = t.replace(/^\s+|\s+$/g, '').toLowerCase();
+        els.clearq.hidden = !t;
+        if (!t) {
+            if (current) {
+                paint();
+            } else {
+                goHome();
+            }
+            return;
+        }
+        current = null;
+        els.toolbar.innerHTML = '';
+
+        /**
+         * Does a name match the current global search term?
+         *
+         * @param {string} name
+         * @return {boolean}
+         */
+        function matchName(name) {
+            return name.toLowerCase().indexOf(t) !== -1;
+        }
+
+        var buckets = [];
+        var i;
+        searchPanelBuckets(matchName, buckets);
+        searchPluginBucket(matchName, buckets);
+        searchLinkBuckets(matchName, buckets);
 
         var total = 0;
         for (i = 0; i < buckets.length; i++) {
@@ -1766,6 +1860,13 @@ j;
      * Modals: icon-picker builder, purge schedule, credit unlock.
      * ------------------------------------------------------------------ */
 
+    /**
+     * Open the shared modal with the supplied title, body and footer.
+     *
+     * @param {string} title Modal heading text.
+     * @param {string} body Modal body HTML.
+     * @param {string} foot Modal footer HTML, usually the action buttons.
+     */
     function openModal(title, body, foot) {
         els.mtitle.textContent = title;
         els.mbody.innerHTML = body;
@@ -1791,7 +1892,7 @@ j;
         if (!list.length) {
             return '<div class="ainav2-hint" style="padding:8px">No icon matches.</div>';
         }
-        var i, 
+        var i,
 out = '';
         for (i = 0; i < list.length; i++) {
             out += '<button class="ainav2-ibtn" type="button" data-icon="' + list[i] + '" ' +
@@ -1902,6 +2003,7 @@ out = '';
      *
      * @param {string} name Plugin name.
      * @param {number} credits Credits deducted.
+     * @param {string} source Where the entitlement came from, e.g. 'credits' or 'marketplace'.
      */
     function recordSpend(name, credits, source) {
         spend.push({n: name, c: credits || 0, s: source || '',
@@ -1926,9 +2028,9 @@ out = '';
             els.spend.innerHTML = '';
             return;
         }
-        var total = 0, 
-charged = 0, 
-i, 
+        var total = 0,
+charged = 0,
+i,
 rows = '';
         for (i = 0; i < spend.length; i++) {
             var c = parseInt(spend[i].c, 10) || 0;
@@ -2091,6 +2193,12 @@ rows = '';
      * @return {number} 1 if b is newer than a, -1 if older, 0 if equal or unparseable.
      */
     function cmpVersions(a, b) {
+        /**
+         * Split a Moodle version into its date prefix and trailing sequence.
+         *
+         * @param {string|number} v The raw version value.
+         * @return {?object} An object with d (YYYYMMDD) and seq, or null if unparseable.
+         */
         function parseV(v) {
             var s = String(v === null || typeof v === 'undefined' ? '' : v).replace(/[^0-9]/g, '');
             if (s.length < 8) {
@@ -2098,7 +2206,7 @@ rows = '';
             }
             return {d: s.slice(0, 8), seq: parseInt(s.slice(8) || '0', 10)};
         }
-        var pa = parseV(a), 
+        var pa = parseV(a),
 pb = parseV(b);
         if (!pa || !pb) {
             return 0;
@@ -2113,6 +2221,80 @@ pb = parseV(b);
             return -1;
         }
         return 0;
+    }
+
+    /**
+     * Drop uninstalled plugins the update server does not report as ready.
+     *
+     * Second line of defence on testing builds. PHP drops the ones the registry
+     * knows about, but check_versions.php is the authoritative source: any
+     * plugin the server does not call ready is removed here unless this site
+     * already has it installed. A testing build must never be offered for
+     * install from the block.
+     *
+     * @param {Array} plugins The plugin rows from the payload.
+     * @param {Object} map The update server's plugin map, keyed by component.
+     * @return {Array} The rows that may still be shown.
+     */
+    function dropUnreleased(plugins, map) {
+        var kept = [];
+        var i;
+        for (i = 0; i < plugins.length; i++) {
+            var q = plugins[i];
+            var live = map[q.component];
+            if (!q.installed && live && live.status && live.status !== 'ready') {
+                continue;
+            }
+            kept.push(q);
+        }
+        if (kept.length !== plugins.length) {
+            DATA.plugins = kept;
+            return kept;
+        }
+        return plugins;
+    }
+
+    /**
+     * Flag every installed plugin that has a newer ready build, and cache its download.
+     *
+     * @param {Array} plugins The plugin rows to annotate in place.
+     * @param {Object} map The update server's plugin map, keyed by component.
+     * @return {number} How many rows now carry an available update.
+     */
+    function markUpdates(plugins, map) {
+        var i,
+n = 0;
+        for (i = 0; i < plugins.length; i++) {
+            var p = plugins[i];
+            var latest = map[p.component];
+            if (!p.installed || !latest) {
+                continue;
+            }
+            if (latest.downloadUrl) {
+                downloadCache[p.component] = {
+                    url: latest.downloadUrl,
+                    sha: safeSha(latest.sha256)
+                };
+            }
+            if (latest.status && latest.status !== 'ready') {
+                continue;
+            }
+            if (cmpVersions(p.versionint, latest.numericVersion) !== 1) {
+                continue;
+            }
+            // An update with no download would fail the moment it was attempted.
+            if (!latest.downloadUrl) {
+                continue;
+            }
+            p.update = true;
+            p.latestversion = latest.version || '';
+        }
+        for (i = 0; i < plugins.length; i++) {
+            if (plugins[i].update) {
+                n++;
+            }
+        }
+        return n;
     }
 
     /**
@@ -2151,62 +2333,8 @@ pb = parseV(b);
                     }
                     return;
                 }
-                var plugins = DATA.plugins || [];
-                var changed = false;
-                var i;
-
-                // Second line of defence on testing builds. PHP drops the ones the registry
-                // knows about, but check_versions.php is the authoritative source: any
-                // plugin the server does not call ready is removed here unless this site
-                // already has it installed. A testing build must never be offered for
-                // install from the block.
-                var kept = [];
-                for (i = 0; i < plugins.length; i++) {
-                    var q = plugins[i];
-                    var live = map[q.component];
-                    if (!q.installed && live && live.status && live.status !== 'ready') {
-                        changed = true;
-                        continue;
-                    }
-                    kept.push(q);
-                }
-                if (kept.length !== plugins.length) {
-                    DATA.plugins = kept;
-                    plugins = kept;
-                }
-
-                for (i = 0; i < plugins.length; i++) {
-                    var p = plugins[i];
-                    var latest = map[p.component];
-                    if (!p.installed || !latest) {
-                        continue;
-                    }
-                    if (latest.downloadUrl) {
-                        downloadCache[p.component] = {
-                            url: latest.downloadUrl,
-                            sha: safeSha(latest.sha256)
-                        };
-                    }
-                    if (latest.status && latest.status !== 'ready') {
-                        continue;
-                    }
-                    if (cmpVersions(p.versionint, latest.numericVersion) !== 1) {
-                        continue;
-                    }
-                    // An update with no download would fail the moment it was attempted.
-                    if (!latest.downloadUrl) {
-                        continue;
-                    }
-                    p.update = true;
-                    p.latestversion = latest.version || '';
-                    changed = true;
-                }
-                var n = 0;
-                for (i = 0; i < plugins.length; i++) {
-                    if (plugins[i].update) {
-                        n++;
-                    }
-                }
+                var plugins = dropUnreleased(DATA.plugins || [], map);
+                var n = markUpdates(plugins, map);
                 DATA.counts = DATA.counts || {};
                 DATA.counts.updates = n;
                 checkState = 'done';
@@ -2256,11 +2384,77 @@ pb = parseV(b);
     }
 
     /**
+     * Apply whatever balance the unlock response reported.
+     *
+     * @param {Object} r The unlock web service response.
+     * @return {?number} The new balance, or null when the response carried none.
+     */
+    function applyUnlockBalance(r) {
+        var rem = r.remainingcredits;
+        if (rem === 'Unlimited' || rem === 'unlimited') {
+            creditUnlimited = true;
+            setCredits(0);
+            return null;
+        }
+        if (rem !== '' && rem !== null && typeof rem !== 'undefined' && !isNaN(parseInt(rem, 10))) {
+            var after = parseInt(rem, 10);
+            creditUnlimited = false;
+            setCredits(after);
+            return after;
+        }
+        return null;
+    }
+
+    /**
+     * Work out how many credits an unlock actually cost.
+     *
+     * @param {Object} r The unlock web service response.
+     * @param {?number} before The balance before the call, or null when unlimited.
+     * @param {?number} after The balance the response reported, or null when it gave none.
+     * @param {number} cost The advertised price for this plugin.
+     * @return {number} The credits deducted.
+     */
+    function deriveUsed(r, before, after, cost) {
+        var used = parseInt(r.creditsconsumed, 10) || 0;
+        if (!used && before !== null && after !== null && before > after) {
+            used = before - after;
+        }
+        if (!used && !r.alreadyunlocked && !creditUnlimited && after === null) {
+            // Unlock succeeded but the API told us nothing about the balance.
+            // Fall back to the advertised price rather than claiming it was free.
+            used = cost || 0;
+        }
+        return used;
+    }
+
+    /**
+     * Tell the admin what the unlock cost, just before the install starts.
+     *
+     * @param {string} name Human-readable plugin name.
+     * @param {number} used Credits actually deducted.
+     * @param {string} src Where the entitlement came from, when the server said.
+     * @param {boolean} already True when this site had already unlocked the plugin.
+     */
+    function unlockToast(name, used, src, already) {
+        if (used === 0 && String(src).toLowerCase().indexOf('marketplace') !== -1) {
+            showToast(name + ' is covered by your Moodle Marketplace purchase — ' +
+                'no credits used. Installing…');
+        } else if (already) {
+            showToast(name + ' is already licensed to this site — no credits used. Installing…');
+        } else if (used > 0) {
+            showToast(fmtNum(used) + ' credits deducted. Installing ' + name + '…');
+        } else {
+            showToast('Installing ' + name + '…');
+        }
+    }
+
+    /**
      * Unlock a credit-gated plugin then install it.
      *
-     * @param {string} pluginid
-     * @param {string} name
-     * @param {number} cost
+     * @param {string} pluginid Marketplace plugin identifier.
+     * @param {string} component Moodle frankenstyle component name.
+     * @param {string} name Human-readable plugin name.
+     * @param {number} cost Credit cost quoted for this plugin.
      */
     function unlockAndInstall(pluginid, component, name, cost) {
         Ajax.call([{
@@ -2282,39 +2476,13 @@ pb = parseV(b);
                 // the balance reported after it, and creditsconsumed is used only if the
                 // API ever starts sending it.
                 var before = creditUnlimited ? null : creditBalance;
-                var rem = r.remainingcredits;
-                var after = null;
-                if (rem === 'Unlimited' || rem === 'unlimited') {
-                    creditUnlimited = true;
-                    setCredits(0);
-                } else if (rem !== '' && rem !== null && typeof rem !== 'undefined' && !isNaN(parseInt(rem, 10))) {
-                    after = parseInt(rem, 10);
-                    creditUnlimited = false;
-                    setCredits(after);
-                }
+                var after = applyUnlockBalance(r);
 
-                var used = parseInt(r.creditsconsumed, 10) || 0;
-                if (!used && before !== null && after !== null && before > after) {
-                    used = before - after;
-                }
-                if (!used && !r.alreadyunlocked && !creditUnlimited && after === null) {
-                    // Unlock succeeded but the API told us nothing about the balance.
-                    // Fall back to the advertised price rather than claiming it was free.
-                    used = cost || 0;
-                }
+                var used = deriveUsed(r, before, after, cost);
 
                 var src = r.source || '';
                 recordSpend(name, used, used > 0 ? '' : (src || 'entitled'));
-                if (used === 0 && String(src).toLowerCase().indexOf('marketplace') !== -1) {
-                    showToast(name + ' is covered by your Moodle Marketplace purchase — ' +
-                        'no credits used. Installing…');
-                } else if (r.alreadyunlocked) {
-                    showToast(name + ' is already licensed to this site — no credits used. Installing…');
-                } else if (used > 0) {
-                    showToast(fmtNum(used) + ' credits deducted. Installing ' + name + '…');
-                } else {
-                    showToast('Installing ' + name + '…');
-                }
+                unlockToast(name, used, src, r.alreadyunlocked);
 
                 // The unlock response carries the download URL already; use it rather than
                 // making a second round trip to the version-check proxy.
@@ -2329,8 +2497,9 @@ pb = parseV(b);
     /**
      * Download and install one component via the updater service.
      *
-     * @param {string} component
-     * @param {string} name
+     * @param {string} component Moodle frankenstyle component name.
+     * @param {string} name Human-readable plugin name.
+     * @param {string} [knownurl] Download URL already supplied by the unlock response.
      */
     function installComponent(component, name, knownurl) {
         if (knownurl) {
@@ -2384,8 +2553,8 @@ pb = parseV(b);
     /**
      * Install a free (0-credit) plugin directly.
      *
-     * @param {string} pluginid
-     * @param {string} name
+     * @param {string} component Moodle frankenstyle component name.
+     * @param {string} name Human-readable plugin name.
      */
     function installFree(component, name) {
         // The receipt is written by runInstall() once the install actually succeeds —
@@ -2405,7 +2574,7 @@ pb = parseV(b);
         withDownload(component, function(url, sha) {
             if (!url) {
                 if (onDone) {
- onDone(false, {message: 'No download available'}); 
+ onDone(false, {message: 'No download available'});
 }
                 return;
             }
@@ -2414,12 +2583,12 @@ pb = parseV(b);
                 args: {component: component, downloadurl: url, expectedsha256: safeSha(sha)},
                 done: function(response) {
                     if (onDone) {
- onDone(!!(response && response.success), response); 
+ onDone(!!(response && response.success), response);
 }
                 },
                 fail: function(err) {
                     if (onDone) {
- onDone(false, err); 
+ onDone(false, err);
 }
                 }
             }]);
@@ -2768,25 +2937,7 @@ pb = parseV(b);
             if (star && star.hasAttribute('data-fav')) {
                 e.preventDefault();
                 e.stopPropagation();
-                var n = star.getAttribute('data-fav');
-                if (faves[n]) {
-                    delete faves[n];
-                } else {
-                    faves[n] = true;
-                }
-                saveFaves();
-                // In search results there is no open panel, so paint() returns early and
-                // the star never visibly toggled even though the preference was saved.
-                // Toggle the clicked star directly in that case.
-                if (!current) {
-                    // Aria-pressed is what the stylesheet keys the starred look off.
-                    star.setAttribute('aria-pressed', faves[n] ? 'true' : 'false');
-                    return;
-                }
-                var y = els.plist.scrollTop;
-                var open = openGroupNames();
-                paint(open);
-                els.plist.scrollTop = y;
+                toggleFave(star);
                 return;
             }
 
@@ -2809,22 +2960,7 @@ pb = parseV(b);
 
             var upd = closestAttr(e.target, 'data-update');
             if (upd) {
-                var updcomp = upd.getAttribute('data-update');
-                var pname = upd.getAttribute('data-name');
-                upd.disabled = true;
-                upd.textContent = 'Updating…';
-                updatePlugin(updcomp, pname, function(ok) {
-                    if (ok) {
-                        showToast(pname + ' updated. Reloading…');
-                        setTimeout(function() {
-                            window.location.reload(true);
-                        }, 800);
-                    } else {
-                        upd.disabled = false;
-                        upd.textContent = 'Update';
-                        Notification.alert('Update failed', 'Could not update ' + pname + '.');
-                    }
-                });
+                startRowUpdate(upd);
                 return;
             }
 
@@ -2852,15 +2988,7 @@ pb = parseV(b);
             var get = closestAttr(e.target, 'data-cost');
             if (get) {
                 e.preventDefault();
-                var cost = parseInt(get.getAttribute('data-cost'), 10) || 0;
-                var plug = get.getAttribute('data-plug');
-                var comp = get.getAttribute('data-comp');
-                var pn = get.getAttribute('data-plugname');
-                if (cost > 0) {
-                    unlockModal(plug, comp, pn, cost);
-                } else {
-                    freeModal(comp, pn);
-                }
+                openGetModal(get);
                 return;
             }
             if (closestClass(e.target, 'ainav2-docs')) {
@@ -3140,9 +3268,105 @@ pb = parseV(b);
         return null;
     }
 
+    /**
+     * Star or unstar the row a clicked star button belongs to.
+     *
+     * @param {Element} star The clicked star button.
+     */
+    function toggleFave(star) {
+        var n = star.getAttribute('data-fav');
+        if (faves[n]) {
+            delete faves[n];
+        } else {
+            faves[n] = true;
+        }
+        saveFaves();
+        // In search results there is no open panel, so paint() returns early and
+        // the star never visibly toggled even though the preference was saved.
+        // Toggle the clicked star directly in that case.
+        if (!current) {
+            // Aria-pressed is what the stylesheet keys the starred look off.
+            star.setAttribute('aria-pressed', faves[n] ? 'true' : 'false');
+            return;
+        }
+        var y = els.plist.scrollTop;
+        var open = openGroupNames();
+        paint(open);
+        els.plist.scrollTop = y;
+    }
+
+    /**
+     * Run the update for the row whose Update button was clicked.
+     *
+     * @param {Element} upd The clicked Update button.
+     */
+    function startRowUpdate(upd) {
+        var updcomp = upd.getAttribute('data-update');
+        var pname = upd.getAttribute('data-name');
+        upd.disabled = true;
+        upd.textContent = 'Updating…';
+        updatePlugin(updcomp, pname, function(ok) {
+            if (ok) {
+                showToast(pname + ' updated. Reloading…');
+                setTimeout(function() {
+                    window.location.reload(true);
+                }, 800);
+                return;
+            }
+            upd.disabled = false;
+            upd.textContent = 'Update';
+            Notification.alert('Update failed', 'Could not update ' + pname + '.');
+        });
+    }
+
+    /**
+     * Open the confirmation modal for the row whose Get button was clicked.
+     *
+     * @param {Element} get The clicked Get button.
+     */
+    function openGetModal(get) {
+        var cost = parseInt(get.getAttribute('data-cost'), 10) || 0;
+        var plug = get.getAttribute('data-plug');
+        var comp = get.getAttribute('data-comp');
+        var pn = get.getAttribute('data-plugname');
+        if (cost > 0) {
+            unlockModal(plug, comp, pn, cost);
+            return;
+        }
+        freeModal(comp, pn);
+    }
+
     /* ------------------------------------------------------------------ *
      * Init.
      * ------------------------------------------------------------------ */
+
+    /**
+     * Parse the server payload out of its script tag and adopt it as module state.
+     *
+     * @param {Element} script The #ainav2-data script element.
+     * @return {boolean} False when the payload could not be parsed.
+     */
+    function applyPayload(script) {
+        var payload;
+        try {
+            payload = JSON.parse(script.textContent || script.innerHTML || '{}');
+        } catch (e) {
+            if (window.console && window.console.error) {
+                window.console.error('block_aiplugin_nav/ui: failed to parse #ainav2-data payload', e);
+            }
+            // Leave the server-rendered home view alone.
+            return false;
+        }
+
+        DATA = payload || {};
+        CATS = DATA.categories || {};
+        CATORDER = DATA.catorder || keysOf(CATS);
+        PTYPES = DATA.ptypes || {};
+        HELP = DATA.help || {};
+        customLinks = (DATA.custom || []).slice();
+        customReports = (DATA.customreports || []).slice();
+        return true;
+    }
 
     /**
      * Parse the payload, build the UI and wire every behaviour.
@@ -3154,24 +3378,9 @@ pb = parseV(b);
             return;
         }
 
-        var payload;
-        try {
-            payload = JSON.parse(script.textContent || script.innerHTML || '{}');
-        } catch (e) {
-            if (window.console && window.console.error) {
-                window.console.error('block_aiplugin_nav/ui: failed to parse #ainav2-data payload', e);
-            }
-            // Leave the server-rendered home view alone.
+        if (!applyPayload(script)) {
             return;
         }
-
-        DATA = payload || {};
-        CATS = DATA.categories || {};
-        CATORDER = DATA.catorder || keysOf(CATS);
-        PTYPES = DATA.ptypes || {};
-        HELP = DATA.help || {};
-        customLinks = (DATA.custom || []).slice();
-        customReports = (DATA.customreports || []).slice();
 
         isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         try {
