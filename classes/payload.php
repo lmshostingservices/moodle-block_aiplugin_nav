@@ -507,13 +507,10 @@ class block_aiplugin_nav_payload {
             // is_plugin_installed() is always true for it and a testing-stage entry was
             // always displayed. Anything genuinely installed remains manageable through
             // Moodle's own plugin pages, so nothing is lost by hiding it here.
-            if ($status === 'testing') {
-                continue;
-            }
-
-            // Client-specific builds keep the older rule: never offered, but still shown to
-            // the one client that runs them, since that is the only place they surface.
-            if ($status === 'private' && !$installed) {
+            // Client-specific builds are dropped on the same terms: a strict client-only
+            // build must never surface in this block on any site, including the client's
+            // own, where it stays reachable through Moodle's normal plugin pages.
+            if ($status === 'testing' || $status === 'private') {
                 continue;
             }
 

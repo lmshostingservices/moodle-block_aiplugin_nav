@@ -742,9 +742,17 @@ class block_aiplugin_nav extends block_base {
         // Only set --primary when we actually have a colour. Setting it to anything else
         // defeats the stylesheet's own var(--primary, #0e6e68) fallback, because a custom
         // property that is set-but-invalid is substituted as-is rather than falling back.
-        $style = $this->is_css_color((string) $primarycolor)
-            ? ' style="--primary: ' . s($primarycolor) . ';"'
-            : '';
+        $vars = '';
+        if ($this->is_css_color((string) $primarycolor)) {
+            $vars .= '--primary: ' . s($primarycolor) . ';';
+        }
+        // Minimum width, in pixels. Clamped: 0 disables it, and anything beyond 3000 is a
+        // typo rather than an intention.
+        $minwidth = (int) get_config('block_aiplugin_nav', 'minwidth');
+        if ($minwidth > 0) {
+            $vars .= '--ainav2-minw: ' . min($minwidth, 3000) . 'px;';
+        }
+        $style = $vars === '' ? '' : ' style="' . $vars . '"';
         $html  = '<div class="ainav2" id="ainav2-root"' . $style . '>';
         $html .= '<div class="ainav2-boot">' . get_string('loading_block', 'block_aiplugin_nav') . '</div>';
         $html .= '</div>';

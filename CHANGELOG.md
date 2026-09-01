@@ -2,6 +2,29 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.24] - 2026-09-01
+
+### Added
+- **Minimum block width** setting. Boost has no content-width setting of its own, so the block
+  can sit in a column too narrow to lay the cards out well. Set a width in pixels and the block
+  widens past its column; set 0 (the default) and nothing changes.
+
+  Applied in JavaScript rather than CSS, because CSS cannot do it safely: centring the block with
+  negative margins assumes its column is centred in the viewport. That holds for Boost's
+  dashboard but not for a left-aligned theme or a narrow side region, where testing pushed the
+  block up to 438px off the left edge of the screen. The script measures the room actually free
+  on each side and clamps to it, so the block grows into whatever space exists and never
+  off-screen. Verified in centred, left-aligned, right-aligned and 300px-side-region layouts at
+  1400px and 700px: no element off-screen, no horizontal scrollbar. Transforms and container
+  queries are both avoided deliberately — either would make the block the containing block for
+  its own `position: fixed` modal overlay, shrinking it from the screen to the block.
+
+### Fixed
+- **Client-only plugins no longer appear in the block on any site.** A strict client-only build
+  such as `qbehaviour_wilkinsoncoutts` was previously still shown wherever it was installed. It
+  is now dropped on the same terms as a testing build — never listed anywhere — and stays
+  reachable through Moodle's normal plugin pages.
+
 ## [2.5.23] - 2026-09-01
 
 ### Fixed

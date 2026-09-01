@@ -31,6 +31,13 @@ if ($hassiteconfig) {
         get_string('aitools_settings_desc', 'block_aiplugin_nav')
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'block_aiplugin_nav/minwidth',
+        get_string('minwidth', 'block_aiplugin_nav'),
+        get_string('minwidth_desc', 'block_aiplugin_nav'),
+        0,
+        PARAM_INT
+    ));
     $settings->add(new admin_setting_configcheckbox(
         'block_aiplugin_nav/aitools_collapsed_default',
         get_string('aitools_collapsed_default', 'block_aiplugin_nav'),

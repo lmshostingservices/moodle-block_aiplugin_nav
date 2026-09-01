@@ -64,6 +64,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var isTouch = false;
     var reduceMotion = false;
     var rtTimer = null;
+    var minwTimer = null;
     var toastTimer = null;
 
     // Cached DOM references, populated by buildShell().
@@ -1458,6 +1459,60 @@ k;
         if (sel) {
             sel.value = 'update';
         }
+    }
+
+    /**
+     * Widen the block past its theme column when it is narrower than the configured
+     * minimum, without pushing any of it off screen.
+     *
+     * This cannot be done in CSS alone. Centring with negative margins assumes the block's
+     * column is itself centred in the viewport — true for Boost's dashboard, false for a
+     * left-aligned theme or a narrow side region, where the block ended up hundreds of
+     * pixels off the left edge. Here the space actually free on each side is measured and
+     * the pull is clamped to it, so the block grows into whatever room exists and no
+     * further. Doing nothing is always a safe outcome.
+     */
+    function applyMinWidth() {
+        var root = els.root;
+        if (!root) {
+            return;
+        }
+        // Measure with any previous adjustment removed, or we would compound it.
+        root.style.width = '';
+        root.style.maxWidth = '';
+        root.style.marginLeft = '';
+        root.style.marginRight = '';
+
+        var minw = parseInt(window.getComputedStyle(root).getPropertyValue('--ainav2-minw'), 10);
+        if (!minw || minw <= 0) {
+            return;
+        }
+        var gutter = 16;
+        var viewport = document.documentElement.clientWidth;
+        var box = root.getBoundingClientRect();
+        var natural = box.width;
+        var target = Math.min(minw, viewport - (gutter * 2));
+        if (target <= natural) {
+            return;
+        }
+
+        var extra = target - natural;
+        var roomLeft = Math.max(0, box.left - gutter);
+        var roomRight = Math.max(0, viewport - box.right - gutter);
+
+        // Split evenly where possible, then give any share a side cannot take to the other.
+        var pullLeft = Math.min(extra / 2, roomLeft);
+        var pullRight = Math.min(extra - pullLeft, roomRight);
+        pullLeft = Math.min(extra - pullRight, roomLeft);
+
+        var width = natural + pullLeft + pullRight;
+        if (width <= natural + 1) {
+            return;
+        }
+        root.style.width = width + 'px';
+        root.style.maxWidth = width + 'px';
+        root.style.marginLeft = (-pullLeft) + 'px';
+        root.style.marginRight = (-pullRight) + 'px';
     }
 
     /**
@@ -3419,6 +3474,11 @@ n = 0;
 
         els.root = root;
         buildShell();
+        applyMinWidth();
+        window.addEventListener('resize', function() {
+            clearTimeout(minwTimer);
+            minwTimer = setTimeout(applyMinWidth, 120);
+        });
         renderCore();
         renderCards();
         renderStrip();

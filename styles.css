@@ -3221,3 +3221,18 @@
 .ainav2 .ainav2-fleft {
     min-width: 0;
 }
+
+/* Minimum width.
+ *
+ * Boost has no content-width setting, so the block can sit in a column too narrow to lay
+ * the cards out well. The "Minimum block width" setting lets it widen past its column.
+ *
+ * The widening itself is applied by JavaScript (applyMinWidth in amd/src/ui.js), not here,
+ * because it cannot be done safely in CSS alone: centring the block with negative margins
+ * assumes its parent is centred in the viewport. Boost's dashboard container is, but a
+ * left-aligned theme or a narrow side region is not, and there the block was pushed off
+ * the left edge of the screen. JavaScript can measure the room actually available on each
+ * side and clamp to it. If the script never runs, nothing here changes the layout. */
+.ainav2 {
+    --ainav2-minw: 0px;
+}
