@@ -456,11 +456,16 @@ row;
                     '" data-name="' + esc(it.name) + '">Update</button>';
             }
             // Activities, blocks and subplugins have no page to open — they are used
-            // inside a course. PHP decides which of the two this row is (see
-            // block_aiplugin_nav_payload::resolve_action).
+            // inside a course. PHP decides which of the three this row is (see
+            // block_aiplugin_nav_payload::resolve_action). 'none' means the plugin
+            // registers no settings page and has nothing to open, so the row shows its
+            // version only rather than a button that can only reach "Incorrect section".
+            if (it.action === 'none' || !it.gotourl) {
+                return '<span class="ainav2-ver">' + esc(it.version || '') + '</span>';
+            }
             var label = it.action === 'settings' ? 'Settings' : 'Open';
             return '<span class="ainav2-ver">' + esc(it.version || '') + '</span>' +
-                '<button class="ainav2-rowact" type="button" data-goto="' + esc(it.gotourl || '#') + '">' +
+                '<button class="ainav2-rowact" type="button" data-goto="' + esc(it.gotourl) + '">' +
                 label + '</button>';
         }
         var cost = it.credits || 0;

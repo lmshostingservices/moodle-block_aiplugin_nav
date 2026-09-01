@@ -2,6 +2,82 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.27] - 2026-09-01
+
+### Fixed
+- **Every installed plugin row showed a Settings button, whether or not the plugin had
+  settings.** The destination was a section name guessed from the plugin type, so for any
+  plugin that registers no settings page the button could only ever reach Moodle's
+  "Incorrect section" error. Against a stock Moodle install, 345 of 449 plugins produced a
+  dead link of this kind.
+
+  The section name is no longer guessed. Moodle derives it per plugin type in each
+  plugininfo class, so `plugininfo_base::get_settings_url()` is asked instead: it returns
+  the real URL where a settings page was registered and null where none was. A row with no
+  settings page and nothing to open now shows its version and no button. The hand-maintained
+  table of section-name prefixes is gone with it, and with it the need to discover the
+  correct prefix for plugin types where `<type>_<name>` is only a convention.
+
+  The Settings panel is filtered on the same rule: an entry whose registry `settings_url`
+  names a section this site never registered is no longer listed.
+
+  Settings links are also withheld from users without `moodle/site:config`, for whom they
+  could only lead to "Access denied".
+
+---
+
+## [2.5.26] - 2026-09-01
+
+### Fixed
+- **Paid plugins were being offered free.** Only 13 of the 67 plugins on offer carried an
+  explicit `credits_required`; every other one fell through a `?? 0` fallback and rendered a
+  "Free" pill with a working Get button. 54 plugins could be taken for nothing, including paid
+  products, on a site holding no credits at all.
+
+  A missing price now fails closed at the standard 500 credits, and free has to be declared:
+  the genuinely free plugins are named in `FREE_COMPONENTS`, so being free is a decision on the
+  record rather than the result of an absent value.
+
+  The resulting prices are 500 for everything except AI RTO Compliance at 20,000, with AI
+  Grader Central Config and the QuickLinks block itself free. The stale 1,000 and 5,000 prices
+  previously hardcoded against thirteen plugins were removed.
+
+### Changed
+- **LMS Labs is now the authority on price.** When the version-check service supplies a credit
+  price for a component, the block uses it; the values in the plugin file are only an offline
+  fallback. Prices held in the plugin cannot be changed without shipping a release to every
+  client site, so a site on an older build would keep charging an old price, and the block and
+  the Marketplace could disagree. The block reads `credits`, `credits_required` or
+  `credit_cost` from the service, so it starts working as soon as the server sends any of them
+  and needs no further plugin release.
+
+## [2.5.25] - 2026-09-01
+
+### Fixed
+- **The block's own Configure link failed with "Incorrect section".** Moodle only registers a
+  block's settings page when the block class reports `has_config() === true`. The block shipped
+  a settings.php but never declared it, so `settings.php` was never included, the admin section
+  `blocksettingaiplugin_nav` was never created, and every link to it errored. Verified against a
+  real Moodle admin tree: missing before, present after.
+- **Settings links were wrong for three plugin types**, giving the same "Incorrect section"
+  error. Moodle names these sections itself, and the block disagreed:
+
+  | type | was | correct |
+  |---|---|---|
+  | `availability` | `availability_<name>` | `availabilitysetting<name>` |
+  | `paygw` | `paygw_<name>` | `paymentgateway<name>` |
+  | `plagiarism` | `plagiarism_<name>` | `plagiarism<name>` |
+
+  Affected `availability_groupmanager`, `availability_workshopattendance`, `paygw_paddle`,
+  `plagiarism_essayguard` and `plagiarism_docguard`. Every plugin type in the registry was then
+  checked against Moodle's own `get_settings_section_name()`: all eight that Moodle defines a
+  rule for now match exactly.
+
+  For `local`, `report`, `qbehaviour`, `gradingform`, `quiz` and `quizaccess`, Moodle defines no
+  section name at all — each plugin chooses its own in its settings.php — so `<type>_<name>`
+  remains a convention rather than a guarantee for those. Validating at runtime was rejected:
+  building the admin tree costs ~305ms, too much for every dashboard load.
+
 ## [2.5.24] - 2026-09-01
 
 ### Added

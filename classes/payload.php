@@ -530,7 +530,12 @@ class block_aiplugin_nav_payload {
                 // whether an update exists — see refreshUpdates() in amd/src/ui.js.
                 'versionint' => $installed ? $block->get_plugin_numeric_version($plugintype, $pluginname) : null,
                 'update'    => $update,
-                'credits'   => $masterentry['credits_required'] ?? ($plugin['credits_required'] ?? 0),
+                'credits'   => self::plugin_credits(
+                    $component,
+                    $masterentry,
+                    $plugin,
+                    $statusmap[$component] ?? null
+                ),
                 'status'    => $status,
                 'gotourl'   => $action['url'],
                 'action'    => $action['label'],
@@ -579,50 +584,152 @@ class block_aiplugin_nav_payload {
         $gotourl     = $plugin['goto_url'] ?? null;
 
         if (in_array($plugintype, $settingsonly, true)) {
-            $url = $settingsurl ?: self::settings_section_url($plugintype, $pluginname);
-            return ['url' => $url, 'label' => 'settings'];
+            return self::settings_action($plugintype, $pluginname, $settingsurl);
         }
 
         // A goto_url that is itself a settings section is a settings destination,
         // whatever the plugin type.
         $candidate = $pageurl ?: ($gotourl ?: $settingsurl);
         if (!$candidate) {
-            return ['url' => self::settings_section_url($plugintype, $pluginname), 'label' => 'settings'];
+            return self::settings_action($plugintype, $pluginname, null);
         }
         if (strpos($candidate, '/admin/settings.php') !== false) {
-            return ['url' => $candidate, 'label' => 'settings'];
+            return self::settings_action($plugintype, $pluginname, $candidate);
         }
         return ['url' => $candidate, 'label' => 'open'];
     }
 
     /**
-     * The admin settings section URL for a plugin, following Moodle's own naming.
+     * A verified Settings destination, or no action at all.
+     *
+     * Every row used to get a Settings button whether or not the plugin had a settings
+     * page, pointing at a section name this class guessed from the plugin type. A plugin
+     * that declares no settings has no such section, so Moodle answered with its
+     * "Incorrect section" error — the button was an error link by construction.
+     *
+     * The section name is no longer guessed either. Moodle already derives it per plugin
+     * type in each plugininfo class, so plugininfo_base::get_settings_url() is asked
+     * instead: it returns the real URL when the plugin registered a settings page and
+     * null when it did not. That both removes the error links and removes the need for a
+     * hand-maintained table of section-name prefixes for the plugin types where
+     * "<type>_<name>" is only a convention.
+     *
+     * @param string $plugintype Moodle plugin type, e.g. 'mod', 'local'.
+     * @param string $pluginname Plugin name without its type prefix.
+     * @param string|null $declared A settings URL declared in the master registry, if any.
+     * @return array{url: string, label: string} Label 'none' means: render no button.
+     */
+    private static function settings_action(string $plugintype, string $pluginname, ?string $declared): array {
+        $none = ['url' => '', 'label' => 'none'];
+
+        // Only a site administrator can open an admin settings page at all, so for anyone
+        // else the button could only ever lead to "Access denied".
+        if (!has_capability('moodle/site:config', \context_system::instance())) {
+            return $none;
+        }
+
+        $url = self::plugin_settings_url($plugintype, $pluginname);
+        if ($url !== null) {
+            return ['url' => $url, 'label' => 'settings'];
+        }
+
+        // A URL declared in the master registry is only honoured if it names a section
+        // that actually exists in this site's admin tree.
+        if ($declared !== null && $declared !== '') {
+            $section = self::section_of($declared);
+            if ($section !== null && self::admin_section_exists($section)) {
+                return ['url' => $declared, 'label' => 'settings'];
+            }
+        }
+
+        return $none;
+    }
+
+    /**
+     * The settings page URL Moodle itself publishes for a plugin, or null if it has none.
      *
      * @param string $plugintype Moodle plugin type.
      * @param string $pluginname Plugin name without its type prefix.
-     * @return string
+     * @return string|null Absolute URL, or null when the plugin has no settings page.
      */
-    private static function settings_section_url(string $plugintype, string $pluginname): string {
+    private static function plugin_settings_url(string $plugintype, string $pluginname): ?string {
+        try {
+            $info = \core_plugin_manager::instance()->get_plugin_info($plugintype . '_' . $pluginname);
+            if ($info === null || !method_exists($info, 'get_settings_url')) {
+                return null;
+            }
+            $url = $info->get_settings_url();
+            return $url === null ? null : $url->out(false);
+        } catch (\Throwable $e) {
+            // A broken or half-installed plugin must not take the dashboard down with it.
+            return null;
+        }
+    }
+
+    /**
+     * The section parameter of an admin settings URL, if it is one.
+     *
+     * @param string $url URL to inspect, absolute or site-relative.
+     * @return string|null The section name, or null if this is not a settings URL.
+     */
+    private static function section_of(string $url): ?string {
+        if (strpos($url, '/admin/settings.php') === false) {
+            return null;
+        }
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (!is_string($query) || $query === '') {
+            return null;
+        }
+        parse_str($query, $params);
+        $section = $params['section'] ?? null;
+        return (is_string($section) && $section !== '') ? $section : null;
+    }
+
+    /**
+     * A registry settings URL, made absolute, or null if it leads nowhere.
+     *
+     * Non-settings URLs are passed through unchanged; a /admin/settings.php URL is kept
+     * only when its section exists in this site's admin tree.
+     *
+     * @param string $relative Site-relative URL from the master registry, may be empty.
+     * @return string|null Absolute URL, or null when nothing should be linked.
+     */
+    private static function verified_settings_url(string $relative): ?string {
         global $CFG;
 
-        // Moodle names these sections per plugin type; the rest use the full component.
-        $prefixes = [
-            'mod'    => 'modsetting',
-            'block'  => 'blocksetting',
-            'enrol'  => 'enrolsettings',
-            'auth'   => 'authsetting',
-            'format' => 'formatsetting',
-            'filter' => 'filtersetting',
-            'theme'  => 'themesetting',
-        ];
-
-        if (isset($prefixes[$plugintype])) {
-            $section = $prefixes[$plugintype] . $pluginname;
-        } else {
-            $section = $plugintype . '_' . $pluginname;
+        if ($relative === '') {
+            return null;
         }
 
-        return $CFG->wwwroot . '/admin/settings.php?section=' . $section;
+        $absolute = $CFG->wwwroot . $relative;
+        $section  = self::section_of($absolute);
+        if ($section === null) {
+            return $absolute;
+        }
+
+        if (!has_capability('moodle/site:config', \context_system::instance())) {
+            return null;
+        }
+
+        return self::admin_section_exists($section) ? $absolute : null;
+    }
+
+    /**
+     * Whether a named section exists in this site's admin settings tree.
+     *
+     * @param string $section Section name, as used by /admin/settings.php?section=.
+     * @return bool
+     */
+    private static function admin_section_exists(string $section): bool {
+        global $CFG;
+
+        require_once($CFG->libdir . '/adminlib.php');
+
+        try {
+            return admin_get_root()->locate($section) !== null;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     // The "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
@@ -667,14 +774,19 @@ class block_aiplugin_nav_payload {
             $desc = $descbycomponent[$component] ?? '';
             $docs = self::docs_url_for($plugin['name']);
 
-            if (!empty($plugin['settings_url'])) {
+            // Same rule as the plugin rows: a Settings entry is listed only when the page
+            // it points at genuinely exists on this site. A registry entry naming a section
+            // that was never registered produced Moodle's "Incorrect section" error the
+            // moment it was clicked.
+            $settingsurl = self::verified_settings_url((string) ($plugin['settings_url'] ?? ''));
+            if ($settingsurl !== null) {
                 $settings[] = [
                     'name'       => $plugin['name'],
                     'cat'        => $cat,
                     'ptype'      => $ptype,
                     'desc'       => $desc,
                     'docs'       => $docs,
-                    'url'        => $CFG->wwwroot . $plugin['settings_url'],
+                    'url'        => $settingsurl,
                     // No per-plugin "is this configured" signal exists in the registries
                     // (would require inspecting each plugin's own config table/settings).
                     // Left false; see payload_notes.md ("configured").
@@ -727,6 +839,18 @@ class block_aiplugin_nav_payload {
         'qbehaviour_wilkinsoncoutts',
     ];
 
+    /** @var int Standard unlock price when a plugin carries no explicit credits_required. */
+    private const DEFAULT_CREDITS = 500;
+
+    /**
+     * @var array Components that really are free. Listed explicitly so that "free" is a
+     * decision, not the by-product of missing pricing data.
+     */
+    private const FREE_COMPONENTS = [
+        'block_aiplugin_nav',
+        'local_aiconfig',
+    ];
+
     /**
      * Is this registry entry a testing-stage plugin?
      *
@@ -743,6 +867,51 @@ class block_aiplugin_nav_payload {
             return true;
         }
         return stripos((string) ($plugin['description'] ?? ''), 'testing-stage') !== false;
+    }
+
+    /**
+     * Credit price for one plugin.
+     *
+     * An explicit credits_required in either registry wins. Otherwise the standard price
+     * applies — deliberately NOT zero. The old fallback was 0, so any plugin without an
+     * explicit price rendered a "Free" pill and a working Get button: 54 of the 67 plugins
+     * on offer, including paid products, could be taken for nothing. Missing pricing data
+     * must fail closed.
+     *
+     * Genuinely free plugins are listed explicitly in FREE_COMPONENTS so that being free is
+     * a decision on the record rather than the result of an absent value.
+     *
+     * @param string $component The frankenstyle component name.
+     * @param array|null $masterentry Entry from get_master_plugin_registry(), if any.
+     * @param array $plugin Entry from get_complete_plugin_registry().
+     * @param array|null $livestatus This component's entry from the version-check service,
+     *                               which is authoritative on price when it carries one.
+     * @return int Credits required to unlock.
+     */
+    private static function plugin_credits(
+        string $component,
+        ?array $masterentry,
+        array $plugin,
+        ?array $livestatus = null
+    ): int {
+        // LMS Labs is the authority on price. Prices held in this file cannot be changed
+        // without shipping a new plugin release to every client site, so a site running an
+        // older build would keep charging an old price. When the version-check service
+        // supplies a price, it wins; the values below are only the offline fallback.
+        foreach (['credits', 'credits_required', 'credit_cost'] as $key) {
+            if (isset($livestatus[$key]) && is_numeric($livestatus[$key])) {
+                return (int) $livestatus[$key];
+            }
+        }
+
+        $explicit = $masterentry['credits_required'] ?? ($plugin['credits_required'] ?? null);
+        if ($explicit !== null) {
+            return (int) $explicit;
+        }
+        if (in_array($component, self::FREE_COMPONENTS, true)) {
+            return 0;
+        }
+        return self::DEFAULT_CREDITS;
     }
 
     /**

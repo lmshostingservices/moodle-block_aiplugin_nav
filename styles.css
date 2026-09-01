@@ -3234,5 +3234,5 @@
  * the left edge of the screen. JavaScript can measure the room actually available on each
  * side and clamp to it. If the script never runs, nothing here changes the layout. */
 .ainav2 {
-    --ainav2-minw: 0px;
+    --ainav2-minw: 0;
 }

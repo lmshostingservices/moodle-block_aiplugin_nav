@@ -47,6 +47,20 @@ class block_aiplugin_nav extends block_base {
     }
 
     /**
+     * This block has site-wide settings.
+     *
+     * Required, not optional: core\plugininfo\block::load_settings() only registers a
+     * block's settings page when the block reports has_config() === true. Without it
+     * settings.php is never included, the admin section blocksettingaiplugin_nav is never
+     * created, and any link to it fails with Moodle's "Incorrect section" error.
+     *
+     * @return bool Always true.
+     */
+    public function has_config() {
+        return true;
+    }
+
+    /**
      * This block applies to all pages.
      */
     public function applicable_formats() {
@@ -242,6 +256,7 @@ class block_aiplugin_nav extends block_base {
                 'name' => 'AI RTO Compliance',
                 'plugin_type' => 'local',
                 'plugin_name' => 'rtocompliance',
+                'credits_required' => 20000,
                 'settings_url' => '/admin/settings.php?section=local_rtocompliance_settings',
                 'page_url' => '/local/rtocompliance/index.php',
                 'report_url' => '/local/rtocompliance/ai_usage_report.php',
@@ -1120,7 +1135,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'groupmanager',
                 'icon' => 'users',
                 'category' => 'enrolment',
-                'credits_required' => 1000,
                 'description' => 'Cohort-based time-controlled access with intake groups, grace periods, and AVETMISS complianc' .
                     'e reports.',
                 'access' => 'Course > Users > Groups Management',
@@ -1133,7 +1147,6 @@ class block_aiplugin_nav extends block_base {
                 'icon' => 'lock',
                 'category' => 'enrolment',
                 'group' => 'Groups Management',
-                'credits_required' => 1000,
                 'description' => 'Availability restriction based on group intake dates. Activities auto-hide before/after acces' .
                     's windows.',
                 'access' => 'Activity > Restrict access > Add restriction > Group Intake Dates',
@@ -1145,7 +1158,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'courseversion',
                 'icon' => 'book',
                 'category' => 'security',
-                'credits_required' => 1000,
                 'description' => 'Version management for course materials with auto-lock protection, audit trails, and TAS in' .
                     'tegration.',
                 'access' => 'Course > Course Version Control',
@@ -1168,7 +1180,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'sitefont',
                 'icon' => 'palette',
                 'category' => 'branding',
-                'credits_required' => 1000,
                 'description' => 'Global font customisation with 10 Google Fonts, comprehensive CSS overrides, and FontAwesome pr' .
                     'eservation.',
                 'access' => 'Site admin > Appearance > Change Site Font',
@@ -1180,7 +1191,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'cohortbranding',
                 'icon' => 'palette',
                 'category' => 'branding',
-                'credits_required' => 1000,
                 'description' => 'Multi-tenant branding per cohort with logos, colours, fonts, and priority system for multi-coh' .
                     'ort users.',
                 'access' => 'Site admin > Appearance > Cohort Branding',
@@ -1192,7 +1202,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'benchmarks',
                 'icon' => 'clipboard-check',
                 'category' => 'ai_grading',
-                'credits_required' => 1000,
                 'description' => 'Competency-based checklist grading with automatic grade calculation and evidence requirements.',
                 'access' => 'Assignment > Grading method > Benchmarks',
             ],
@@ -1216,7 +1225,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'simple2fa',
                 'icon' => 'shield',
                 'category' => 'security',
-                'credits_required' => 1000,
                 'description' => 'Two-factor authentication with Google Authenticator TOTP for admin accounts. Includes built-in ' .
                     'OAuth2/OIDC SSO.',
                 'access' => 'Site admin > Plugins > Authentication > Simple 2FA',
@@ -1228,7 +1236,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'groupcap',
                 'icon' => 'users',
                 'category' => 'enrolment',
-                'credits_required' => 1000,
                 'description' => 'Enforce maximum group size. Blocks self-enrolment and manual additions when a group reaches its' .
                     ' member limit.',
                 'access' => 'Course > Participants > Groups > Edit Group',
@@ -1240,7 +1247,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'paymentunlockassign',
                 'icon' => 'lock',
                 'category' => 'enrolment',
-                'credits_required' => 1000,
                 'description' => 'Monetise late assignment submissions. Students pay via Stripe to reopen locked assignments for ' .
                     'another attempt. Configurable fees per attempt, admin overrides, revenue reporting, and full audit log.',
                 'access' => 'Site admin > Plugins > Local plugins > Payment Unlock Assignment',
@@ -1253,7 +1259,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'essayguard',
                 'icon' => 'shield',
                 'category' => 'integrity',
-                'credits_required' => 5000,
                 'description' => 'Live writing-process analysis for academic integrity. Monitors keystroke dynamics, paste events' .
                     ', burst typing, pause patterns, and revision behaviour — gives teachers a Low / Medium / High risk badge on ' .
                         'every submission.',
@@ -1267,7 +1272,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'docguard',
                 'icon' => 'file-search',
                 'category' => 'integrity',
-                'credits_required' => 5000,
                 'description' => 'AI and plagiarism detection for PDF and Word document submissions. Extracts text, detects quest' .
                     'ion/answer sections, and scores each answer across 12 signals — producing a Low / Medium / High risk badge' .
                         ' per file.',
@@ -1281,7 +1285,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'courseavailabilitydelay',
                 'icon' => 'clock',
                 'category' => 'training',
-                'credits_required' => 1000,
                 'description' => 'Delay when enrolled courses appear on a student\'s My Courses dashboard. Set per-course delays ' .
                     '(days since enrolment) or fixed unlock dates, with per-user overrides and bulk CSV import.',
                 'access' => 'Site admin > Plugins > Local plugins > Course Availability Delay',
@@ -1318,7 +1321,6 @@ class block_aiplugin_nav extends block_base {
                 'plugin_name' => 'trainingplan',
                 'icon' => 'calendar-clock',
                 'category' => 'training',
-                'credits_required' => 5000,
                 'description' => 'Weekly overdue digest to trainers. One email per trainer listing every learner whose training p' .
                     'lan has fallen behind — each shown against the specific course they are stuck on. Settings → Notification Se' .
                         'ttings to control the kill switch, test recipients, and overdue cutoff.',
