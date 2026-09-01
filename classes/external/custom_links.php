@@ -38,11 +38,11 @@ class custom_links extends external_api {
      * Returns description of save_custom_link parameters.
      */
     public static function save_custom_link_parameters() {
-        return new external_function_parameters(array(
+        return new external_function_parameters([
             'name' => new external_value(PARAM_TEXT, 'Link name'),
             'url' => new external_value(PARAM_URL, 'Link URL'),
             'icon' => new external_value(PARAM_ALPHANUMEXT, 'Icon identifier'),
-        ));
+        ]);
     }
 
     /**
@@ -52,13 +52,13 @@ class custom_links extends external_api {
         global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
-        $params = self::validate_parameters(self::save_custom_link_parameters(), array(
+        $params = self::validate_parameters(self::save_custom_link_parameters(), [
             'name' => $name,
             'url' => $url,
             'icon' => $icon,
-        ));
+        ]);
 
-        // Sanitize inputs
+        // Sanitize inputs.
         $name = clean_param($params['name'], PARAM_TEXT);
         $url = clean_param($params['url'], PARAM_URL);
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
@@ -75,47 +75,47 @@ class custom_links extends external_api {
             throw new \moodle_exception('invalidurl', 'error');
         }
 
-        // Get existing links
-        $links_json = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
-        $links = json_decode($links_json, true);
+        // Get existing links.
+        $linksjson = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
+        $links = json_decode($linksjson, true);
         if (!is_array($links)) {
-            $links = array();
+            $links = [];
         }
 
-        // Limit to 20 custom links
+        // Limit to 20 custom links.
         if (count($links) >= 20) {
             throw new \moodle_exception('Too many custom links. Maximum is 20.');
         }
 
-        // Add new link
-        $links[] = array(
+        // Add new link.
+        $links[] = [
             'name' => substr($name, 0, 50),
             'url' => $url,
             'icon' => $icon,
-        );
+        ];
 
-        // Save
+        // Save.
         set_user_preference('block_aiplugin_nav_custom_links', json_encode($links), $USER->id);
 
-        return array('success' => true);
+        return ['success' => true];
     }
 
     /**
      * Returns description of save_custom_link return value.
      */
     public static function save_custom_link_returns() {
-        return new external_single_structure(array(
+        return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-        ));
+        ]);
     }
 
     /**
      * Returns description of delete_custom_link parameters.
      */
     public static function delete_custom_link_parameters() {
-        return new external_function_parameters(array(
+        return new external_function_parameters([
             'index' => new external_value(PARAM_INT, 'Link index to delete'),
-        ));
+        ]);
     }
 
     /**
@@ -125,44 +125,44 @@ class custom_links extends external_api {
         global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
-        $params = self::validate_parameters(self::delete_custom_link_parameters(), array(
+        $params = self::validate_parameters(self::delete_custom_link_parameters(), [
             'index' => $index,
-        ));
+        ]);
 
-        // Get existing links
-        $links_json = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
-        $links = json_decode($links_json, true);
+        // Get existing links.
+        $linksjson = get_user_preferences('block_aiplugin_nav_custom_links', '[]', $USER->id);
+        $links = json_decode($linksjson, true);
         if (!is_array($links)) {
-            $links = array();
+            $links = [];
         }
 
-        // Remove link at index
+        // Remove link at index.
         if (isset($links[$params['index']])) {
             array_splice($links, $params['index'], 1);
             set_user_preference('block_aiplugin_nav_custom_links', json_encode($links), $USER->id);
         }
 
-        return array('success' => true);
+        return ['success' => true];
     }
 
     /**
      * Returns description of delete_custom_link return value.
      */
     public static function delete_custom_link_returns() {
-        return new external_single_structure(array(
+        return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-        ));
+        ]);
     }
 
     /**
      * Returns description of save_custom_report parameters.
      */
     public static function save_custom_report_parameters() {
-        return new external_function_parameters(array(
+        return new external_function_parameters([
             'name' => new external_value(PARAM_TEXT, 'Report name'),
             'url' => new external_value(PARAM_URL, 'Report URL'),
             'icon' => new external_value(PARAM_ALPHANUMEXT, 'Icon identifier'),
-        ));
+        ]);
     }
 
     /**
@@ -172,13 +172,13 @@ class custom_links extends external_api {
         global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
-        $params = self::validate_parameters(self::save_custom_report_parameters(), array(
+        $params = self::validate_parameters(self::save_custom_report_parameters(), [
             'name' => $name,
             'url' => $url,
             'icon' => $icon,
-        ));
+        ]);
 
-        // Sanitize inputs
+        // Sanitize inputs.
         $name = clean_param($params['name'], PARAM_TEXT);
         $url = clean_param($params['url'], PARAM_URL);
         $icon = clean_param($params['icon'], PARAM_ALPHANUMEXT);
@@ -195,47 +195,47 @@ class custom_links extends external_api {
             throw new \moodle_exception('invalidurl', 'error');
         }
 
-        // Get existing reports
-        $reports_json = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
-        $reports = json_decode($reports_json, true);
+        // Get existing reports.
+        $reportsjson = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
+        $reports = json_decode($reportsjson, true);
         if (!is_array($reports)) {
-            $reports = array();
+            $reports = [];
         }
 
-        // Limit to 20 custom reports
+        // Limit to 20 custom reports.
         if (count($reports) >= 20) {
             throw new \moodle_exception('Too many custom reports. Maximum is 20.');
         }
 
-        // Add new report
-        $reports[] = array(
+        // Add new report.
+        $reports[] = [
             'name' => substr($name, 0, 50),
             'url' => $url,
             'icon' => $icon,
-        );
+        ];
 
-        // Save
+        // Save.
         set_user_preference('block_aiplugin_nav_custom_reports', json_encode($reports), $USER->id);
 
-        return array('success' => true);
+        return ['success' => true];
     }
 
     /**
      * Returns description of save_custom_report return value.
      */
     public static function save_custom_report_returns() {
-        return new external_single_structure(array(
+        return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-        ));
+        ]);
     }
 
     /**
      * Returns description of delete_custom_report parameters.
      */
     public static function delete_custom_report_parameters() {
-        return new external_function_parameters(array(
+        return new external_function_parameters([
             'index' => new external_value(PARAM_INT, 'Report index to delete'),
-        ));
+        ]);
     }
 
     /**
@@ -245,32 +245,32 @@ class custom_links extends external_api {
         global $USER, $CFG;
         self::validate_context(\context_system::instance());
 
-        $params = self::validate_parameters(self::delete_custom_report_parameters(), array(
+        $params = self::validate_parameters(self::delete_custom_report_parameters(), [
             'index' => $index,
-        ));
+        ]);
 
-        // Get existing reports
-        $reports_json = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
-        $reports = json_decode($reports_json, true);
+        // Get existing reports.
+        $reportsjson = get_user_preferences('block_aiplugin_nav_custom_reports', '[]', $USER->id);
+        $reports = json_decode($reportsjson, true);
         if (!is_array($reports)) {
-            $reports = array();
+            $reports = [];
         }
 
-        // Remove report at index
+        // Remove report at index.
         if (isset($reports[$params['index']])) {
             array_splice($reports, $params['index'], 1);
             set_user_preference('block_aiplugin_nav_custom_reports', json_encode($reports), $USER->id);
         }
 
-        return array('success' => true);
+        return ['success' => true];
     }
 
     /**
      * Returns description of delete_custom_report return value.
      */
     public static function delete_custom_report_returns() {
-        return new external_single_structure(array(
+        return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-        ));
+        ]);
     }
 }

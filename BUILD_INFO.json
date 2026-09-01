@@ -1,9 +1,9 @@
 {
   "component": "block_aiplugin_nav",
   "folder": "aiplugin_nav",
-  "version": "2.5.19",
-  "numeric_version": "2026083060",
+  "version": "2.5.20",
+  "numeric_version": "2026083061",
   "build_timestamp": "2026-08-30T00:00:00.000Z",
-  "build_id": "52f71717798d2806",
-  "verification": "14e802171976f115"
+  "build_id": "d5680e21ff84e65d",
+  "verification": "2b00484b98e30d41"
 }

@@ -59,16 +59,16 @@ foreach ($endpoints as $url) {
     $httpcode = isset($info['http_code']) ? (int)$info['http_code'] : 0;
 
     if ($response !== false && $httpcode === 200) {
-        // Validate it looks like our expected JSON before passing through
+        // Validate it looks like our expected JSON before passing through.
         $decoded = json_decode($response, true);
         if (isset($decoded['success']) && $decoded['success'] && isset($decoded['plugins'])) {
             echo $response;
             exit;
         }
     }
-    // This endpoint failed — try next
+    // This endpoint failed — try next.
 }
 
-// All endpoints failed
+// All endpoints failed.
 http_response_code(502);
 echo json_encode(['success' => false, 'error' => 'all_endpoints_failed']);

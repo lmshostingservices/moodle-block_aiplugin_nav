@@ -4044,11 +4044,10 @@
     gap: 5px;
     padding: 9px 12px;
     border-radius: 9px;
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
     box-shadow: var(--e1);
     min-height: 58px;
-    /* traffic-light state */
+    /* Traffic-light state. The plain --surface background and --line-soft border
+       these replaced were dead declarations, overridden on the very next lines. */
     border: 1px solid color-mix(in srgb, var(--sig) 34%, var(--line));
     background: linear-gradient(135deg, color-mix(in srgb, var(--sig) 13%, var(--surface)), var(--surface));
 }

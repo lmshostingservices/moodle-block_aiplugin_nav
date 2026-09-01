@@ -19,7 +19,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repository'],
-        function ($, Ajax, Notification, Str, UserRepository) {
+        function($, Ajax, Notification, Str, UserRepository) {
 
     'use strict';
 
@@ -35,25 +35,25 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * Module state.
      * ------------------------------------------------------------------ */
 
-    var DATA = null;               // Parsed payload.
-    var CATS = {};                 // cat key -> label.
-    var CATORDER = [];             // ordered cat keys.
-    var PTYPES = {};               // ptype key -> label.
-    var HELP = {};                 // help key -> {b,t,p,l,tip}.
+    var DATA = null; // Parsed payload.
+    var CATS = {}; // Cat key -> label.
+    var CATORDER = []; // Ordered cat keys.
+    var PTYPES = {}; // Ptype key -> label.
+    var HELP = {}; // Help key -> {b,t,p,l,tip}.
 
-    var current = null;            // 'plugins' | 'settings' | 'manage' | 'reports' | null.
+    var current = null; // 'plugins' | 'settings' | 'manage' | 'reports' | null.
     var filt = 'all';
     var sort = 'az';
     var ptype = 'all';
     var pstate = 'all';
-    var pq = '';                   // Per-panel search term (Plugins/Settings/Manage/Reports).
+    var pq = ''; // Per-panel search term (Plugins/Settings/Manage/Reports).
 
-    var checkState = 'idle';       // 'idle' | 'checking' | 'done' | 'failed'.
-    var lastCheck = null;          // When the last successful check finished.
-    var spend = [];                // Recent credit spends: [{n: name, c: credits, t: unixtime}].
-    var faves = {};                // name -> true.
+    var checkState = 'idle'; // 'idle' | 'checking' | 'done' | 'failed'.
+    var lastCheck = null; // When the last successful check finished.
+    var spend = []; // Recent credit spends: [{n: name, c: credits, t: unixtime}].
+    var faves = {}; // Name -> true.
     var helpOn = true;
-    var layouts = {};              // panel id -> {filt,sort,ptype,pstate,open:[]}.
+    var layouts = {}; // Panel id -> {filt,sort,ptype,pstate,open:[]}.
     var pickIcon = 'link';
     var customLinks = [];
     var customReports = [];
@@ -83,7 +83,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         if (s === undefined || s === null) {
             return '';
         }
-        return String(s).replace(/[&<>"']/g, function (c) {
+        return String(s).replace(/[&<>"']/g, function(c) {
             return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
         });
     }
@@ -108,25 +108,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return (n < 0 ? '-' : '') + out;
     }
 
-    /**
-     * True if two arrays contain the same primitive values in order.
-     *
-     * @param {Array} a
-     * @param {Array} b
-     * @return {boolean}
-     */
-    function sameArray(a, b) {
-        if (!a || !b || a.length !== b.length) {
-            return false;
-        }
-        var i;
-        for (i = 0; i < a.length; i++) {
-            if (a[i] !== b[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Object.keys shim-safe helper returning own keys of a plain object.
@@ -157,7 +138,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      */
     function setPref(name, value) {
         try {
-            // core_user/repository is the supported route. Its predecessor,
+            // Core_user/repository is the supported route. Its predecessor,
             // M.util.set_user_preference, goes through an endpoint whose whitelist
             // function (user_preference_allow_ajax_update) is deprecated. The four
             // preferences this block writes are declared in lib.php via
@@ -165,7 +146,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             if (UserRepository && UserRepository.setUserPreference) {
                 var p = UserRepository.setUserPreference(name, value);
                 if (p && p.catch) {
-                    p.catch(function () {
+                    p.catch(function() {
                         // Preference just won't stick this time; not worth interrupting.
                     });
                 }
@@ -206,7 +187,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * sensible defaults when the payload does not carry it.
      */
     function loadPrefsFromPayload() {
-        var i, arr;
+        var i, 
+arr;
 
         faves = {};
         try {
@@ -276,7 +258,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         'gauge': '<path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 14 4-4"/>',
         'users': '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0-2-5"/>',
         'user': '<circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/>',
-        'group': '<circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><path d="M3 19a5 5 0 0 1 10 0M13 19a5 5 0 0 1 8-4"/>',
+        'group': '<circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><path d="M3 19a5 5 0 0 1 10 0M13 19a5 5 0 ' +
+            '0 1 8-4"/>',
         'book': '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M9 4v16"/>',
         'grad': '<path d="m2 8 10-4 10 4-10 4z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
         'calendar': '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/>',
@@ -285,8 +268,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         'lock': '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/>',
         'unlock': '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/>',
         'key': '<circle cx="8" cy="14" r="4"/><path d="m11 11 9-9M17 5l2 2M14 8l2 2"/>',
-        'cog': '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>',
-        'sliders': '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/>',
+        'cog': '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.' +
+            '9 17 7M7 1' +
+            '7l-2.1 2.1"/>',
+        'sliders': '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><c' +
+            'ircle cx="' +
+            '15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/>',
         'wrench': '<path d="M15 3a5 5 0 0 0-4.6 7L3 17.4 6.6 21l7.4-7.4A5 5 0 1 0 15 3z"/>',
         'mail': '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         'bell': '<path d="M6 9a6 6 0 1 1 12 0v5l2 3H4l2-3z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
@@ -304,7 +291,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         'rocket': '<path d="M12 3c4 2 6 6 6 10l-3 3H9l-3-3c0-4 2-8 6-10z"/><path d="M9 19l-2 3 4-1M15 19l2 3-4-1"/>',
         'globe': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18"/>',
         'db': '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/>',
-        'server': '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+        'server': '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><pat' +
+            'h d="M7 7.' +
+            '5h.01M7 16.5h.01"/>',
         'cloud': '<path d="M7 18a4 4 0 0 1 .5-8 6 6 0 0 1 11.5 2 3.5 3.5 0 0 1-1 6z"/>',
         'download': '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/>',
         'upload': '<path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M4 4h16"/>',
@@ -314,7 +303,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         'filter': '<path d="M3 5h18l-7 8v6l-4-2v-4z"/>',
         'tag': '<path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
         'card': '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
-        'coins': '<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><ellipse cx="15" cy="15" rx="6" ry="3"/><path d="M9 15v3c0 1.7 2.7 3 6 3s6-1.3 6-3v-3"/>',
+        'coins': '<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><ellipse cx="15" c' +
+            'y="15" rx=' +
+            '"6" ry="3"/><path d="M9 15v3c0 1.7 2.7 3 6 3s6-1.3 6-3v-3"/>',
         'cart': '<circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11L21 8H6"/>',
         'video': '<rect x="3" y="6" width="12" height="12" rx="2"/><path d="m15 10 6-3v10l-6-3z"/>',
         'mic': '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 12a7 7 0 0 0 14 0M12 19v3"/>',
@@ -323,8 +314,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         'map': '<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
         'pin': '<path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
         'building': '<path d="M4 21V5l8-3v19"/><path d="M12 9h8v12"/><path d="M7 8h1M7 12h1M7 16h1M16 13h1M16 17h1"/>',
-        'palette': '<path d="M12 3a9 9 0 1 0 0 18c1.7 0 2-1 1.3-1.8-.9-1 .1-2.2 1.2-2.2H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9z"/><circle cx="8" cy="10" r="1" fill="currentColor"/>',
-        'help': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3 2.4V14"/><circle cx="12" cy="17" r=".6" fill="currentColor"/>',
+        'palette': '<path d="M12 3a9 9 0 1 0 0 18c1.7 0 2-1 1.3-1.8-.9-1 .1-2.2 1.2-2.2H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9z"' +
+            '/><circle ' +
+            'cx="8" cy="10" r="1" fill="currentColor"/>',
+        'help': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3 2.4V14"/><circle cx="12" cy="17" r=".6' +
+            '" fill="cu' +
+            'rrentColor"/>',
         'info': '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r=".6" fill="currentColor"/>',
         'warn': '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".6" fill="currentColor"/>',
         'eye': '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/>',
@@ -334,12 +329,20 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     };
     var ICONKEYS = keysOf(ICONS);
 
-    var CHEV = '<svg class="ainav2-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 5 7 7-7 7"/></svg>';
-    var STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L12 16.8 6.4 20l1.4-6.2L3 9.5l6.4-.6z"/></svg>';
+    var CHEV = '<svg class="ainav2-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path ' +
+        'd="m9 5 7 ' +
+        '7-7 7"/></svg>';
+    var STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L12 16.8 6.4 20' +
+        'l1.4-6.2L3' +
+        ' 9.5l6.4-.6z"/></svg>';
     var I_CARDS = {
         plugins: '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
-        settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>',
-        manage: '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/>',
+        settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1' +
+            ' 4.9 17 7M' +
+            '7 17l-2.1 2.1"/>',
+        manage: '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circ' +
+            'le cx="15"' +
+            ' cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="2" fill="currentColor" stroke="none"/>',
         reports: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
     };
 
@@ -366,7 +369,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @return {Array}
      */
     function datasetFor(id) {
-        var src, out = [], i, x;
+        var src, 
+out = [], 
+i, 
+x;
         if (id === 'plugins') {
             src = DATA.plugins || [];
             for (i = 0; i < src.length; i++) {
@@ -400,7 +406,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
             return out;
         }
-        // reports
+        // Reports
         src = DATA.reports || [];
         for (i = 0; i < src.length; i++) {
             x = src[i];
@@ -508,7 +514,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             tail = plugTail(d.item);
         } else {
             var st = rowState(d);
-            var act = d.kind === 'report' ? 'Run' : (current === 'settings' ? 'Configure' : 'Open');
+            var act = 'Open';
+            if (d.kind === 'report') {
+                act = 'Run';
+            } else if (current === 'settings') {
+                act = 'Configure';
+            }
             var pill = st.txt ? '<span class="ainav2-state ainav2-' + st.cls + '">' + esc(st.txt) + '</span>' : '';
             tail = pill + '<button class="ainav2-rowact" type="button" data-goto="' + esc(d.url || '#') + '">' + act + '</button>';
         }
@@ -557,6 +568,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return !!DATA.isadmin;
     }
 
+    /**
+     * Build the block shell once: head, home view, panel, help card, toast, modal and footer.
+     */
     function buildShell() {
         var root = els.root;
         var html = '';
@@ -577,7 +591,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             html += '  </div>';
         }
         html += '  <div class="ainav2-searchwrap" data-help="search">';
-        html += '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>';
+        html += '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="1' +
+            '1" r="7"/>' +
+            '<path d="m20 20-3.2-3.2"/></svg>';
         html += '    <input id="ainav2-q" type="search" placeholder="Search everything…" autocomplete="off" ' +
             'aria-label="Search settings, manage, reports and plugins">';
         html += '    <button class="ainav2-clearq" id="ainav2-clearq" type="button" hidden aria-label="Clear search">×</button>';
@@ -596,7 +612,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         html += '<div class="ainav2-panel" id="ainav2-panel">';
         html += '  <div class="ainav2-phead">';
         html += '    <button class="ainav2-back" id="ainav2-back" type="button">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 5-7 7 7 7"/></svg>Back</button>';
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 5-7 7 7 7"/></svg>Bac' +
+                'k</button>';
         html += '    <div class="ainav2-ptitle" id="ainav2-ptitle">Panel</div>';
         html += '    <div class="ainav2-pcount" id="ainav2-pcount">0</div>';
         html += '  </div>';
@@ -620,7 +637,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
         html += '<div class="ainav2-bfoot">';
         html += '  <div class="ainav2-fleft"><span><span class="ainav2-dotok"></span>Connected to LMS Labs</span>' +
-            '<label class="ainav2-helptoggle"><input type="checkbox" id="ainav2-helpon"><span class="ainav2-sw"></span>Show help tips</label></div>';
+            '<label class="ainav2-helptoggle"><input type="checkbox" id="ainav2-helpon"><span class="ainav2-sw"></span>S' +
+                'how help t' +
+                'ips</label></div>';
         html += '  <div class="ainav2-fcentre"></div>';
         html += '  <div class="ainav2-flinks">';
         html += '    <a href="https://marketplace.moodle.com/user/31" target="_blank" rel="noopener">Moodle Marketplace</a>';
@@ -690,8 +709,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return !root || u.indexOf(root) !== 0;
     }
 
+    /**
+     * Render the Moodle shortcut row and the user's own custom links.
+     */
     function renderCore() {
-        var i, c, out = '';
+        var i, 
+c, 
+out = '';
         var core = DATA.core || [];
         for (i = 0; i < core.length; i++) {
             c = core[i];
@@ -705,11 +729,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             c = customLinks[i];
             out += '<a class="ainav2-corebtn ainav2-mine" href="' + esc(c.url) + '" target="_blank" rel="noopener" ' +
                 'data-name="' + esc(c.name) + '" title="' + esc(c.url) + '">' +
-                '<button class="ainav2-del" type="button" data-del="' + esc(c.id) + '" aria-label="Remove ' + esc(c.name) + '">×</button>' +
+                '<button class="ainav2-del" type="button" ' +
+                    'data-del="' + esc(c.id) + '" aria-label="Remove ' + esc(c.name) + '">×</button>' +
                 svgIcon(c.icon || 'link') + esc(c.name) + '</a>';
         }
         out += '<button class="ainav2-addtile" type="button" data-addtile="1">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add link</button>';
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></s' +
+                'vg>Add lin' +
+                'k</button>';
         els.core.innerHTML = out;
     }
 
@@ -728,25 +755,32 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             });
         }
         if (isAdmin() && DATA.settings && DATA.settings.length) {
-            cards.push({id: 'settings', label: 'Settings', n: DATA.settings.length, unit: 'pages', sub: 'Configure what you run', flag: ''});
+            cards.push({id: 'settings', label: 'Settings', n: DATA.settings.length,
+                unit: 'pages', sub: 'Configure what you run', flag: ''});
         }
         if (isAdmin() && DATA.manage && DATA.manage.length) {
-            cards.push({id: 'manage', label: 'Manage', n: DATA.manage.length, unit: 'tools', sub: 'Day-to-day admin', flag: ''});
+            cards.push({id: 'manage', label: 'Manage', n: DATA.manage.length,
+                unit: 'tools', sub: 'Day-to-day admin', flag: ''});
         }
         if (isAdmin() && DATA.reports && DATA.reports.length) {
-            cards.push({id: 'reports', label: 'Reports', n: DATA.reports.length, unit: 'reports', sub: 'View all reports', flag: ''});
+            cards.push({id: 'reports', label: 'Reports', n: DATA.reports.length,
+                unit: 'reports', sub: 'View all reports', flag: ''});
         }
-        var i, c, out = '';
+        var i, 
+c, 
+out = '';
         for (i = 0; i < cards.length; i++) {
             c = cards[i];
-            out += '<button class="ainav2-card" type="button" data-id="' + c.id + '" data-help="' + c.id + '" aria-expanded="false">';
+            out += '<button class="ainav2-card" type="button"' +
+                ' data-id="' + c.id + '" data-help="' + c.id + '" aria-expanded="false">';
             if (c.flag) {
                 out += '<span class="ainav2-flag">' + esc(c.flag) + ' new</span>';
             }
             out += '<div class="ainav2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">' +
                 (I_CARDS[c.id] || '') + '</svg></div>';
             out += '<div class="ainav2-lbl">' + esc(c.label) + '</div>';
-            out += '<div class="ainav2-meta"><span class="ainav2-n">' + c.n + '</span><span class="ainav2-unit">' + esc(c.unit) + '</span></div>';
+            out += '<div class="ainav2-meta"><span class="' +
+                'ainav2-n">' + c.n + '</span><span class="ainav2-unit">' + esc(c.unit) + '</span></div>';
             out += '<div class="ainav2-sub">' + esc(c.sub) + '</div>';
             out += '</button>';
         }
@@ -783,6 +817,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
     }
 
+    /**
+     * Short local time for the "checked at" text.
+     *
+     * @param {Date} d
+     * @return {string}
+     */
     function fmtTime(d) {
         try {
             return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -791,6 +831,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
     }
 
+    /**
+     * Render the support card and the two status cards below the nav cards.
+     */
     function renderStrip() {
         var counts = DATA.counts || {};
         var updates = counts.updates || 0;
@@ -801,7 +844,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         out += '<a class="ainav2-support" href="' + esc(supporturl) + '" id="ainav2-support"' +
             (supportext ? ' target="_blank" rel="noopener"' : '') + ' data-help="support">' +
             '<div class="ainav2-sico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<path d="M12 3a9 9 0 0 0-9 9v4a3 3 0 0 0 3 3h1v-7H5v-.5a7 7 0 0 1 14 0V15h-2v7h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z"/></svg></div>' +
+            '<path d="M12 3a9 9 0 0 0-9 9v4a3 3 0 0 0 3 3h1v-7H5v-.5a7 7 0 0 1 14 0V15h-2v7h1a3 3 0 0 0 3-3v-7a9 9 0 0 0' +
+                '-9-9z"/></' +
+                'svg></div>' +
             '<div class="ainav2-sbody"><div class="ainav2-stitle">Ask AI Support</div>' +
             '<div class="ainav2-sdesc">Answers about your site, plugins and credits</div></div>' +
             '<span class="ainav2-sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
@@ -809,7 +854,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         // The card must never imply "up to date" when the check has not run or has failed.
         // A zero on a site that cannot reach the update server reads as good news, which is
         // the worst possible way for this to fail.
-        var num, title, desc;
+        var num, 
+title, 
+desc;
         if (checkState === 'checking') {
             num = '';
             title = 'Checking for updates\u2026';
@@ -859,13 +906,19 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      */
     function renderProducts() {
         var products = DATA.products || [];
-        var i, p, out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software</div>';
+        var i, 
+p, 
+out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software</div>';
         for (i = 0; i < products.length; i++) {
             p = products[i];
-            out += '<a class="ainav2-fam" href="' + esc(p.url) + '" target="_blank" rel="noopener" style="--fc:' + esc(p.colour || '#3B82F6') + '">';
-            out += '<span class="ainav2-farrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17 17 7M9 7h8v8"/></svg></span>';
+            out += '<a class="ainav2-fam" href="' + esc(p.url) + '" target="_blank" rel="noopener" st' +
+                'yle="--fc:' + esc(p.colour || '#3B82F6') + '">';
+            out += '<span class="ainav2-farrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=' +
+                '"2.2"><pat' +
+                'h d="M7 17 17 7M9 7h8v8"/></svg></span>';
             out += '<div class="ainav2-ftop"><div class="ainav2-fico ainav2-logo">' + (p.logo || '') + '</div>' +
-                '<div class="ainav2-fname"><b>' + esc(p.name) + '</b><span class="ainav2-fkind">' + esc(p.kind || '') + '</span></div></div>';
+                '<div class="ainav2-fname"><b>' + esc(p.name) + '</b><span class="ainav2-fkind">' + esc(p.kind
+                    || '') + '</span></div></div>';
             out += '<div class="ainav2-fbody"><div class="ainav2-fdesc">' + esc(p.desc || '') + '</div>' +
                 '<div class="ainav2-fprice">' + esc(p.price || '') + '</div></div>';
             out += '</a>';
@@ -882,7 +935,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         els.toasttxt.textContent = msg;
         els.toast.classList.add('ainav2-show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () {
+        toastTimer = setTimeout(function() {
             els.toast.classList.remove('ainav2-show');
         }, 2200);
     }
@@ -901,15 +954,27 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         if (!els.creditbox) {
             return;
         }
-        var level = creditUnlimited || n >= 5000 ? 'ok' : (n >= 2000 ? 'warn' : 'low');
+        var level = 'low';
+        if (creditUnlimited || n >= 5000) {
+            level = 'ok';
+        } else if (n >= 2000) {
+            level = 'warn';
+        }
         els.creditbox.className = 'ainav2-creditbox ainav2-' + level;
         els.camt.textContent = creditUnlimited ? 'Unlimited' : fmtNum(n);
         els.ctop.classList.toggle('ainav2-urgent', level === 'low');
         els.ctop.textContent = level === 'low' ? 'Top up now' : 'Top up';
-        els.cmsg.textContent = creditUnlimited ? 'Unlimited plan — every plugin unlocks at no extra cost.' :
-            (level === 'ok' ? 'Most plugins unlock for 500 credits. Already bought on the Moodle Marketplace? Yours at no cost.' :
-                (level === 'warn' ? 'Running low. Most plugins unlock for 500 credits — or free if you bought them on the Moodle Marketplace.' :
-                    'Credits critically low. Gated plugins will stop working.'));
+        var cmsg = 'Credits critically low. Gated plugins will stop working.';
+        if (creditUnlimited) {
+            cmsg = 'Unlimited plan — every plugin unlocks at no extra cost.';
+        } else if (level === 'ok') {
+            cmsg = 'Most plugins unlock for 500 credits. ' +
+                'Already bought on the Moodle Marketplace? Yours at no cost.';
+        } else if (level === 'warn') {
+            cmsg = 'Running low. Most plugins unlock for 500 credits — ' +
+                'or free if you bought them on the Moodle Marketplace.';
+        }
+        els.cmsg.textContent = cmsg;
         els.creditbox.setAttribute('aria-live', level === 'low' ? 'assertive' : 'off');
     }
 
@@ -923,7 +988,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: 'block_aiplugin_nav_get_credits',
             args: {},
-            done: function (response) {
+            done: function(response) {
                 if (!response || !response.success || response.credits === '') {
                     return;
                 }
@@ -935,7 +1000,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     setCredits(parseInt(response.credits, 10) || 0);
                 }
             },
-            fail: function () {
+            fail: function() {
                 // Silent fail - the traffic light simply keeps its default state.
             }
         }]);
@@ -950,7 +1015,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @return {string}
      */
     function chipsHTML(defs) {
-        var i, d, out = '<div class="ainav2-chips">';
+        var i, 
+d, 
+out = '<div class="ainav2-chips">';
         for (i = 0; i < defs.length; i++) {
             d = defs[i];
             out += '<button class="ainav2-chip" type="button" data-f="' + esc(d.k) + '" aria-pressed="' + (filt === d.k) + '">' +
@@ -977,7 +1044,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      */
     function openGroupNames() {
         var nodes = els.plist.querySelectorAll('.ainav2-grp.ainav2-open .ainav2-grpname');
-        var out = [], i;
+        var out = [], 
+i;
         for (i = 0; i < nodes.length; i++) {
             out.push(nodes[i].textContent);
         }
@@ -994,7 +1062,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             return;
         }
         var groups = els.plist.querySelectorAll('.ainav2-grp');
-        var i, g, head, name;
+        var i, 
+g, 
+head, 
+name;
         for (i = 0; i < groups.length; i++) {
             g = groups[i];
             head = g.querySelector('.ainav2-grphead');
@@ -1060,13 +1131,28 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return 'Search plugins\u2026';
     }
 
+    /**
+     * Render the current panel: chips, filters and grouped rows.
+     */
     function renderPanel() {
         var all = datasetFor(current);
-        var i, d;
+        var i;
 
+        /**
+         * Does this row match the Type filter?
+         *
+         * @param {Object} d Row model.
+         * @return {boolean}
+         */
         function byType(d) {
             return ptype === 'all' || d.ptype === ptype;
         }
+        /**
+         * Does this row match the per-panel search term?
+         *
+         * @param {Object} d Row model.
+         * @return {boolean}
+         */
         function byQuery(d) {
             if (!pq) {
                 return true;
@@ -1076,6 +1162,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 (CATS[d.cat] || '') + ' ' + (PTYPES[d.ptype] || '');
             return hay.toLowerCase().indexOf(pq) !== -1;
         }
+        /**
+         * Does this row match the Status filter?
+         *
+         * @param {Object} d Row model.
+         * @return {boolean}
+         */
         function byState(d) {
             if (pstate === 'all') {
                 return true;
@@ -1108,7 +1200,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         defs.push({k: 'fav', l: '★ Starred', n: favCount});
         for (i = 0; i < CATORDER.length; i++) {
             var c = CATORDER[i];
-            var n = 0, j;
+            var n = 0, 
+j;
             for (j = 0; j < base.length; j++) {
                 if (base[j].cat === c) {
                     n++;
@@ -1125,9 +1218,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 types.push(all[i].ptype);
             }
         }
-        types.sort(function (a, b) {
-            var la = PTYPES[a] || a, lb = PTYPES[b] || b;
-            return la < lb ? -1 : (la > lb ? 1 : 0);
+        types.sort(function(a, b) {
+            var la = PTYPES[a] || a, 
+lb = PTYPES[b] || b;
+            if (la < lb) {
+                return -1;
+            }
+            return la > lb ? 1 : 0;
         });
 
         var statusOpts = statusOptsFor();
@@ -1143,7 +1240,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
             controls += '</select></div>';
         }
-        controls += '<div class="ainav2-typewrap"><label for="ainav2-ptypesel">Type</label><select class="ainav2-sortsel" id="ainav2-ptypesel"><option value="all">All types</option>';
+        controls += '<div class="ainav2-typewrap"><label for="ainav2-ptypesel">Type</label><select class="ainav2-sortsel' +
+            '" id="aina' +
+            'v2-ptypesel"><option value="all">All types</option>';
         for (i = 0; i < types.length; i++) {
             controls += '<option value="' + esc(types[i]) + '"' + (types[i] === ptype ? ' selected' : '') + '>' +
                 esc(PTYPES[types[i]] || types[i]) + '</option>';
@@ -1168,11 +1267,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             '<option value="az">A–Z</option><option value="fav">Favourites first</option></select>' +
             '<div class="ainav2-resn" id="ainav2-resn"></div>' +
             (dirty ? '<button class="ainav2-clearf" type="button" data-clear="1">Clear filters</button>' : '') +
-            '<button class="ainav2-savebtn' + (isSaved() ? ' ainav2-saved' : '') + '" type="button" data-savelayout="1" data-help="savelayout">' +
+            '<button class="ainav2-savebtn' + (isSaved() ? ' ainav2-saved' : '') + '" type="button" data-savelayout="1" ' +
+                'data-help=' +
+                '"savelayout">' +
             (isSaved() ? 'Layout saved' : 'Save layout') + '</button>' +
             (current === 'plugins' ? '<button class="ainav2-bulk" type="button" data-updateall="1">Update all</button>' : '') +
             '</div>';
-        // renderPanel rewrites the whole toolbar, which would drop focus mid-typing.
+        // RenderPanel rewrites the whole toolbar, which would drop focus mid-typing.
         // Remember where the caret was and put it back.
         var act = document.activeElement;
         var hadfocus = !!(act && act.id === 'ainav2-psearch');
@@ -1197,7 +1298,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         }
         if (sort === 'fav') {
-            items.sort(function (a, b) {
+            items.sort(function(a, b) {
                 return (faves[b.name] ? 1 : 0) - (faves[a.name] ? 1 : 0);
             });
         }
@@ -1207,7 +1308,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         for (i = 0; i < CATORDER.length; i++) {
             var cat = CATORDER[i];
             var rows = [];
-            for (var k = 0; k < items.length; k++) {
+            var k;
+            for (k = 0; k < items.length; k++) {
                 if (items[k].cat === cat) {
                     rows.push(items[k]);
                 }
@@ -1346,7 +1448,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             '<div class="ainav2-tico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">' +
             '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></div>' +
             '<div class="ainav2-tbody"><div class="ainav2-ttitle">Cache maintenance</div>' +
-            '<div class="ainav2-tmeta">Manual ' + esc(schedule.lastmanual || 'never') + ' · Auto ' + esc(schedule.lastauto || 'never') + '</div></div>' +
+            '<div class="ainav2-tmeta">Manual ' + esc(schedule.lastmanual || 'never') + ' · Auto ' + esc(schedule.lastauto
+                || 'never') + '</div></div>' +
             tag + '</div><div class="ainav2-toolbtns">' +
             '<button class="ainav2-btn ainav2-primary" type="button" data-purge="1">Purge caches now</button>' +
             '<button class="ainav2-btn" type="button" data-sched="1">Schedule…</button></div></div>';
@@ -1359,10 +1462,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     function customBlockHTML(kind) {
         var list = kind === 'link' ? customLinks : customReports;
         var label = kind === 'link' ? 'Your quick links' : 'Your reports';
-        var i, c, rows = '';
+        var i, 
+c, 
+rows = '';
         for (i = 0; i < list.length; i++) {
             c = list[i];
-            rows += '<a class="ainav2-row ainav2-custom" href="' + esc(c.url) + '" target="_blank" rel="noopener" data-name="' + esc(c.name) + '">' +
+            rows += '<a class="ainav2-row ainav2-custom" href="' + esc(c.url) + '" target="_blank" rel="noopener" d' +
+                'ata-name="' + esc(c.name) + '">' +
                 '<span class="ainav2-star" style="color:var(--accent)">' + svgIcon(c.icon || 'link') + '</span>' +
                 '<span class="ainav2-nm">' + esc(c.name) + '<span class="ainav2-desc">' + esc(c.url) + '</span></span>' +
                 '<span class="ainav2-tag">custom</span>' +
@@ -1371,7 +1477,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
         return '<div class="ainav2-srchead">' + esc(label) + ' · ' + list.length + '</div>' +
             '<div class="ainav2-rows">' + rows + '</div>' +
-            '<button class="ainav2-addbtn" type="button" data-add="' + kind + '">+ Add ' + (kind === 'link' ? 'quick link' : 'report') + '</button>';
+            '<button class="ainav2-addbtn" type="button" ' +
+                'data-add="' + kind + '">+ Add ' + (kind === 'link' ? 'quick link' : 'report') + '</button>';
     }
 
     /* ------------------------------------------------------------------ *
@@ -1398,19 +1505,28 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         current = null;
         els.toolbar.innerHTML = '';
 
+        /**
+         * Does a name match the current global search term?
+         *
+         * @param {string} name
+         * @return {boolean}
+         */
         function matchName(name) {
             return name.toLowerCase().indexOf(t) !== -1;
         }
 
         var buckets = [];
-        var i, rows;
+        var i, 
+rows;
 
         rows = [];
-        var settings = DATA.settings || [], j;
+        var settings = DATA.settings || [], 
+j;
         for (j = 0; j < settings.length; j++) {
             if (matchName(settings[j].name)) {
                 rows.push(rowHTML({name: settings[j].name, cat: settings[j].cat, ptype: settings[j].ptype || 'local',
-                    desc: settings[j].desc, docs: settings[j].docs, url: settings[j].url, configured: !!settings[j].configured, kind: 'link'}));
+                    desc: settings[j].desc, docs: settings[j].docs, url: settings[j].url, configured: !!settings[j].configured,
+                        kind: 'link'}));
             }
         }
         if (rows.length) {
@@ -1472,7 +1588,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         var products = DATA.products || [];
         for (j = 0; j < products.length; j++) {
             if (matchName(products[j].name + ' ' + (products[j].desc || ''))) {
-                rows.push('<a class="ainav2-row ainav2-famrow" href="' + esc(products[j].url) + '" target="_blank" rel="noopener" data-name="' +
+                rows.push('<a class="ainav2-row ainav2-famr' +
+                    'ow" href="' + esc(products[j].url) + '" target="_blank" rel="noopener" ' +
+                    'data-name="' +
                     esc(products[j].name) + '"><span class="ainav2-nm">' + esc(products[j].name) + '</span>' +
                     '<span class="ainav2-ptype" data-t="local">Product</span></a>');
             }
@@ -1532,7 +1650,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
         if (h.tip) {
             body += '<div class="ainav2-protip"><div class="ainav2-pico">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 21h4"/>' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M' +
+                    '10 21h4"/>' +
                 '<path d="M12 3a6 6 0 0 1 4 10.5V16H8v-2.5A6 6 0 0 1 12 3z"/></svg></div>' +
                 '<div class="ainav2-ptxt"><span class="ainav2-plabel">Pro tip</span>' + esc(h.tip) + '</div></div>';
         }
@@ -1562,6 +1681,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
     var helpOwner = null;
 
+    /**
+     * Hide the floating help card.
+     */
     function hideHelp() {
         els.helpcard.classList.remove('ainav2-show');
         els.helpcard.setAttribute('aria-hidden', 'true');
@@ -1633,6 +1755,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         els.rowtip.style.setProperty('--ax', Math.max(10, Math.min(w - 20, r.left + 18 - left)) + 'px');
     }
 
+    /**
+     * Hide the floating row tooltip.
+     */
     function hideRowTip() {
         els.rowtip.classList.remove('ainav2-show');
     }
@@ -1648,6 +1773,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         els.ov.classList.add('ainav2-show');
     }
 
+    /**
+     * Close the modal overlay.
+     */
     function closeModal() {
         els.ov.classList.remove('ainav2-show');
     }
@@ -1657,13 +1785,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @return {string}
      */
     function iconTiles(filterText) {
-        var list = filterText ? ICONKEYS.filter(function (k) {
+        var list = filterText ? ICONKEYS.filter(function(k) {
             return k.indexOf(filterText.toLowerCase()) !== -1;
         }) : ICONKEYS;
         if (!list.length) {
             return '<div class="ainav2-hint" style="padding:8px">No icon matches.</div>';
         }
-        var i, out = '';
+        var i, 
+out = '';
         for (i = 0; i < list.length; i++) {
             out += '<button class="ainav2-ibtn" type="button" data-icon="' + list[i] + '" ' +
                 'aria-pressed="' + (list[i] === pickIcon) + '" title="' + list[i] + '" aria-label="' + list[i] + '">' +
@@ -1672,6 +1801,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return out;
     }
 
+    /**
+     * Build the icon picker grid for the custom link builder.
+     *
+     * @return {string}
+     */
     function iconGrid() {
         return '<div class="ainav2-fld"><label>Icon · ' + ICONKEYS.length + ' available</label>' +
             '<input class="ainav2-iconsearch" id="ainav2-iconsearch" placeholder="Filter icons…" autocomplete="off">' +
@@ -1697,6 +1831,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
     var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+    /**
+     * Open the cache purge schedule dialog.
+     */
     function scheduleModal() {
         var body = '<div class="ainav2-toggle"><input type="checkbox" id="ainav2-schon"' + (schedule.on ? ' checked' : '') +
             '><span>Purge caches automatically</span></div>' +
@@ -1704,14 +1841,15 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             // Only daily and weekly are offered: save_purge_schedule silently treats
             // anything else as daily, so a "monthly" choice was stored in config while the
             // task actually ran every day — the two disagreeing with no sign to the admin.
-            ['daily', 'weekly'].map(function (f) {
+            ['daily', 'weekly'].map(function(f) {
                 return '<option' + (schedule.freq === f ? ' selected' : '') + '>' + f + '</option>';
             }).join('') + '</select></div>' +
             '<div class="ainav2-fld"><label>Day</label><select id="ainav2-schday">' +
-            WEEKDAYS.map(function (d) {
+            WEEKDAYS.map(function(d) {
                 return '<option' + (d === schedule.day ? ' selected' : '') + '>' + d + '</option>';
             }).join('') + '</select></div>' +
-            '<div class="ainav2-fld"><label>Time</label><input id="ainav2-schtime" type="time" value="' + esc(schedule.time) + '">' +
+            '<div class="ainav2-fld"><label>Time</label><input id="ainav2-schtime" type="tim' +
+                'e" value="' + esc(schedule.time) + '">' +
             '<div class="ainav2-hint">Runs via Moodle cron. Pick a quiet hour — purging clears all caches site-wide.</div></div>';
         var foot = '<button class="ainav2-btn" type="button" data-close="1">Cancel</button>' +
             '<button class="ainav2-btn ainav2-primary" type="button" data-savesched="1">Save schedule</button>';
@@ -1788,7 +1926,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             els.spend.innerHTML = '';
             return;
         }
-        var total = 0, charged = 0, i, rows = '';
+        var total = 0, 
+charged = 0, 
+i, 
+rows = '';
         for (i = 0; i < spend.length; i++) {
             var c = parseInt(spend[i].c, 10) || 0;
             var cell;
@@ -1823,6 +1964,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         els.spend.hidden = false;
     }
 
+    /**
+     * Confirm a credit-gated unlock, stating exactly what will be deducted.
+     *
+     * @param {string} pluginid
+     * @param {string} component
+     * @param {string} name
+     * @param {number} cost
+     */
     function unlockModal(pluginid, component, name, cost) {
         var bal = creditBalance;
         var short = !creditUnlimited && bal < cost;
@@ -1949,7 +2098,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
             return {d: s.slice(0, 8), seq: parseInt(s.slice(8) || '0', 10)};
         }
-        var pa = parseV(a), pb = parseV(b);
+        var pa = parseV(a), 
+pb = parseV(b);
         if (!pa || !pb) {
             return 0;
         }
@@ -1965,6 +2115,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return 0;
     }
 
+    /**
+     * Ask the update server which installed plugins have a newer release.
+     *
+     * @param {boolean} manual True when the admin pressed Check for updates.
+     */
     function refreshUpdates(manual) {
         if (!DATA.proxyurl || !DATA.isadmin) {
             return;
@@ -1977,7 +2132,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             renderStrip();
         }
         $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
-            .fail(function () {
+            .fail(function() {
                 // A failed check is not the same as "everything is current". Say so rather
                 // than leaving a zero on screen that looks like good news.
                 checkState = 'failed';
@@ -1986,7 +2141,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     showToast('Could not reach the update server. Try again shortly.');
                 }
             })
-            .done(function (data) {
+            .done(function(data) {
                 var map = (data && data.plugins) || null;
                 if (!map) {
                     checkState = 'failed';
@@ -2070,6 +2225,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             });
     }
 
+    /**
+     * Resolve a component's download URL and hash, then run the callback.
+     *
+     * @param {string} component
+     * @param {Function} cb Receives (url, sha), or (null) on failure.
+     */
     function withDownload(component, cb) {
         if (downloadCache[component]) {
             cb(downloadCache[component].url, downloadCache[component].sha);
@@ -2080,7 +2241,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             return;
         }
         $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
-            .done(function (data) {
+            .done(function(data) {
                 var p = data && data.plugins && data.plugins[component];
                 if (p && p.downloadUrl) {
                     downloadCache[component] = {url: p.downloadUrl, sha: safeSha(p.sha256)};
@@ -2089,7 +2250,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     cb(null);
                 }
             })
-            .fail(function () {
+            .fail(function() {
                 cb(null);
             });
     }
@@ -2108,7 +2269,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             // the full component string, not the short plugin id, so the server needs it
             // to spot a plugin this site has already paid for and skip the deduction.
             args: {pluginid: pluginid, component: component || ''},
-            done: function (r) {
+            done: function(r) {
                 if (!r || !r.success) {
                     Notification.alert('Unlock failed',
                         (r && (r.error || r.message)) || 'Could not unlock this plugin.');
@@ -2159,7 +2320,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 // making a second round trip to the version-check proxy.
                 installComponent(component, name, r.downloadurl || '');
             },
-            fail: function (err) {
+            fail: function(err) {
                 Notification.alert('Unlock failed', (err && err.message) || 'An error occurred during unlock.');
             }
         }]);
@@ -2177,7 +2338,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             runInstall(component, name, knownurl, '');
             return;
         }
-        withDownload(component, function (url, sha) {
+        withDownload(component, function(url, sha) {
             if (!url) {
                 Notification.alert('Install failed', 'Could not find a download for ' + name + '.');
                 return;
@@ -2199,21 +2360,22 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: 'block_aiplugin_nav_auto_install_plugin',
             args: {component: component, downloadurl: url, expectedsha256: safeSha(sha)},
-            done: function (installResponse) {
+            done: function(installResponse) {
                 if (installResponse && installResponse.success) {
                     if (installResponse.needsupgrade) {
                         finishUpgrade(name);
                         return;
                     }
                     showToast(name + ' installed. Reloading…');
-                    setTimeout(function () {
+                    setTimeout(function() {
                         window.location.reload(true);
                     }, 900);
                 } else {
-                    Notification.alert('Install failed', (installResponse && installResponse.message) || 'Could not install this plugin.');
+                    Notification.alert('Install failed', (installResponse && installResponse.message)
+                        || 'Could not install this plugin.');
                 }
             },
-            fail: function (err) {
+            fail: function(err) {
                 Notification.alert('Install failed', (err && err.message) || 'An error occurred during install.');
             }
         }]);
@@ -2240,19 +2402,25 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @param {Function} [onDone]
      */
     function updatePlugin(component, name, onDone) {
-        withDownload(component, function (url, sha) {
+        withDownload(component, function(url, sha) {
             if (!url) {
-                if (onDone) { onDone(false, {message: 'No download available'}); }
+                if (onDone) {
+ onDone(false, {message: 'No download available'}); 
+}
                 return;
             }
             Ajax.call([{
                 methodname: 'block_aiplugin_nav_auto_update_plugin',
                 args: {component: component, downloadurl: url, expectedsha256: safeSha(sha)},
-                done: function (response) {
-                    if (onDone) { onDone(!!(response && response.success), response); }
+                done: function(response) {
+                    if (onDone) {
+ onDone(!!(response && response.success), response); 
+}
                 },
-                fail: function (err) {
-                    if (onDone) { onDone(false, err); }
+                fail: function(err) {
+                    if (onDone) {
+ onDone(false, err); 
+}
                 }
             }]);
         });
@@ -2280,11 +2448,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      */
     function finishUpgrade(what) {
         showToast(what + ' downloaded. Finishing in Moodle\u2019s upgrade screen\u2026');
-        setTimeout(function () {
+        setTimeout(function() {
             window.location.href = (DATA.wwwroot || '') + '/admin/index.php';
         }, 900);
     }
 
+    /**
+     * Update every plugin currently flagged with an update, one after another.
+     */
     function updateAll() {
         var pending = [];
         var plugins = DATA.plugins || [];
@@ -2302,6 +2473,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         var idx = 0;
         var okcount = 0;
         var failed = [];
+        /**
+         * Process the next pending plugin in the update queue.
+         */
         function next() {
             if (idx >= pending.length) {
                 // Never report success for downloads that failed. Upgrading the database
@@ -2315,7 +2489,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     Notification.alert('Some plugins were not updated',
                         okcount + ' of ' + pending.length + ' updated. These failed:\n\n' +
                         failed.join('\n') + '\n\nThe database upgrade will run for the ones that succeeded.',
-                        function () {
+                        function() {
                             finishUpgrade(okcount + ' plugin(s)');
                         });
                     return;
@@ -2324,7 +2498,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 return;
             }
             var p = pending[idx];
-            updatePlugin(p.component || p.pluginid, p.name, function (ok, resp) {
+            updatePlugin(p.component || p.pluginid, p.name, function(ok, resp) {
                 if (ok) {
                     okcount++;
                 } else {
@@ -2349,14 +2523,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: 'block_aiplugin_nav_purge_caches',
             args: {},
-            done: function (response) {
+            done: function(response) {
                 schedule.lastmanual = 'Just now';
                 if (current) {
                     paint();
                 }
                 showToast((response && response.message) || 'Caches purged.');
             },
-            fail: function (err) {
+            fail: function(err) {
                 if (current) {
                     paint();
                 }
@@ -2372,7 +2546,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: 'block_aiplugin_nav_get_purge_status',
             args: {},
-            done: function (response) {
+            done: function(response) {
                 if (!response) {
                     return;
                 }
@@ -2393,7 +2567,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     paint();
                 }
             },
-            fail: function () {
+            fail: function() {
                 // Keep local defaults.
             }
         }]);
@@ -2405,12 +2579,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     function savePurgeSchedule() {
         Ajax.call([{
             methodname: 'block_aiplugin_nav_save_purge_schedule',
-            args: {enabled: schedule.on ? 1 : 0, schedule_type: schedule.freq,
-                schedule_time: schedule.time, schedule_day: dayIndex(schedule.day)},
-            done: function () {
+            // Quoted because these are the web service's parameter names, not ours to
+            // rename into camel case.
+            args: {'enabled': schedule.on ? 1 : 0, 'schedule_type': schedule.freq,
+                'schedule_time': schedule.time, 'schedule_day': dayIndex(schedule.day)},
+            done: function() {
                 showToast('Purge schedule saved.');
             },
-            fail: function (err) {
+            fail: function(err) {
                 Notification.alert('Save failed', (err && err.message) || 'Could not save the purge schedule.');
             }
         }]);
@@ -2431,7 +2607,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: methodname,
             args: {name: name, url: url, icon: icon},
-            done: function (response) {
+            done: function(response) {
                 var id = (response && response.id) ? response.id : customIdSeq--;
                 var entry = {id: id, name: name, url: url, icon: icon};
                 if (kind === 'link') {
@@ -2444,7 +2620,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     paint();
                 }
             },
-            fail: function (err) {
+            fail: function(err) {
                 Notification.alert('Save failed', (err && err.message) || 'Could not save this link.');
             }
         }]);
@@ -2474,7 +2650,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         Ajax.call([{
             methodname: methodname,
             args: {index: idx},
-            done: function () {
+            done: function() {
                 var i;
                 for (i = 0; i < list.length; i++) {
                     if (String(list[i].id) === String(id)) {
@@ -2489,7 +2665,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                     paint();
                 }
             },
-            fail: function (err) {
+            fail: function(err) {
                 Notification.alert('Remove failed', (err && err.message) || 'Could not remove this link.');
             }
         }]);
@@ -2503,20 +2679,20 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * Attach every delegated event listener. Called once from init().
      */
     function wireEvents() {
-        els.cards.addEventListener('click', function (e) {
+        els.cards.addEventListener('click', function(e) {
             var c = closestWithAttr(e.target, 'data-id');
             if (c) {
                 openPanel(c.getAttribute('data-id'));
             }
         });
 
-        els.back.addEventListener('click', function () {
+        els.back.addEventListener('click', function() {
             els.q.value = '';
             els.clearq.hidden = true;
             goHome();
         });
 
-        els.toolbar.addEventListener('click', function (e) {
+        els.toolbar.addEventListener('click', function(e) {
             var chip = closestClass(e.target, 'ainav2-chip');
             if (chip) {
                 filt = chip.getAttribute('data-f');
@@ -2553,14 +2729,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.toolbar.addEventListener('input', function (e) {
+        els.toolbar.addEventListener('input', function(e) {
             if (e.target.id === 'ainav2-psearch') {
                 pq = String(e.target.value || '').trim().toLowerCase();
                 paint();
             }
         });
 
-        els.toolbar.addEventListener('keydown', function (e) {
+        els.toolbar.addEventListener('keydown', function(e) {
             if (e.target.id === 'ainav2-psearch' && e.keyCode === 27) {
                 e.stopPropagation();
                 if (pq) {
@@ -2574,7 +2750,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.toolbar.addEventListener('change', function (e) {
+        els.toolbar.addEventListener('change', function(e) {
             if (e.target.id === 'ainav2-sortsel') {
                 sort = e.target.value;
                 paint();
@@ -2587,7 +2763,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.plist.addEventListener('click', function (e) {
+        els.plist.addEventListener('click', function(e) {
             var star = closestClass(e.target, 'ainav2-star');
             if (star && star.hasAttribute('data-fav')) {
                 e.preventDefault();
@@ -2603,7 +2779,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 // the star never visibly toggled even though the preference was saved.
                 // Toggle the clicked star directly in that case.
                 if (!current) {
-                    // aria-pressed is what the stylesheet keys the starred look off.
+                    // Aria-pressed is what the stylesheet keys the starred look off.
                     star.setAttribute('aria-pressed', faves[n] ? 'true' : 'false');
                     return;
                 }
@@ -2633,14 +2809,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
             var upd = closestAttr(e.target, 'data-update');
             if (upd) {
-                var comp = upd.getAttribute('data-update');
+                var updcomp = upd.getAttribute('data-update');
                 var pname = upd.getAttribute('data-name');
                 upd.disabled = true;
                 upd.textContent = 'Updating…';
-                updatePlugin(comp, pname, function (ok) {
+                updatePlugin(updcomp, pname, function(ok) {
                     if (ok) {
                         showToast(pname + ' updated. Reloading…');
-                        setTimeout(function () {
+                        setTimeout(function() {
                             window.location.reload(true);
                         }, 800);
                     } else {
@@ -2691,12 +2867,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
                 e.stopPropagation();
                 return;
             }
-            if (closestAttr(e.target, 'data-goto') || closestClass(e.target, 'ainav2-get') || closestClass(e.target, 'ainav2-rowact')) {
+            if (closestAttr(e.target, 'data-goto') || closestClass(e.target, 'ainav2-get')
+                || closestClass(e.target, 'ainav2-rowact')) {
                 e.preventDefault();
             }
         });
 
-        els.core.addEventListener('click', function (e) {
+        els.core.addEventListener('click', function(e) {
             var del = closestAttr(e.target, 'data-del');
             if (del) {
                 e.preventDefault();
@@ -2714,7 +2891,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.spend.addEventListener('click', function (e) {
+        els.spend.addEventListener('click', function(e) {
             if (closestAttr(e.target, 'data-spendclear')) {
                 spend = [];
                 saveSpend();
@@ -2722,7 +2899,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.strip.addEventListener('click', function (e) {
+        els.strip.addEventListener('click', function(e) {
             // The support card is a real link (see buildStrip) — let it navigate.
             if (closestAttr(e.target, 'data-recheck')) {
                 refreshUpdates(true);
@@ -2733,41 +2910,41 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        document.addEventListener('mouseover', function (e) {
+        document.addEventListener('mouseover', function(e) {
             var t = closestWithAttr(e.target, 'data-help');
-            if (t && root_contains(t)) {
+            if (t && rootContains(t)) {
                 helpOwner = t;
                 showHelp(t.getAttribute('data-help'), t);
             } else if (!closestClass(e.target, 'ainav2-helpcard')) {
                 hideHelp();
             }
         });
-        document.addEventListener('focusin', function (e) {
+        document.addEventListener('focusin', function(e) {
             var t = closestWithAttr(e.target, 'data-help');
-            if (t && root_contains(t)) {
+            if (t && rootContains(t)) {
                 helpOwner = t;
                 showHelp(t.getAttribute('data-help'), t);
             }
             var rt = closestWithAttr(e.target, 'data-rowhelp');
-            if (rt && root_contains(rt)) {
+            if (rt && rootContains(rt)) {
                 showRowTip(rt);
             }
         });
-        document.addEventListener('focusout', function () {
+        document.addEventListener('focusout', function() {
             hideHelp();
             hideRowTip();
         });
-        window.addEventListener('scroll', function () {
+        window.addEventListener('scroll', function() {
             hideHelp();
             hideRowTip();
         }, {passive: true});
 
-        document.addEventListener('mouseover', function (e) {
+        document.addEventListener('mouseover', function(e) {
             var el = closestWithAttr(e.target, 'data-rowhelp');
             clearTimeout(rtTimer);
-            if (el && root_contains(el)) {
+            if (el && rootContains(el)) {
                 var delay = reduceMotion ? 0 : 110;
-                rtTimer = setTimeout(function () {
+                rtTimer = setTimeout(function() {
                     showRowTip(el);
                 }, delay);
             } else {
@@ -2776,7 +2953,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         });
 
         if (isTouch) {
-            els.plist.addEventListener('click', function (e) {
+            els.plist.addEventListener('click', function(e) {
                 var el = closestWithAttr(e.target, 'data-rowhelp');
                 if (el && !closestClass(e.target, 'ainav2-star') && !closestAttr(e.target, 'data-fav')) {
                     showRowTip(el);
@@ -2784,34 +2961,34 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             });
         }
 
-        els.q.addEventListener('input', function () {
+        els.q.addEventListener('input', function() {
             search(els.q.value);
         });
-        els.q.addEventListener('keydown', function (e) {
+        els.q.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 els.q.value = '';
                 search('');
             }
         });
-        els.clearq.addEventListener('click', function () {
+        els.clearq.addEventListener('click', function() {
             els.q.value = '';
             search('');
             els.q.focus();
         });
 
         els.mclose.addEventListener('click', closeModal);
-        els.ov.addEventListener('click', function (e) {
+        els.ov.addEventListener('click', function(e) {
             if (e.target === els.ov) {
                 closeModal();
             }
         });
-        document.addEventListener('keydown', function (e) {
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && els.ov.classList.contains('ainav2-show')) {
                 closeModal();
             }
         });
 
-        els.mfoot.addEventListener('click', function (e) {
+        els.mfoot.addEventListener('click', function(e) {
             var b = closestTag(e.target, 'BUTTON');
             if (!b) {
                 return;
@@ -2861,12 +3038,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             }
         });
 
-        els.mbody.addEventListener('input', function (e) {
+        els.mbody.addEventListener('input', function(e) {
             if (e.target.id === 'ainav2-iconsearch') {
                 document.getElementById('ainav2-icons').innerHTML = iconTiles(e.target.value);
             }
         });
-        els.mbody.addEventListener('click', function (e) {
+        els.mbody.addEventListener('click', function(e) {
             var i = closestClass(e.target, 'ainav2-ibtn');
             if (!i) {
                 return;
@@ -2881,7 +3058,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
         if (els.helpon) {
             els.helpon.checked = helpOn;
-            els.helpon.addEventListener('change', function () {
+            els.helpon.addEventListener('change', function() {
                 helpOn = els.helpon.checked;
                 setPref(PREF_HELP, helpOn ? '1' : '0');
                 if (!helpOn) {
@@ -2892,7 +3069,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
 
         if (els.ctop) {
-            els.ctop.addEventListener('click', function () {
+            els.ctop.addEventListener('click', function() {
                 // Credits are bought from LMS Labs, not from the Moodle site. This used to
                 // open <wwwroot>/local/lmslabs/credits.php, a path no plugin provides, so
                 // the button led to a 404.
@@ -2908,10 +3085,17 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * @param {Element} node
      * @return {boolean}
      */
-    function root_contains(node) {
+    function rootContains(node) {
         return !!(els.root && els.root.contains(node));
     }
 
+    /**
+     * Nearest ancestor (or self) carrying a class.
+     *
+     * @param {Element} el
+     * @param {string} cls
+     * @return {?Element}
+     */
     function closestClass(el, cls) {
         while (el && el.nodeType === 1) {
             if (el.classList && el.classList.contains(cls)) {
@@ -2922,6 +3106,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return null;
     }
 
+    /**
+     * Nearest ancestor (or self) carrying an attribute.
+     *
+     * @param {Element} el
+     * @param {string} attr
+     * @return {?Element}
+     */
     function closestAttr(el, attr) {
         while (el && el.nodeType === 1) {
             if (el.hasAttribute && el.hasAttribute(attr)) {
@@ -2932,6 +3123,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         return null;
     }
 
+    /**
+     * Nearest ancestor (or self) with a tag name.
+     *
+     * @param {Element} el
+     * @param {string} tag
+     * @return {?Element}
+     */
     function closestTag(el, tag) {
         while (el && el.nodeType === 1) {
             if (el.tagName === tag) {

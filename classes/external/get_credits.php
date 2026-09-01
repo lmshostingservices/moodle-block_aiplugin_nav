@@ -64,10 +64,10 @@ class get_credits extends external_api {
         // Silently hides the credits display for everyone.
         // Allowed: site admins, editing teachers, non-editing teachers, lmshsadmin, and any
         // User who has moodle/site:configview (covers custom admin roles that aren't full siteadmins).
-        $is_allowed = is_siteadmin()
+        $isallowed = is_siteadmin()
             || has_capability('moodle/site:configview', $context, $USER->id, false);
-        if (!$is_allowed) {
-            $is_allowed = $DB->record_exists_sql(
+        if (!$isallowed) {
+            $isallowed = $DB->record_exists_sql(
                 "SELECT ra.id
                    FROM {role_assignments} ra
                    JOIN {role} r ON r.id = ra.roleid
@@ -76,7 +76,7 @@ class get_credits extends external_api {
                 ['userid' => $USER->id]
             );
         }
-        if (!$is_allowed) {
+        if (!$isallowed) {
             return ['credits' => '', 'cached' => false, 'success' => false];
         }
 
@@ -99,9 +99,9 @@ class get_credits extends external_api {
         }
 
         // Load AI Grader Central Config library.
-        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        if (file_exists($aiconfig_lib)) {
-            require_once($aiconfig_lib);
+        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($aiconfiglib)) {
+            require_once($aiconfiglib);
         }
 
         $siteid = '';

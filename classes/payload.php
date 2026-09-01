@@ -53,11 +53,11 @@ class block_aiplugin_nav_payload {
     // majority (a handful of plugins), a component-level override is used instead — see
     // CATEGORY_OVERRIDES. Legacy values with no live registry example (ai, ai_credit, admin)
     // are given a defensible default and flagged in payload_notes.md.
-    // =====================================================================================
+    // =====================================================================================.
     const CATEGORY_MAP = [
         // AI plugin categories.
         'ai'            => 'assess',   // No live entries (commented-out testing stubs only);
-                                        // those stubs were themselves mostly quiz/mod grading
+                                        // Those stubs were themselves mostly quiz/mod grading
                                         // plugins, so 'assess' is the closest default.
         'ai_grading'    => 'assess',   // AI Essay Grader, AI Quiz Maker, AI Knowledge Check,
                                         // AI Mapping, Assignment Benchmarks, AI Quiz Remedial
@@ -68,13 +68,13 @@ class block_aiplugin_nav_payload {
         'ai_media'      => 'media',    // AI Video Activity, AI Slideshow, AI SCORM Voiceover.
         'ai_rto'        => 'rto',      // AI RTO Compliance, RTO Compliance Dashboard, RPL Kit.
         'ai_ux'         => 'site',     // AI Verify ID, AI Support, AI Login Designer — all
-                                        // three sit in the mockup's Plugins "site" group.
+                                        // Three sit in the mockup's Plugins "site" group.
                                         // NOTE: the mockup's *Settings* row for AI Verify ID
                                         // tags it 'access' instead — a genuine inconsistency
                                         // in the mockup itself. We follow the Plugins-panel
                                         // (GROUPS) placement as primary. See payload_notes.md.
         'ai_credit'     => 'assess',   // No live entries (legacy generic "credit gated AI"
-                                        // catch-all used only by commented-out stubs, which
+                                        // Catch-all used only by commented-out stubs, which
                                         // spanned assess/content/media/rto). Defaulted to
                                         // 'assess' as the single most common case.
         // Non-AI / general categories.
@@ -90,14 +90,14 @@ class block_aiplugin_nav_payload {
         'security'      => 'site',     // Course Version Control, Simple 2FA & SSO.
         'integrity'     => 'assess',   // Essay Guard, DocGuard -> mockup's "assess" group.
         'utility'       => 'site',     // No live entries (commented-out Speed/BigBlueButton
-                                        // stubs). Defaulted to 'site' as the general bucket.
+                                        // Stubs). Defaulted to 'site' as the general bucket.
         'reporting'     => 'site',     // Beacon — Reports & Analytics.
         'payments'      => 'site',     // Paddle Payment Gateway.
         'config'        => 'site',     // AI Grader Central Config.
         'admin'         => 'site',     // No live entries (commented-out AI Training Matrix
-                                        // stub only). Defaulted to 'site'.
+                                        // Stub only). Defaulted to 'site'.
         'other'         => 'site',     // Catch-all for the ~14 stub/placeholder components
-                                        // added late to get_complete_plugin_registry() with
+                                        // Added late to get_complete_plugin_registry() with
                                         // generic descriptions. Individually confirmed
                                         // exceptions are listed in CATEGORY_OVERRIDES.
     ];
@@ -129,7 +129,7 @@ class block_aiplugin_nav_payload {
     // enrol, format, local, theme, auth, paygw, plagiarism). Direct 1:1 matches pass through
     // unchanged; the remainder are cross-referenced against the mockup's GROUPS array, which
     // tags each plugin row with the ptype used for the coloured type pill.
-    // =====================================================================================
+    // =====================================================================================.
     const PTYPE_MAP = [
         'mod'          => 'mod',
         'block'        => 'block',
@@ -142,10 +142,10 @@ class block_aiplugin_nav_payload {
         'paygw'        => 'paygw',
         'plagiarism'   => 'plagiarism',
         'theme'        => 'theme',
-        // quiz_aigrader (plugin_type 'quiz' in this registry — not a real Moodle plugin
+        // Quiz_aigrader (plugin_type 'quiz' in this registry — not a real Moodle plugin
         // type) is tagged 'quizaccess' in the mockup's GROUPS array for AI Essay Grader.
         'quiz'         => 'quizaccess',
-        // gradingform_benchmarks is tagged 'assignfeedback' in the mockup's GROUPS array
+        // Gradingform_benchmarks is tagged 'assignfeedback' in the mockup's GROUPS array
         // for Assignment Benchmarks.
         'gradingform'  => 'assignfeedback',
         // No live examples in the active registry (commented-out stubs only). No ptypes
@@ -339,7 +339,7 @@ class block_aiplugin_nav_payload {
     // Fixed contract vocabularies (categories / catorder / ptypes). Labels are user-facing
     // UI chrome, so they are routed through get_string(). See TODO_LANG list in
     // payload_notes.md for the exact keys/fallback English needed in lang/en/block_aiplugin_nav.php.
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function get_categories(): array {
         return [
@@ -376,7 +376,7 @@ class block_aiplugin_nav_payload {
 
     // =====================================================================================
     // Category / ptype / docs resolution helpers.
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function resolve_category(string $component, string $legacycategory): string {
         if (isset(self::CATEGORY_OVERRIDES[$component])) {
@@ -407,7 +407,7 @@ class block_aiplugin_nav_payload {
     // "plugins" array — built from get_complete_plugin_registry(), enriched with live
     // install/version/credit data from get_master_plugin_registry() + is_plugin_installed()
     // + get_plugin_version().
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function build_plugins(block_aiplugin_nav $block, array $completeregistry, array $masterregistry): array {
         $out = [];
@@ -578,12 +578,16 @@ class block_aiplugin_nav_payload {
     // "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
     // filtered to installed plugins only (identical filtering logic to the existing
     // get_links_registry()).
-    // =====================================================================================
+    // =====================================================================================.
 
-    private static function build_settings_manage_reports(block_aiplugin_nav $block, array $masterregistry, array $completeregistry): array {
+    private static function build_settings_manage_reports(
+        block_aiplugin_nav $block,
+        array $masterregistry,
+        array $completeregistry
+    ): array {
         global $CFG;
 
-        // component => description, for rows whose name/component matches a
+        // Component => description, for rows whose name/component matches a
         // get_complete_plugin_registry() entry. Rows with no match (e.g. duplicate label
         // rows like "Training Plan — Notifications") fall back to an empty description —
         // see payload_notes.md ("desc" for settings/manage/reports).
@@ -716,7 +720,7 @@ class block_aiplugin_nav_payload {
     // The personal links carry no capability requirement in core Moodle — every
     // authenticated user can reach them — so they are gated on being logged in rather
     // than on moodle/site:config. Guests get nothing.
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function build_core_links(bool $isadmin): array {
         global $CFG;
@@ -756,18 +760,24 @@ class block_aiplugin_nav_payload {
         }
 
         return array_merge($links, [
-            ['name' => get_string('site_admin', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/search.php', 'icon' => 'sliders'],
-            ['name' => get_string('manage_users', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/user.php', 'icon' => 'users'],
-            ['name' => get_string('manage_courses', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/course/management.php', 'icon' => 'book'],
-            ['name' => get_string('cohorts', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/cohort/index.php', 'icon' => 'group'],
-            ['name' => get_string('reports', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/category.php?category=reports', 'icon' => 'chart'],
-            ['name' => get_string('themes', 'block_aiplugin_nav'), 'url' => $CFG->wwwroot . '/admin/themeselector.php', 'icon' => 'palette'],
+            ['name' => get_string('site_admin', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/admin/search.php', 'icon' => 'sliders'],
+            ['name' => get_string('manage_users', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/admin/user.php', 'icon' => 'users'],
+            ['name' => get_string('manage_courses', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/course/management.php', 'icon' => 'book'],
+            ['name' => get_string('cohorts', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/cohort/index.php', 'icon' => 'group'],
+            ['name' => get_string('reports', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/admin/category.php?category=reports', 'icon' => 'chart'],
+            ['name' => get_string('themes', 'block_aiplugin_nav'),
+                'url' => $CFG->wwwroot . '/admin/themeselector.php', 'icon' => 'palette'],
         ]);
     }
 
     // =====================================================================================
     // "custom" array — the user's own custom links, ported from get_custom_links().
-    // =====================================================================================
+    // =====================================================================================.
 
     /**
      * The user's own report links, stored in the same shape as custom links.
@@ -818,7 +828,7 @@ class block_aiplugin_nav_payload {
     // (fam cards). Names/urls/kinds/descriptions/prices/colours are hardcoded content
     // (identical treatment to plugin names/descriptions in the existing registries — see
     // get_complete_plugin_registry(), which is likewise not routed through get_string()).
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function build_products(): array {
         return [
@@ -834,9 +844,12 @@ class block_aiplugin_nav_payload {
                     . '<stop stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient></defs>'
                     . '<rect width="180" height="180" rx="42" fill="#0F172A"/>'
                     . '<rect x="12" y="12" width="156" height="156" rx="34" fill="url(#lg-trainly)"/>'
-                    . '<path d="M42 48C42 43.582 45.582 40 50 40H130C134.418 40 138 43.582 138 48V58C138 62.418 134.418 66 130 66H108V132'
-                    . 'C108 136.418 104.418 140 100 140H80C75.582 140 72 136.418 72 132V66H50C45.582 66 42 62.418 42 58V48Z" fill="white"/>'
-                    . '<path d="M121 121.5C121 116.253 125.253 112 130.5 112H138V132C138 136.418 134.418 140 130 140H121V121.5Z" fill="#F97316"/>'
+                    . '<path d="M42 48C42 43.582 45.582 40 50 40H130C134.418 40 138 43.582 138 48V58C138 62.418 134.418 66 130 ' .
+                        '66H108V132'
+                    . 'C108 136.418 104.418 140 100 140H80C75.582 140 72 136.418 72 132V66H50C45.582 66 42 62.418 42 58V48Z" fill' .
+                        '="white"/>'
+                    . '<path d="M121 121.5C121 116.253 125.253 112 130.5 112H138V132C138 136.418 134.418 140 130 140H121V121.5Z" ' .
+                        'fill="#F97316"/>'
                     . '</svg>',
             ],
             [
@@ -885,10 +898,10 @@ class block_aiplugin_nav_payload {
     // body/title/paragraphs/bullets/tip is user-facing UI copy, so every string is routed
     // through get_string(). See payload_notes.md for the full TODO_LANG key list with their
     // English fallback text (too long to repeat as inline comments here).
-    // =====================================================================================
+    // =====================================================================================.
 
     private static function build_help(): array {
-        // key => [paragraph count, bullet count].
+        // Key => [paragraph count, bullet count].
         $cards = [
             'block'      => [2, 3],
             'credits'    => [2, 4],
@@ -929,7 +942,7 @@ class block_aiplugin_nav_payload {
     // =====================================================================================
     // Ported private helpers from block_aiplugin_nav.php (minimum logic only — see class
     // docblock for why these are duplicated rather than reflected into).
-    // =====================================================================================
+    // =====================================================================================.
 
 
 

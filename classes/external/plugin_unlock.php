@@ -79,9 +79,9 @@ class plugin_unlock extends external_api {
         $component = $params['component'];
 
         // Load AI Grader Central Config library.
-        $aiconfig_lib = $CFG->dirroot . '/local/aiconfig/lib.php';
-        if (file_exists($aiconfig_lib)) {
-            require_once($aiconfig_lib);
+        $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($aiconfiglib)) {
+            require_once($aiconfiglib);
         }
 
         $siteid = '';
@@ -227,7 +227,8 @@ class plugin_unlock extends external_api {
             'creditsconsumed'  => new external_value(PARAM_INT,  'Number of credits consumed (0 if already unlocked)'),
             'remainingcredits' => new external_value(PARAM_TEXT, 'Remaining credits balance, or empty string'),
             'message'          => new external_value(PARAM_TEXT, 'Informational message from server'),
-            'source'           => new external_value(PARAM_TEXT, 'Entitlement source reported by the API, e.g. marketplace; empty when not reported'),
+            'source'           => new external_value(PARAM_TEXT, 'Entitlement source reported by the API, e.g. marketplace; empty' .
+                ' when not reported'),
             'downloadurl'      => new external_value(PARAM_URL, 'Download URL returned by the unlock API, or empty string'),
             'error'            => new external_value(PARAM_TEXT, 'Error message, or empty string on success'),
         ]);
