@@ -2,6 +2,43 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.23] - 2026-09-01
+
+### Fixed
+- **The block lost its accent colouring on Boost.** When no theme brand colour was set —
+  Boost's default — `get_theme_primary_color()` returned the string `__DETECT_FROM_DOM__`,
+  intended for JavaScript to swap out. No such JavaScript exists, so the marker went straight
+  into `style="--primary: __DETECT_FROM_DOM__;"`. A custom property that is set-but-invalid is
+  substituted as written rather than falling back, so `--accent` and every colour derived from
+  it became invalid at computed-value time: icon backgrounds computed to `rgba(0, 0, 0, 0)` and
+  the card tints and borders vanished. The property is now emitted only when the value is a
+  real CSS colour, so the stylesheet's own `var(--primary, #0e6e68)` fallback applies. Theme
+  settings are admin-supplied text, so the value is validated as a hex, `rgb()`, `hsl()` or
+  keyword colour before it is inlined.
+- **Testing-stage plugins could still appear in the catalogue.** AI Video Conference and AI
+  Practical Assessment were visible on client dashboards. The rule was "hide unless the site has
+  it installed", which leaks for anything Moodle reports as installed — `mod_bigbluebuttonbn`
+  ships with core, so `is_plugin_installed()` is always true for it and it was always shown. A
+  testing-stage plugin is now hidden unconditionally, installed or not. Client-only builds keep
+  the old rule, since the owning client has nowhere else to reach them.
+- **Bulk updates could leave a stale JavaScript bundle and crash the dashboard.** Moodle serves
+  every AMD module as one response keyed on `jsrev`, and that key did not change when the updater
+  swapped plugin files. A page request landing mid-extraction could cache a half-written bundle,
+  which then persisted until someone purged caches by hand — symptom:
+  `(0 , _jquery.default) is not a function` from `lib/requirejs.php`, cleared only by turning
+  Cache JavaScript off. Install and update now call `js_reset_all_caches()` and
+  `theme_reset_all_caches()` after writing files. Verified present and not deprecated in both
+  Moodle 4.5 and 5.2.
+- The updates card said how many plugins needed updating but not which. It now opens the Plugins
+  panel filtered to exactly those, and says so.
+
+### Changed
+- **Type scale raised throughout.** 62% of font sizes were under 12px and the smallest was 9.5px;
+  nothing reached 16px. All 94 declarations were lifted proportionally with a 12px floor, keeping
+  the visual hierarchy intact.
+- `supported` now declares `[400, 502]`, so the plugin is not flagged as unsupported on
+  Moodle 5.2.
+
 ## [2.5.21] - 2026-09-01
 
 Pipeline-correctness and layout release.

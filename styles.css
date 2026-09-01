@@ -368,7 +368,7 @@
     display: flex;
     flex-direction: column;
     font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    font-size: 13px;
+    font-size: 14.5px;
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
     max-width: 100%;
@@ -646,7 +646,7 @@
 }
 .ainav2 .ainav2-brandrow h2 {
     font-family: Archivo, sans-serif;
-    font-size: 15.5px;
+    font-size: 17px;
     font-weight: 600;
     margin: 0;
     flex: 1;
@@ -655,7 +655,7 @@
     color: var(--ink);
 }
 .ainav2 .ainav2-bsub {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
     margin-top: 2px;
     white-space: nowrap;
@@ -719,14 +719,14 @@
 }
 .ainav2 .ainav2-amt {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 17px;
+    font-size: 18.5px;
     font-weight: 500;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     color: var(--sig);
 }
 .ainav2 .ainav2-lab {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -739,7 +739,7 @@
     border-radius: 6px;
     padding: 3px 9px;
     font: inherit;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
 }
@@ -786,7 +786,7 @@
     }
 }
 .ainav2 .ainav2-meterlab {
-    font-size: 10.5px;
+    font-size: 12.5px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-creditbox.ainav2-low .ainav2-meterlab {
@@ -821,7 +821,7 @@
     width: 100%;
     height: 100%;
     font: inherit;
-    font-size: 13.5px;
+    font-size: 15px;
     padding: 8px 26px 8px 24px;
     border: 0;
     background: none;
@@ -840,7 +840,7 @@
     background: none;
     cursor: pointer;
     color: var(--ink-3);
-    font-size: 15px;
+    font-size: 16.5px;
     line-height: 1;
     padding: 4px 6px;
     border-radius: 5px;
@@ -874,7 +874,7 @@
 
 .ainav2 .ainav2-corehead {
     font-family: Archivo, sans-serif;
-    font-size: 10.5px;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -908,7 +908,7 @@
     background: var(--surface-2);
     color: var(--ink-2);
     text-decoration: none;
-    font-size: 10.5px;
+    font-size: 12.5px;
     text-align: center;
     line-height: 1.25;
 }
@@ -941,7 +941,7 @@
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--ink-3);
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1;
     cursor: pointer;
     display: none;
@@ -989,7 +989,7 @@
     color: var(--ink-3);
     cursor: pointer;
     font: inherit;
-    font-size: 10.5px;
+    font-size: 12.5px;
     line-height: 1.25;
 }
 .ainav2 .ainav2-addtile:hover {
@@ -1057,7 +1057,7 @@
 .ainav2 .ainav2-card .ainav2-lbl {
     font-family: Archivo, sans-serif;
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 16px;
     letter-spacing: -.01em;
 }
 .ainav2 .ainav2-card .ainav2-meta {
@@ -1068,17 +1068,17 @@
 }
 .ainav2 .ainav2-card .ainav2-n {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 21px;
+    font-size: 23px;
     font-weight: 500;
     line-height: 1;
     font-variant-numeric: tabular-nums;
 }
 .ainav2 .ainav2-card .ainav2-unit {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-card .ainav2-sub {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     line-height: 1.4;
 }
@@ -1087,7 +1087,7 @@
     top: 11px;
     right: 11px;
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 6px;
     border-radius: 999px;
     background: var(--warn-soft);
@@ -1148,13 +1148,13 @@
 }
 .ainav2 .ainav2-support .ainav2-stitle {
     font-family: Archivo, sans-serif;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--ink);
     letter-spacing: -.01em;
 }
 .ainav2 .ainav2-support .ainav2-sdesc {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     margin-top: 2px;
     line-height: 1.4;
@@ -1187,6 +1187,13 @@
     overflow: hidden;
     min-width: 0;
 }
+.ainav2 .ainav2-alert.ainav2-clickable {
+    cursor: pointer;
+}
+.ainav2 .ainav2-alert.ainav2-clickable:hover {
+    border-color: var(--sc);
+    box-shadow: var(--e2);
+}
 .ainav2 .ainav2-alert.ainav2-calm {
     --sc: var(--ok);
 }
@@ -1217,7 +1224,7 @@
 }
 .ainav2 .ainav2-alert .ainav2-anum {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 19px;
+    font-size: 21px;
     font-weight: 500;
     line-height: 1;
     color: var(--sc);
@@ -1225,13 +1232,13 @@
 }
 .ainav2 .ainav2-alert .ainav2-atitle {
     font-family: Archivo, sans-serif;
-    font-size: 13px;
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--ink);
     letter-spacing: -.01em;
 }
 .ainav2 .ainav2-alert .ainav2-adesc {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     margin-top: 3px;
     line-height: 1.4;
@@ -1242,7 +1249,7 @@
     border-radius: 7px;
     padding: 5px 11px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     flex: none;
@@ -1270,11 +1277,11 @@
         padding: 11px;
     }
     .ainav2 .ainav2-alert .ainav2-anum {
-        font-size: 17px;
+        font-size: 18.5px;
     }
     .ainav2 .ainav2-support .ainav2-sdesc,
     .ainav2 .ainav2-alert .ainav2-adesc {
-        font-size: 11px;
+        font-size: 13px;
     }
 }
 
@@ -1289,7 +1296,7 @@
 .ainav2 .ainav2-famhead {
     grid-column: 1 / -1;
     font-family: Archivo, sans-serif;
-    font-size: 10.5px;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -1355,7 +1362,7 @@
     box-shadow: var(--e1);
     font-family: Archivo, sans-serif;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: -.02em;
 }
 .ainav2 .ainav2-fam .ainav2-fbody {
@@ -1372,13 +1379,13 @@
 }
 .ainav2 .ainav2-fam .ainav2-fname b {
     font-family: Archivo, sans-serif;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--ink);
     letter-spacing: -.01em;
 }
 .ainav2 .ainav2-fam .ainav2-fkind {
-    font-size: 10px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .05em;
     color: var(--fc);
@@ -1387,14 +1394,14 @@
     padding: 1px 7px;
 }
 .ainav2 .ainav2-fam .ainav2-fdesc {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     line-height: 1.45;
     margin-top: 3px;
 }
 .ainav2 .ainav2-fam .ainav2-fprice {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-2);
     margin-top: 6px;
     font-variant-numeric: tabular-nums;
@@ -1460,7 +1467,7 @@
     border-radius: 7px;
     padding: 5px 10px 5px 7px;
     font: inherit;
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
     box-shadow: var(--e1);
 }
@@ -1480,14 +1487,14 @@
 .ainav2 .ainav2-ptitle {
     font-family: Archivo, sans-serif;
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 15px;
     letter-spacing: .03em;
     text-transform: uppercase;
     flex: 1;
 }
 .ainav2 .ainav2-pcount {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
     background: var(--surface-2);
     border: 1px solid var(--line-soft);
@@ -1517,7 +1524,7 @@
     border-radius: 999px;
     padding: 3px 10px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -1536,7 +1543,7 @@
 }
 .ainav2 .ainav2-chip .ainav2-cn {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10px;
+    font-size: 12px;
     opacity: .7;
     margin-left: 3px;
 }
@@ -1561,7 +1568,7 @@
     border-radius: 8px;
     padding: 6px 11px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -1625,7 +1632,7 @@
     flex: 1;
     min-width: 0;
     font-weight: 650;
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--ink);
 }
 .ainav2 .ainav2-spx {
@@ -1635,7 +1642,7 @@
     border-radius: 7px;
     padding: 3px 9px;
     font: inherit;
-    font-size: 11px;
+    font-size: 13px;
     cursor: pointer;
     flex: none;
 }
@@ -1659,7 +1666,7 @@
     gap: 10px;
     padding: 4px 0;
     border-top: 1px solid var(--line-soft);
-    font-size: 12px;
+    font-size: 14px;
 }
 .ainav2 .ainav2-splist li:first-child {
     border-top: 0;
@@ -1675,19 +1682,19 @@
 .ainav2 .ainav2-spc {
     flex: none;
     font-family: "IBM Plex Mono", monospace;
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--credit);
     font-weight: 600;
 }
 .ainav2 .ainav2-spc.ainav2-spfree {
     font-family: inherit;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--ok);
 }
 .ainav2 .ainav2-spfoot {
     margin-top: 9px;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
 }
 
@@ -1716,7 +1723,7 @@
     border-radius: 7px;
     padding: 4px 26px 4px 26px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     line-height: 1.5;
     transition: border-color .12s ease, box-shadow .12s ease;
     -webkit-appearance: none;
@@ -1775,7 +1782,7 @@
     border-radius: 7px;
     padding: 4px 8px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     cursor: pointer;
 }
 .ainav2 .ainav2-sortsel:focus-visible {
@@ -1783,7 +1790,7 @@
 }
 .ainav2 .ainav2-resn {
     flex: 1;
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-bulk {
@@ -1793,7 +1800,7 @@
     border-radius: 7px;
     padding: 4px 10px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
 }
@@ -1810,7 +1817,7 @@
     gap: 7px;
 }
 .ainav2 .ainav2-typewrap label {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
     white-space: nowrap;
 }
@@ -1821,7 +1828,7 @@
     border-radius: 7px;
     padding: 4px 9px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     cursor: pointer;
 }
 .ainav2 .ainav2-clearf:hover {
@@ -1840,7 +1847,7 @@
     border-radius: 7px;
     padding: 4px 10px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -1866,7 +1873,7 @@
 /* ---- filter-type colour pills (12 hues), fixed and NOT tied to accent ---- */
 .ainav2 .ainav2-ptype {
     --pc: #475569;
-    font-size: 9.5px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
@@ -1941,7 +1948,7 @@
     padding: 2px 9px;
     border-radius: 999px;
     font: inherit;
-    font-size: 10.5px;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: .02em;
 }
@@ -1987,7 +1994,7 @@
     cursor: pointer;
     color: var(--ink-2);
     font: inherit;
-    font-size: 12.5px;
+    font-size: 14px;
     text-align: left;
 }
 .ainav2 .ainav2-grphead:hover {
@@ -2016,7 +2023,7 @@
 }
 .ainav2 .ainav2-count {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10.5px;
+    font-size: 12.5px;
     color: var(--ink-3);
     background: var(--surface-2);
     border: 1px solid var(--line-soft);
@@ -2052,7 +2059,7 @@
     border-radius: 8px;
     color: var(--ink-2);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 14.5px;
     border: 1px solid transparent;
     min-width: 0;
 }
@@ -2074,7 +2081,7 @@
 }
 .ainav2 .ainav2-row .ainav2-desc {
     display: block;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
     margin-top: 1px;
 }
@@ -2088,7 +2095,7 @@
     align-items: center;
     gap: 9px;
     padding: 8px 6px;
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--ink-2);
     background: none;
     border: 0;
@@ -2157,7 +2164,7 @@
 }
 
 .ainav2 .ainav2-found {
-    font-size: 9.5px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .05em;
     padding: 1px 6px;
@@ -2175,7 +2182,7 @@
     flex: none;
 }
 .ainav2 .ainav2-tag {
-    font-size: 10px;
+    font-size: 12px;
     padding: 1px 6px;
     border-radius: 999px;
     background: var(--surface-3);
@@ -2185,7 +2192,7 @@
 }
 .ainav2 .ainav2-ver {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10.5px;
+    font-size: 12.5px;
     color: var(--ok);
     background: var(--ok-soft);
     border: 1px solid color-mix(in srgb, var(--ok) 28%, transparent);
@@ -2201,7 +2208,7 @@
 }
 .ainav2 .ainav2-cost {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10.5px;
+    font-size: 12.5px;
     color: var(--credit);
     background: var(--credit-soft);
     border: 1px solid color-mix(in srgb, var(--credit) 30%, transparent);
@@ -2219,7 +2226,7 @@
 
 .ainav2 .ainav2-state {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10.5px;
+    font-size: 12.5px;
     padding: 1px 8px;
     border-radius: 999px;
     white-space: nowrap;
@@ -2254,7 +2261,7 @@
     border-radius: 7px;
     padding: 4px 11px;
     font: inherit;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -2313,7 +2320,7 @@
     color: var(--surface, #fff);
     border-radius: 8px;
     padding: 8px 11px;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.45;
     box-shadow: var(--e3, 0 1px 2px rgba(18, 22, 27, .06), 0 18px 40px -20px rgba(18, 22, 27, .3));
     opacity: 0;
@@ -2330,7 +2337,7 @@
     margin-top: 6px;
     padding-top: 6px;
     font-family: "IBM Plex Mono", monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: #d0ad79;
     border-top: 1px solid rgba(255, 255, 255, .14);
 }
@@ -2360,15 +2367,15 @@
 }
 .ainav2 .ainav2-empty p {
     margin: 0;
-    font-size: 13px;
+    font-size: 14.5px;
 }
 .ainav2 .ainav2-empty .ainav2-hintline {
-    font-size: 11.5px;
+    font-size: 13.5px;
     margin-top: 4px;
 }
 .ainav2 .ainav2-srchead {
     font-family: Archivo, sans-serif;
-    font-size: 10.5px;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -2421,13 +2428,13 @@
     min-width: 0;
 }
 .ainav2 .ainav2-toolrow .ainav2-ttitle {
-    font-size: 13px;
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--ink);
 }
 .ainav2 .ainav2-toolrow .ainav2-tmeta {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 10px;
+    font-size: 12px;
     color: var(--ink-3);
     margin-top: 2px;
 }
@@ -2442,7 +2449,7 @@
     border-radius: 7px;
     padding: 5px 10px;
     font: inherit;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -2468,7 +2475,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ok);
     background: var(--ok-soft);
     border-radius: 999px;
@@ -2487,7 +2494,7 @@
     border-radius: 8px;
     padding: 8px;
     font: inherit;
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
     width: 100%;
     margin-top: 8px;
@@ -2514,7 +2521,7 @@
     padding: 16px 18px;
     border-top: 1px solid var(--line);
     background: var(--surface-2);
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-bfoot .ainav2-fleft {
@@ -2634,7 +2641,7 @@
     gap: 7px;
     cursor: pointer;
     user-select: none;
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-helptoggle input {
@@ -2702,7 +2709,7 @@
     color: var(--surface);
     border-radius: 8px;
     padding: 9px 14px;
-    font-size: 12.5px;
+    font-size: 14px;
     box-shadow: var(--e3);
     display: none;
     align-items: center;
@@ -2759,7 +2766,7 @@
 }
 .ainav2 .ainav2-helpcard h4 {
     font-family: Archivo, sans-serif;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
     margin: 0 0 6px;
     color: var(--ink);
@@ -2769,7 +2776,7 @@
     gap: 7px;
 }
 .ainav2 .ainav2-helpcard h4 .ainav2-hb {
-    font-size: 9.5px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
     padding: 1px 6px;
@@ -2780,7 +2787,7 @@
 }
 .ainav2 .ainav2-helpcard p {
     margin: 0 0 7px;
-    font-size: 12.5px;
+    font-size: 14px;
     line-height: 1.55;
     color: var(--ink-2);
 }
@@ -2795,7 +2802,7 @@
     gap: 4px;
 }
 .ainav2 .ainav2-helpcard li {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.45;
     color: var(--ink-3);
 }
@@ -2826,14 +2833,14 @@
     height: 12px;
 }
 .ainav2 .ainav2-helpcard .ainav2-protip .ainav2-ptxt {
-    font-size: 11.5px;
+    font-size: 13.5px;
     line-height: 1.5;
     color: var(--ink-2);
 }
 .ainav2 .ainav2-helpcard .ainav2-protip .ainav2-plabel {
     display: block;
     font-family: Archivo, sans-serif;
-    font-size: 9.5px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .09em;
@@ -2885,7 +2892,7 @@
 }
 .ainav2 .ainav2-mhead h3 {
     font-family: Archivo, sans-serif;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
     margin: 0;
     flex: 1;
@@ -2895,7 +2902,7 @@
     border: 0;
     background: none;
     color: var(--ink-3);
-    font-size: 17px;
+    font-size: 18.5px;
     line-height: 1;
     cursor: pointer;
     padding: 3px 6px;
@@ -2921,7 +2928,7 @@
     gap: 5px;
 }
 .ainav2 .ainav2-fld label {
-    font-size: 11px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: .05em;
     color: var(--ink-3);
@@ -2930,7 +2937,7 @@
 .ainav2 .ainav2-fld input,
 .ainav2 .ainav2-fld select {
     font: inherit;
-    font-size: 13px;
+    font-size: 14.5px;
     padding: 7px 9px;
     border: 1px solid var(--line);
     border-radius: 7px;
@@ -2945,7 +2952,7 @@
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .ainav2 .ainav2-hint {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink-3);
 }
 .ainav2 .ainav2-icons {
@@ -2987,7 +2994,7 @@
 }
 .ainav2 .ainav2-iconsearch {
     font: inherit;
-    font-size: 12.5px;
+    font-size: 14px;
     padding: 6px 9px;
     border: 1px solid var(--line);
     border-radius: 7px;
@@ -3016,7 +3023,7 @@
     accent-color: var(--accent);
 }
 .ainav2 .ainav2-toggle span {
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--ink-2);
     flex: 1;
 }
@@ -3039,19 +3046,19 @@
 }
 .ainav2 .ainav2-costline .ainav2-big {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 19px;
+    font-size: 21px;
     font-weight: 500;
     color: var(--credit);
     font-variant-numeric: tabular-nums;
     line-height: 1;
 }
 .ainav2 .ainav2-costline .ainav2-small {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--credit);
     flex: 1;
 }
 .ainav2 .ainav2-balline {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     font-family: "IBM Plex Mono", monospace;
 }
@@ -3135,7 +3142,7 @@
     }
     .ainav2 .ainav2-chip {
         padding: 4px 9px;
-        font-size: 12px;
+        font-size: 14px;
     }
     /* rows: let the tail drop to a second line rather than crushing the name */
     .ainav2 .ainav2-pl {

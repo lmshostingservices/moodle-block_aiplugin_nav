@@ -487,20 +487,33 @@ class block_aiplugin_nav_payload {
             // to touch block_aiplugin_nav.php. See payload_notes.md ("status" heuristic).
             $status = self::is_testing_stage($plugin) ? 'testing' : 'ready';
 
+            // Hard safety net: never list a plugin that ships with Moodle itself. The block
+            // can install and update what it lists, and pointing that machinery at a core
+            // plugin would overwrite part of Moodle. mod_bigbluebuttonbn is in the registry
+            // and is a standard Moodle plugin, so this is a live risk, not a theoretical one.
+            if (self::is_moodle_standard_plugin($plugintype, $pluginname)) {
+                continue;
+            }
+
             // Client-specific builds are treated the same way as testing builds: never on
             // offer, kept only where the site already runs one.
             if ($status === 'ready' && in_array($component, self::PRIVATE_COMPONENTS, true)) {
                 $status = 'private';
             }
 
-            // A plugin still in testing must never be offered for install from the block.
-            // It is dropped from the catalogue entirely unless this site already runs it —
-            // an installed plugin is a fact of the site and stays visible so it can still be
-            // configured and updated. check_versions.php is the authoritative source for
-            // status, and the browser applies the same rule again on the live data (see
-            // refreshUpdates() in amd/src/ui.js) to catch anything the registry has not
-            // been told about.
-            if (($status === 'testing' || $status === 'private') && !$installed) {
+            // A plugin still in testing never appears in the catalogue — not offered, and
+            // not shown even where the site already runs it. The earlier "keep it if
+            // installed" exemption leaked: mod_bigbluebuttonbn ships with Moodle core, so
+            // is_plugin_installed() is always true for it and a testing-stage entry was
+            // always displayed. Anything genuinely installed remains manageable through
+            // Moodle's own plugin pages, so nothing is lost by hiding it here.
+            if ($status === 'testing') {
+                continue;
+            }
+
+            // Client-specific builds keep the older rule: never offered, but still shown to
+            // the one client that runs them, since that is the only place they surface.
+            if ($status === 'private' && !$installed) {
                 continue;
             }
 
@@ -733,6 +746,22 @@ class block_aiplugin_nav_payload {
             return true;
         }
         return stripos((string) ($plugin['description'] ?? ''), 'testing-stage') !== false;
+    }
+
+    /**
+     * Is this plugin part of a standard Moodle install?
+     *
+     * Anything Moodle ships itself must never be offered for install or update by this
+     * block, whatever the registry claims, because the updater overwrites the plugin
+     * directory on disk.
+     *
+     * @param string $plugintype The Moodle plugin type, e.g. mod or block.
+     * @param string $pluginname The plugin's short name.
+     * @return bool True when Moodle ships this plugin as standard.
+     */
+    private static function is_moodle_standard_plugin(string $plugintype, string $pluginname): bool {
+        $standard = \core_plugin_manager::standard_plugins_list($plugintype);
+        return is_array($standard) && in_array($pluginname, $standard, true);
     }
 
     /**

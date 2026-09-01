@@ -685,9 +685,37 @@ class block_aiplugin_nav extends block_base {
             return $boostcolor;
         }
 
-        // Return special marker for JavaScript detection.
-        // JS will detect the primary color from existing themed elements.
-        return '__DETECT_FROM_DOM__';
+        // Nothing usable. Return an empty string so the caller omits the custom property
+        // altogether and the stylesheet's own fallback applies. This used to return the
+        // marker '__DETECT_FROM_DOM__' for JavaScript to swap out, but no such JavaScript
+        // exists: the marker went straight into style="--primary: ..." as an invalid colour,
+        // which made --accent and every colour derived from it invalid at computed-value
+        // time. Backgrounds fell back to transparent and the accent icons disappeared —
+        // visible on Boost, whose brandcolor is unset by default.
+        return '';
+    }
+
+    /**
+     * Does this string look like a CSS colour we can safely inline into a style attribute?
+     *
+     * A theme setting is admin-supplied text, and anything that is not a colour would
+     * silently invalidate every custom property derived from it.
+     *
+     * @param string $value The candidate colour.
+     * @return bool True when the value is a hex, rgb(), hsl() or simple keyword colour.
+     */
+    protected function is_css_color(string $value): bool {
+        $value = trim($value);
+        if ($value === '') {
+            return false;
+        }
+        if (preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value)) {
+            return true;
+        }
+        if (preg_match('/^(?:rgb|hsl)a?\([0-9a-z%.,\/\s+-]*\)$/i', $value)) {
+            return true;
+        }
+        return (bool) preg_match('/^[a-z]{3,20}$/i', $value);
     }
 
     /**
@@ -711,7 +739,13 @@ class block_aiplugin_nav extends block_base {
         $primarycolor = $this->get_theme_primary_color();
         $payload = block_aiplugin_nav_payload::build($this);
 
-        $html  = '<div class="ainav2" id="ainav2-root" style="--primary: ' . s($primarycolor) . ';">';
+        // Only set --primary when we actually have a colour. Setting it to anything else
+        // defeats the stylesheet's own var(--primary, #0e6e68) fallback, because a custom
+        // property that is set-but-invalid is substituted as-is rather than falling back.
+        $style = $this->is_css_color((string) $primarycolor)
+            ? ' style="--primary: ' . s($primarycolor) . ';"'
+            : '';
+        $html  = '<div class="ainav2" id="ainav2-root"' . $style . '>';
         $html .= '<div class="ainav2-boot">' . get_string('loading_block', 'block_aiplugin_nav') . '</div>';
         $html .= '</div>';
         $html .= '<script type="application/json" id="ainav2-data">'
@@ -1163,6 +1197,9 @@ class block_aiplugin_nav extends block_base {
                 'category' => 'other',
                 'description' => 'Testing-stage certificate activity tracked by the LMS Labs release pipeline.',
                 'access' => 'Course > Add an activity or resource > Certificate Pro',
+                // Stated explicitly rather than left to the "testing-stage" description
+                // heuristic, which a reworded description would silently defeat.
+                'status' => 'testing',
             ],
             [
                 'name' => 'Simple 2FA & SSO',

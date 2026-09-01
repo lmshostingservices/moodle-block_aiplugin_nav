@@ -865,11 +865,14 @@ desc;
         } else {
             num = String(updates);
             title = updates === 1 ? 'update ready' : 'updates ready';
-            desc = updates > 0 ? 'Keep plugins current' :
+            desc = updates > 0 ? 'See which need updating' :
                 ('All plugins current' + (lastCheck ? ' \u00b7 checked ' + fmtTime(lastCheck) : ''));
         }
 
+        // The count alone does not answer "which ones?". The card opens the Plugins panel
+        // already filtered to the plugins with updates waiting.
         out += '<div class="ainav2-alert' + (checkState === 'failed' ? ' ainav2-warnstate' : '') +
+            (updates > 0 && checkState === 'done' ? ' ainav2-clickable" data-openupdates="1' : '') +
             '" data-help="updates" tabindex="0">' +
             '<div class="ainav2-aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg></div>' +
@@ -1440,6 +1443,21 @@ k;
         els.home.classList.add('ainav2-hide');
         els.panel.classList.add('ainav2-show');
         els.plist.scrollTop = 0;
+    }
+
+    /**
+     * Open the Plugins panel showing only the plugins with an update waiting.
+     */
+    function openUpdatesPanel() {
+        openPanel('plugins');
+        pstate = 'update';
+        filt = 'all';
+        pq = '';
+        paint([]);
+        var sel = document.getElementById('ainav2-pstatesel');
+        if (sel) {
+            sel.value = 'update';
+        }
     }
 
     /**
@@ -2242,7 +2260,11 @@ pb = parseV(b);
         for (i = 0; i < plugins.length; i++) {
             var q = plugins[i];
             var live = map[q.component];
-            if (!q.installed && live && live.status && live.status !== 'ready') {
+            // Unconditional, matching the server: a plugin the update server does not call
+            // ready is removed whether or not this site has it installed. The old rule kept
+            // installed ones, which leaks for anything Moodle reports as installed —
+            // mod_bigbluebuttonbn ships with core, so it was always kept.
+            if (live && live.status && live.status !== 'ready') {
                 continue;
             }
             kept.push(q);
@@ -2895,6 +2917,10 @@ n = 0;
             }
             if (closestAttr(e.target, 'data-updateall')) {
                 updateAll();
+                return;
+            }
+            if (closestAttr(e.target, 'data-openupdates')) {
+                openUpdatesPanel();
             }
         });
 

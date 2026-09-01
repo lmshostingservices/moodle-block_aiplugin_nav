@@ -454,6 +454,16 @@ class plugin_updater extends external_api {
             // Invalidate the block's plugin status cache so next page load re-reads all version files.
             unset_config('plugin_status_cache_time', 'block_aiplugin_nav');
 
+            // Bump jsrev and the theme revision. Moodle serves every AMD module as one
+            // cached bundle keyed on jsrev, and that key does not change when plugin files
+            // do. Without this the browser keeps the bundle built from the previous files —
+            // and a request that lands mid-extraction can cache a half-written bundle, which
+            // then persists until someone purges caches by hand. Symptom seen in the wild:
+            // "(0 , _jquery.default) is not a function" from lib/requirejs.php, cleared only
+            // by turning Cache JavaScript off. Same reasoning for CSS via the theme revision.
+            js_reset_all_caches();
+            theme_reset_all_caches();
+
             return [
                 'success' => true,
                 'message' => 'Plugin files updated. Click "Run Database Upgrade" to complete.',
@@ -739,6 +749,16 @@ class plugin_updater extends external_api {
 
             // Invalidate the block's plugin status cache so next page load re-reads all version files.
             unset_config('plugin_status_cache_time', 'block_aiplugin_nav');
+
+            // Bump jsrev and the theme revision. Moodle serves every AMD module as one
+            // cached bundle keyed on jsrev, and that key does not change when plugin files
+            // do. Without this the browser keeps the bundle built from the previous files —
+            // and a request that lands mid-extraction can cache a half-written bundle, which
+            // then persists until someone purges caches by hand. Symptom seen in the wild:
+            // "(0 , _jquery.default) is not a function" from lib/requirejs.php, cleared only
+            // by turning Cache JavaScript off. Same reasoning for CSS via the theme revision.
+            js_reset_all_caches();
+            theme_reset_all_caches();
 
             return [
                 'success' => true,
