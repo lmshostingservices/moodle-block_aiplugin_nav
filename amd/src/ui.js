@@ -2893,9 +2893,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
 
         if (els.ctop) {
             els.ctop.addEventListener('click', function () {
-                if (DATA.wwwroot) {
-                    window.open(DATA.wwwroot + '/local/lmslabs/credits.php', '_blank');
-                }
+                // Credits are bought from LMS Labs, not from the Moodle site. This used to
+                // open <wwwroot>/local/lmslabs/credits.php, a path no plugin provides, so
+                // the button led to a 404.
+                window.open(DATA.topupurl || 'https://lms-labs.com/pricing', '_blank', 'noopener');
             });
         }
     }

@@ -319,6 +319,9 @@ class block_aiplugin_nav_payload {
             'help'       => self::build_help(),
             'proxyurl'   => $CFG->wwwroot . '/blocks/aiplugin_nav/check_versions.php',
             'supporturl' => self::build_support_url($block),
+            // Where "Top up" goes. It pointed at /local/lmslabs/credits.php on the Moodle
+            // site — a path no LMS Labs plugin provides, so the button opened a 404.
+            'topupurl'   => 'https://lms-labs.com/pricing',
             'prefs'      => [
                 'faves'  => json_decode(get_user_preferences('block_aiplugin_nav_faves', '[]'), true) ?: [],
                 'layout' => json_decode(get_user_preferences('block_aiplugin_nav_layout', '{}'), true) ?: new stdClass(),

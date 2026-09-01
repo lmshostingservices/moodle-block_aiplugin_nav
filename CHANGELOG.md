@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.19] - 2026-08-30
+
+### Fixed
+- The "Top up" button on the credit card led nowhere. It opened
+  `<wwwroot>/local/lmslabs/credits.php` — a path on the customer's own Moodle site that no LMS
+  Labs plugin provides, so the click produced a 404. Credits are bought from LMS Labs, so it now
+  goes to https://lms-labs.com/pricing. The destination is carried in the payload as `topupurl`
+  rather than hardcoded in JavaScript, so it can be changed server-side without a plugin
+  release. This also fixes the Top up button inside the unlock dialog, which delegates to the
+  same control. Savepoint 2026083060.
+
 ## [2.5.18] - 2026-08-30
 
 ### Fixed
