@@ -319,6 +319,7 @@ class block_aiplugin_nav_payload {
             'custom'     => self::build_custom_links($block),
             'customreports' => self::build_custom_reports($block),
             'products'   => self::build_products(),
+            'featured'   => self::build_featured($plugins),
             'help'       => self::build_help(),
             'proxyurl'   => $CFG->wwwroot . '/blocks/aiplugin_nav/check_versions.php',
             'supporturl' => self::build_support_url($block),
@@ -330,6 +331,7 @@ class block_aiplugin_nav_payload {
                 'layout' => json_decode(get_user_preferences('block_aiplugin_nav_layout', '{}'), true) ?: new stdClass(),
                 'help'   => get_user_preferences('block_aiplugin_nav_help', '1'),
                 'spend'  => json_decode(get_user_preferences('block_aiplugin_nav_spend', '[]'), true) ?: [],
+                'dismissed' => json_decode(get_user_preferences('block_aiplugin_nav_dismissed', '[]'), true) ?: [],
             ],
             'counts'     => [
                 'installed' => $installedcount,
@@ -1071,6 +1073,54 @@ class block_aiplugin_nav_payload {
             ];
         }
         return $out;
+    }
+
+    /**
+     * The component shown in the featured row on the home view.
+     *
+     * One component, named here rather than derived, so that changing what is featured is
+     * a deliberate edit. It must be a component that already exists in the registries —
+     * nothing is featured that the block would not otherwise list and be able to install.
+     */
+    private const FEATURED_COMPONENT = 'local_rtocompliance';
+
+    /**
+     * Build the featured-plugin row for the home view, or null when there is nothing to show.
+     *
+     * The row advertises one plugin the site does not yet have. It is deliberately built
+     * from the rows already computed for the Plugins panel rather than from the registry
+     * directly, so it cannot disagree with them: the same price, the same docs link, and
+     * the same testing/private/core exclusions that keep unreleased plugins out of the
+     * catalogue apply here too. If the featured component is filtered out of the panel for
+     * any reason, it is filtered out of this row as well.
+     *
+     * Sites that already run the plugin see nothing — there is no point advertising it to
+     * them — and the row carries no download or install control of its own. The only
+     * outbound link is the documentation page; buying still goes through the normal
+     * credit-gated flow on the plugin's own row, so this cannot become a way around it.
+     *
+     * @param array $plugins The already-built Plugins panel rows.
+     * @return array|null The featured row, or null when nothing should be shown.
+     */
+    private static function build_featured(array $plugins): ?array {
+        foreach ($plugins as $p) {
+            if (($p['component'] ?? '') !== self::FEATURED_COMPONENT) {
+                continue;
+            }
+            if (!empty($p['installed'])) {
+                return null;
+            }
+            return [
+                'component' => $p['component'],
+                'name'      => $p['name'],
+                'desc'      => $p['desc'],
+                'docs'      => $p['docs'],
+                'credits'   => $p['credits'],
+                'cat'       => $p['cat'],
+            ];
+        }
+
+        return null;
     }
 
     // The "products" array — LMS Labs' other products, ported from PRODUCTS in the mockup

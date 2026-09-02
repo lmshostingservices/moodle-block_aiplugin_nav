@@ -66,5 +66,12 @@ function block_aiplugin_nav_user_preferences(): array {
             'default'            => '[]',
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
+        // JSON array of components whose featured row this user has dismissed.
+        'block_aiplugin_nav_dismissed' => [
+            'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
+            'null'               => NULL_NOT_ALLOWED,
+            'default'            => '[]',
+            'permissioncallback' => [core_user::class, 'is_current_user'],
+        ],
     ];
 }

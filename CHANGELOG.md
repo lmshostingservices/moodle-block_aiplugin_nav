@@ -2,6 +2,40 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.28] - 2026-09-02
+
+### Added
+- **Featured plugin row** on the home view, above the Moodle shortcuts. It advertises one
+  plugin the site does not yet run — currently AI RTO Compliance — with a short description,
+  its price and a link to the documentation page.
+
+  The row is built from the same data as the plugin's own row in the Plugins panel rather
+  than from the registry directly, so it cannot show a different price or a different docs
+  link, and every exclusion that keeps testing, client-only and Moodle-core plugins out of
+  the catalogue applies to it too. Sites that already run the plugin see nothing.
+
+  It carries no install or download control of its own. The only link out of it is the
+  documentation page; acquiring the plugin still goes through the ordinary credit-gated
+  flow on its own row, so the row cannot become a way around the price.
+
+  Each admin can dismiss it with the x, remembered in a new user preference.
+
+### Changed
+- **Softer wording on a low credit balance.** "Credits critically low. Gated plugins will
+  stop working." now reads "Credits are low. Consider topping up." The message is also
+  announced politely rather than assertively, so it no longer interrupts whatever a
+  screen-reader user is in the middle of.
+
+### Fixed
+- **Four user preferences were missing from the privacy provider.** The block has written
+  `faves`, `layout`, `help` and `spend` since its first release, but none was declared in
+  the privacy metadata, included in a data export, or removed on a deletion request. They
+  are now declared, exported and deleted, along with the new dismissal preference, and all
+  seven are handled from a single list so that adding one in `lib.php` and forgetting it in
+  the provider cannot happen silently again.
+
+---
+
 ## [2.5.26] - 2026-09-01
 
 ### Fixed

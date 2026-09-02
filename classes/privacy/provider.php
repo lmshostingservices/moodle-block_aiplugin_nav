@@ -48,6 +48,23 @@ class provider implements
     \core_privacy\local\request\plugin\provider,
     \core_privacy\local\request\user_preference_provider {
     /**
+     * Every user preference this plugin writes.
+     *
+     * Exported and deleted from one list so that adding a preference in lib.php and
+     * forgetting it here cannot happen silently — which is how faves, layout, help and
+     * spend went undeclared through every release up to this one.
+     */
+    private const PREFERENCES = [
+        'block_aiplugin_nav_custom_links',
+        'block_aiplugin_nav_custom_reports',
+        'block_aiplugin_nav_faves',
+        'block_aiplugin_nav_layout',
+        'block_aiplugin_nav_help',
+        'block_aiplugin_nav_spend',
+        'block_aiplugin_nav_dismissed',
+    ];
+
+    /**
      * Describe the personal data stored by this plugin.
      *
      * @param collection $collection The collection to add the metadata to.
@@ -67,6 +84,29 @@ class provider implements
         $collection->add_user_preference(
             'block_aiplugin_nav_custom_reports',
             'privacy:metadata:preference:block_aiplugin_nav_custom_reports'
+        );
+        // These four were written by the block from the first release but never declared,
+        // so they were absent from the metadata, from exports and from deletion. Every
+        // preference the plugin writes has to appear here.
+        $collection->add_user_preference(
+            'block_aiplugin_nav_faves',
+            'privacy:metadata:preference:block_aiplugin_nav_faves'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_layout',
+            'privacy:metadata:preference:block_aiplugin_nav_layout'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_help',
+            'privacy:metadata:preference:block_aiplugin_nav_help'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_spend',
+            'privacy:metadata:preference:block_aiplugin_nav_spend'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_dismissed',
+            'privacy:metadata:preference:block_aiplugin_nav_dismissed'
         );
 
         return $collection;
@@ -146,22 +186,16 @@ class provider implements
      * @return void
      */
     public static function export_user_preferences(int $userid) {
-        $links = get_user_preferences('block_aiplugin_nav_custom_links', null, $userid);
-        if ($links !== null) {
+        foreach (self::PREFERENCES as $name) {
+            $value = get_user_preferences($name, null, $userid);
+            if ($value === null) {
+                continue;
+            }
             writer::export_user_preference(
                 'block_aiplugin_nav',
-                'block_aiplugin_nav_custom_links',
-                $links,
-                get_string('privacy:metadata:preference:block_aiplugin_nav_custom_links', 'block_aiplugin_nav')
-            );
-        }
-        $reports = get_user_preferences('block_aiplugin_nav_custom_reports', null, $userid);
-        if ($reports !== null) {
-            writer::export_user_preference(
-                'block_aiplugin_nav',
-                'block_aiplugin_nav_custom_reports',
-                $reports,
-                get_string('privacy:metadata:preference:block_aiplugin_nav_custom_reports', 'block_aiplugin_nav')
+                $name,
+                $value,
+                get_string('privacy:metadata:preference:' . $name, 'block_aiplugin_nav')
             );
         }
     }
@@ -196,8 +230,9 @@ class provider implements
             }
             $DB->set_field('block_aiplugin_nav_purge', 'purged_by', null, ['purged_by' => $user->id]);
         }
-        unset_user_preference('block_aiplugin_nav_custom_links', $user->id);
-        unset_user_preference('block_aiplugin_nav_custom_reports', $user->id);
+        foreach (self::PREFERENCES as $name) {
+            unset_user_preference($name, $user->id);
+        }
     }
 
     /**
@@ -219,8 +254,9 @@ class provider implements
         [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $DB->set_field_select('block_aiplugin_nav_purge', 'purged_by', null, "purged_by $insql", $inparams);
         foreach ($userids as $uid) {
-            unset_user_preference('block_aiplugin_nav_custom_links', $uid);
-            unset_user_preference('block_aiplugin_nav_custom_reports', $uid);
+            foreach (self::PREFERENCES as $name) {
+                unset_user_preference($name, $uid);
+            }
         }
     }
 }

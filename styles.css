@@ -3236,3 +3236,104 @@
 .ainav2 {
     --ainav2-minw: 0;
 }
+
+/* Featured plugin row — one advertised plugin at the top of the home view. Uses the same
+   accent tokens as the rest of the block, wraps like .ainav2-alert so it survives the
+   narrow dashboard column, and is dismissible per user. */
+.ainav2 .ainav2-featured {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin: 0 0 14px;
+    padding: 14px 40px 14px 16px;
+    border: 1px solid var(--line, #e2e5ec);
+    border-left: 4px solid var(--primary, #0f6cbf);
+    border-radius: 10px;
+    background: var(--panel, #fff);
+}
+
+.ainav2 .ainav2-fttag {
+    flex: 0 0 auto;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--primary, #0f6cbf);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.ainav2 .ainav2-ftbody {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.ainav2 .ainav2-ftname {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.ainav2 .ainav2-ftdesc {
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--muted, #5b6472);
+}
+
+.ainav2 .ainav2-ftside {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.ainav2 .ainav2-ftprice {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ainav2 .ainav2-ftdocs {
+    padding: 7px 13px;
+    border: 1px solid var(--primary, #0f6cbf);
+    border-radius: 7px;
+    color: var(--primary, #0f6cbf);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ainav2 .ainav2-ftdocs:hover,
+.ainav2 .ainav2-ftdocs:focus {
+    background: var(--primary, #0f6cbf);
+    color: #fff;
+    text-decoration: none;
+}
+
+.ainav2 .ainav2-ftx {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--muted, #5b6472);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ainav2 .ainav2-ftx:hover,
+.ainav2 .ainav2-ftx:focus {
+    background: var(--hover, #f1f3f7);
+    color: var(--text, #1d2125);
+}

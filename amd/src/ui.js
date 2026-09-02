@@ -69,6 +69,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var faves = {}; // Name -> true.
     var helpOn = true;
     var layouts = {}; // Panel id -> {filt,sort,ptype,pstate,open:[]}.
+    var dismissed = {}; // Component -> true, for featured rows this user has hidden.
     var pickIcon = 'link';
     var customLinks = [];
     var customReports = [];
@@ -239,6 +240,62 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
             h = DATA.help_pref;
         }
         helpOn = (h === undefined || h === null) ? true : (String(h) === '1');
+
+        dismissed = {};
+        var dz = parsePref(prefs.dismissed || null);
+        if (Array.isArray(dz)) {
+            for (i = 0; i < dz.length; i++) {
+                dismissed[dz[i]] = true;
+            }
+        }
+    }
+
+    /**
+     * Hide the featured row for this user and remember the choice.
+     *
+     * @param {string} component Frankenstyle component of the dismissed row.
+     */
+    function dismissFeatured(component) {
+        dismissed[component] = true;
+        setPref('block_aiplugin_nav_dismissed', JSON.stringify(Object.keys(dismissed)));
+        var el = document.getElementById('ainav2-featured');
+        if (el) {
+            el.parentNode.removeChild(el);
+        }
+    }
+
+    /**
+     * Markup for the featured row, or an empty string when there is nothing to feature.
+     *
+     * The row is an advertisement, not a control surface: the only link out of it is the
+     * documentation page. Acquiring the plugin still happens on its own row in the Plugins
+     * panel, through the ordinary credit-gated flow, so nothing here can bypass the price.
+     *
+     * @return {string}
+     */
+    function featuredRow() {
+        var f = DATA.featured;
+        if (!f || !f.component || dismissed[f.component]) {
+            return '';
+        }
+        var price = (f.credits > 0) ? fmtNum(f.credits) + ' credits' : 'Free';
+        var docs = f.docs
+            ? '<a class="ainav2-ftdocs" href="' + esc(f.docs) + '" target="_blank" rel="noopener">' +
+                'Read the docs</a>'
+            : '';
+        return '<div class="ainav2-featured" id="ainav2-featured" data-component="' + esc(f.component) + '">' +
+            '<div class="ainav2-fttag">Featured</div>' +
+            '<div class="ainav2-ftbody">' +
+            '<div class="ainav2-ftname">' + esc(f.name) + '</div>' +
+            '<div class="ainav2-ftdesc">' + esc(f.desc || '') + '</div>' +
+            '</div>' +
+            '<div class="ainav2-ftside">' +
+            '<div class="ainav2-ftprice">' + esc(price) + '</div>' +
+            docs +
+            '</div>' +
+            '<button class="ainav2-ftx" type="button" data-dismiss="' + esc(f.component) + '" ' +
+            'aria-label="Hide this featured plugin">\u00d7</button>' +
+            '</div>';
     }
 
     /* ------------------------------------------------------------------ *
@@ -615,6 +672,7 @@ row;
         html += '</div>';
 
         html += '<div class="ainav2-home" id="ainav2-home">';
+        html += featuredRow();
         html += '  <div class="ainav2-corehead" data-help="core" tabindex="0">Moodle</div>';
         html += '  <div class="ainav2-core" id="ainav2-core"></div>';
         html += '  <div class="ainav2-spend" id="ainav2-spend" hidden></div>';
@@ -981,7 +1039,7 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
         els.camt.textContent = creditUnlimited ? 'Unlimited' : fmtNum(n);
         els.ctop.classList.toggle('ainav2-urgent', level === 'low');
         els.ctop.textContent = level === 'low' ? 'Top up now' : 'Top up';
-        var cmsg = 'Credits critically low. Gated plugins will stop working.';
+        var cmsg = 'Credits are low. Consider topping up.';
         if (creditUnlimited) {
             cmsg = 'Unlimited plan — every plugin unlocks at no extra cost.';
         } else if (level === 'ok') {
@@ -992,7 +1050,9 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
                 'or free if you bought them on the Moodle Marketplace.';
         }
         els.cmsg.textContent = cmsg;
-        els.creditbox.setAttribute('aria-live', level === 'low' ? 'assertive' : 'off');
+        // Polite, not assertive: a low balance is worth noticing but is not an emergency,
+        // and assertive interrupts whatever a screen-reader user is currently reading.
+        els.creditbox.setAttribute('aria-live', level === 'low' ? 'polite' : 'off');
     }
 
     /**
@@ -3065,6 +3125,11 @@ n = 0;
                 return;
             }
 
+            var dis = closestAttr(e.target, 'data-dismiss');
+            if (dis) {
+                dismissFeatured(dis.getAttribute('data-dismiss'));
+                return;
+            }
             var add = closestAttr(e.target, 'data-add');
             if (add) {
                 builderModal(add.getAttribute('data-add'));
