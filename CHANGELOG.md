@@ -2,7 +2,7 @@
 
 All notable changes to this plugin will be documented in this file.
 
-## [2.5.27] - 2026-09-01
+## [2.5.26] - 2026-09-01
 
 ### Fixed
 - **Every installed plugin row showed a Settings button, whether or not the plugin had
@@ -24,11 +24,6 @@ All notable changes to this plugin will be documented in this file.
   Settings links are also withheld from users without `moodle/site:config`, for whom they
   could only lead to "Access denied".
 
----
-
-## [2.5.26] - 2026-09-01
-
-### Fixed
 - **Paid plugins were being offered free.** Only 13 of the 67 plugins on offer carried an
   explicit `credits_required`; every other one fell through a `?? 0` fallback and rendered a
   "Free" pill with a working Get button. 54 plugins could be taken for nothing, including paid
