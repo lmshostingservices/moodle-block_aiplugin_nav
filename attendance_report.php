@@ -290,7 +290,7 @@ if ($export === 'csv') {
  * @param mixed $pctraw The raw percentage from the query, or null when unknown.
  * @return string The badge markup.
  */
-function attendance_pct_badge($pctraw) {
+function block_aiplugin_nav_attendance_pct_badge($pctraw) {
     if ($pctraw === null || $pctraw === '' || $pctraw === false) {
         return '<span class="atnrpt-badge atnrpt-badge-neutral">N/A</span>';
     }
@@ -661,7 +661,7 @@ else :
         echo (int)$act->student_count;
         echo '</td>
                             <td>';
-        echo attendance_pct_badge($act->attendance_pct_raw);
+        echo block_aiplugin_nav_attendance_pct_badge($act->attendance_pct_raw);
         echo '</td>
                             <td>
                                 ';
@@ -761,7 +761,7 @@ else :
         echo (int)$stu->total_logs;
         echo '</td>
                             <td>';
-        echo attendance_pct_badge($stu->attendance_pct_raw);
+        echo block_aiplugin_nav_attendance_pct_badge($stu->attendance_pct_raw);
         echo '</td>
                         </tr>
                     ';
@@ -816,7 +816,7 @@ else :
         echo (int)$sess->log_count;
         echo '</td>
                             <td>';
-        echo attendance_pct_badge($sess->attendance_pct_raw);
+        echo block_aiplugin_nav_attendance_pct_badge($sess->attendance_pct_raw);
         echo '</td>
                         </tr>
                     ';

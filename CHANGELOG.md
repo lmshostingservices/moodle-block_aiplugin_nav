@@ -2,6 +2,25 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.29] - 2026-09-06
+
+### Changed
+- **Hover help tips now start switched off.** They were on for every user until the switch was
+  touched, which made them intrusive on first use. A new site setting, *Show help tips by
+  default* (Site administration → Plugins → Blocks → AI Dashboard Quick Links), ships unticked
+  and sets the starting state. Anyone who has already used the in-block *Show help tips* switch
+  keeps their own choice; the setting only decides where users who have never touched it begin.
+
+### Fixed
+- `attendance_pct_badge()` in `attendance_report.php` was a global function with no frankenstyle
+  prefix and could collide with another plugin defining the same name. Renamed to
+  `block_aiplugin_nav_attendance_pct_badge()`. No behaviour change.
+- The privacy provider now declares the LMS Labs service as an external location, naming the
+  site ID, API key and site URL that are sent to it. Previously the plugin contacted an external
+  service without declaring it.
+- Removed the leftover `privacy:metadata` string claiming the block stores no personal data. It
+  contradicted the provider, which declares a database table and seven user preferences.
+
 ## [2.5.28] - 2026-09-02
 
 ### Added

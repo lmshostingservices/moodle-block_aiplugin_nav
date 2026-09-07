@@ -329,7 +329,7 @@ class block_aiplugin_nav_payload {
             'prefs'      => [
                 'faves'  => json_decode(get_user_preferences('block_aiplugin_nav_faves', '[]'), true) ?: [],
                 'layout' => json_decode(get_user_preferences('block_aiplugin_nav_layout', '{}'), true) ?: new stdClass(),
-                'help'   => get_user_preferences('block_aiplugin_nav_help', '1'),
+                'help'   => get_user_preferences('block_aiplugin_nav_help', self::help_default()),
                 'spend'  => json_decode(get_user_preferences('block_aiplugin_nav_spend', '[]'), true) ?: [],
                 'dismissed' => json_decode(get_user_preferences('block_aiplugin_nav_dismissed', '[]'), true) ?: [],
             ],
@@ -1127,6 +1127,19 @@ class block_aiplugin_nav_payload {
     // (fam cards). Names/urls/kinds/descriptions/prices/colours are hardcoded content
     // (identical treatment to plugin names/descriptions in the existing registries — see
     // get_complete_plugin_registry(), which is likewise not routed through get_string()).
+
+    /**
+     * The starting state of the hover help tips for a user who has never used the switch.
+     *
+     * Returned as the string the UI expects, because the AMD module compares the payload
+     * value with "1" rather than coercing it. The setting ships unticked, so tips are off
+     * until an admin turns them on site-wide or the user turns them on for themselves.
+     *
+     * @return string "1" when help tips start on, "0" when they start off.
+     */
+    private static function help_default(): string {
+        return get_config('block_aiplugin_nav', 'helptips_default') ? '1' : '0';
+    }
 
     /**
      * Build the LMS Labs product links shown on the home view.

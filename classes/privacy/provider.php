@@ -77,6 +77,12 @@ class provider implements
             'purged_at'  => 'privacy:metadata:block_aiplugin_nav_purge:purged_at',
         ], 'privacy:metadata:block_aiplugin_nav_purge');
 
+        $collection->add_external_location_link('lmslabs', [
+            'siteid'  => 'privacy:metadata:lmslabs:siteid',
+            'apikey'  => 'privacy:metadata:lmslabs:apikey',
+            'siteurl' => 'privacy:metadata:lmslabs:siteurl',
+        ], 'privacy:metadata:lmslabs');
+
         $collection->add_user_preference(
             'block_aiplugin_nav_custom_links',
             'privacy:metadata:preference:block_aiplugin_nav_custom_links'

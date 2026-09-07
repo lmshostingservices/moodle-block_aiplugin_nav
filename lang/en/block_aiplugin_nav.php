@@ -237,6 +237,9 @@ $string['free_utilities'] = 'Time Saving Plugins (Credit-Based)';
 $string['friday'] = 'Friday';
 $string['go_to_plugin'] = 'Go to plugin';
 $string['grades'] = 'Grades';
+$string['helptips_default'] = 'Show help tips by default';
+$string['helptips_default_desc'] = 'If enabled, the hover help tips start switched on for users who have not set a prefer' .
+    'ence. Each user can still turn them on or off with the Show help tips switch in the block, and their choice is remembered.';
 $string['in_testing'] = 'In testing';
 $string['install_first'] = 'Install First';
 $string['install_first_badge'] = 'Install first';
@@ -277,13 +280,16 @@ $string['panel_reports'] = 'Reports';
 $string['panel_settings'] = 'Settings';
 $string['pluginname'] = 'AI Dashboard Quick Links';
 $string['preferences'] = 'Preferences';
-$string['privacy:metadata'] = 'The AI Plugin Navigation block does not store any personal data.';
-
 $string['privacy:metadata:block_aiplugin_nav_purge'] = 'Records of cache-purge actions performed from the AI Dashboard Quick Li' .
     'nks block.';
 $string['privacy:metadata:block_aiplugin_nav_purge:purge_type'] = 'Whether the purge was manual or scheduled.';
 $string['privacy:metadata:block_aiplugin_nav_purge:purged_at'] = 'The time the cache purge was performed.';
 $string['privacy:metadata:block_aiplugin_nav_purge:purged_by'] = 'The ID of the user who performed the cache purge.';
+$string['privacy:metadata:lmslabs'] = 'The block contacts the LMS Labs service to read the site\'s credit balance, check plu' .
+    'gin versions and unlock plugins. No user identifiers are sent.';
+$string['privacy:metadata:lmslabs:apikey'] = 'The site API key, sent to authenticate the site.';
+$string['privacy:metadata:lmslabs:siteid'] = 'The site identifier configured in AI Grader Central Config.';
+$string['privacy:metadata:lmslabs:siteurl'] = 'The address of this Moodle site, sent so a purchase can be matched to it.';
 $string['privacy:metadata:preference:block_aiplugin_nav_custom_links'] = 'Custom quick links the user has added to the block.';
 $string['privacy:metadata:preference:block_aiplugin_nav_custom_reports'] = 'Custom report links the user has added to the block.';
 $string['privacy:metadata:preference:block_aiplugin_nav_dismissed'] = 'Featured plugin rows the user has dismissed.';

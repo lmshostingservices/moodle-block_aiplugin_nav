@@ -52,11 +52,13 @@ function block_aiplugin_nav_user_preferences(): array {
             'default'            => '{}',
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
-        // Flag "1" or "0" — whether the hover help cards are shown.
+        // Flag "1" or "0" — whether the hover help cards are shown. The default follows the
+        // helptips_default site setting, which ships unticked, so a user who has never
+        // touched the switch gets no hover tips.
         'block_aiplugin_nav_help' => [
             'type'               => PARAM_INT,
             'null'               => NULL_NOT_ALLOWED,
-            'default'            => 1,
+            'default'            => (int) get_config('block_aiplugin_nav', 'helptips_default'),
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
         // JSON array of recent installs and what each cost, for the install receipt.
