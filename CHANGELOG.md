@@ -2,7 +2,12 @@
 
 All notable changes to this plugin will be documented in this file.
 
-## [2.5.29] - 2026-09-06
+## [2.5.30] - 2026-09-09
+
+### Added
+- **Free Video Tutorials card** in the "Our software" row on the home view, linking to the LMS Labs
+  Moodle Plugin Tutorials playlist on YouTube. Priced as *Free*; it is a documentation link, not a
+  product for sale.
 
 ### Changed
 - **Hover help tips now start switched off.** They were on for every user until the switch was
@@ -20,6 +25,7 @@ All notable changes to this plugin will be documented in this file.
   service without declaring it.
 - Removed the leftover `privacy:metadata` string claiming the block stores no personal data. It
   contradicted the provider, which declares a database table and seven user preferences.
+
 
 ## [2.5.28] - 2026-09-02
 

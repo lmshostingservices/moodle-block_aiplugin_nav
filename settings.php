@@ -44,6 +44,12 @@ if ($hassiteconfig) {
         get_string('aitools_collapsed_default_desc', 'block_aiplugin_nav'),
         0
     ));
+    $settings->add(new admin_setting_heading(
+        'block_aiplugin_nav/helptips_header',
+        get_string('helptips_settings_header', 'block_aiplugin_nav'),
+        get_string('helptips_settings_desc', 'block_aiplugin_nav')
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'block_aiplugin_nav/helptips_default',
         get_string('helptips_default', 'block_aiplugin_nav'),

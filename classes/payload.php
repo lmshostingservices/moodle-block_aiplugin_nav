@@ -1206,6 +1206,21 @@ class block_aiplugin_nav_payload {
                     . '<path d="M9 17l5 5 9-11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
                     . '</svg>',
             ],
+            [
+                'name'   => 'Free Video Tutorials',
+                'url'    => 'https://www.youtube.com/playlist?list=PLVNiB3lxOvhM',
+                'kind'   => 'Tutorials',
+                'desc'   => 'Learn how to use our plugins. Short walkthrough videos covering setup and everyday use.',
+                'price'  => 'Free',
+                'colour' => '#DC2626',
+                // A generic play mark, not the YouTube wordmark or logo: the destination is a
+                // third party's platform and its brand assets are not ours to redraw into the
+                // plugin. The red reads as video without borrowing anyone's identity.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#DC2626"/>'
+                    . '<path d="M13 11.2l8 4.8-8 4.8V11.2z" fill="white"/>'
+                    . '</svg>',
+            ],
         ];
     }
 

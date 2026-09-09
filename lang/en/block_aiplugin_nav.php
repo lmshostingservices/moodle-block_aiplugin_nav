@@ -240,6 +240,8 @@ $string['grades'] = 'Grades';
 $string['helptips_default'] = 'Show help tips by default';
 $string['helptips_default_desc'] = 'If enabled, the hover help tips start switched on for users who have not set a prefer' .
     'ence. Each user can still turn them on or off with the Show help tips switch in the block, and their choice is remembered.';
+$string['helptips_settings_desc'] = 'Control the hover help tips that appear over the block\'s cards, rows and buttons.';
+$string['helptips_settings_header'] = 'Help tips';
 $string['in_testing'] = 'In testing';
 $string['install_first'] = 'Install First';
 $string['install_first_badge'] = 'Install first';
