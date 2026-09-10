@@ -31,7 +31,10 @@
  * @copyright  2025 Essay Grader AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+require_once(__DIR__ . '/classes/local/ai_tools_registry_trait.php');
+
 class block_aiplugin_nav extends block_base {
+    use block_aiplugin_nav_ai_tools_registry_trait;
     /**
      * Initialize the block.
      */
@@ -119,6 +122,8 @@ class block_aiplugin_nav extends block_base {
      * @return array Complete plugin registry with detection and URL patterns.
      */
     public function get_master_plugin_registry() {
+        return require(__DIR__ . '/generated/master_registry.php');
+
         return [
             // AI PLUGINS (Credit-Based).
             // Note: Plugins with only Site ID/API Key don't have settings_url
@@ -798,6 +803,8 @@ class block_aiplugin_nav extends block_base {
      * Each plugin has component name, status, download URL, description, and access info.
      */
     public function get_complete_plugin_registry() {
+        return require(__DIR__ . '/generated/complete_registry.php');
+
         return [
             // Configuration Plugin (Install First).
             [

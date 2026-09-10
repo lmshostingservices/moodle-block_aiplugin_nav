@@ -483,10 +483,6 @@ class block_aiplugin_nav_payload {
             }
 
             // Testing-stage plugins render disabled/orange (contract behaviour #10).
-            // No explicit "status" field exists on the registries; the only live entry
-            // documented as testing-stage is Certificate Pro (see its description text) —
-            // detected here rather than adding a new registry field, per instructions not
-            // to touch block_aiplugin_nav.php. See payload_notes.md ("status" heuristic).
             $status = self::is_testing_stage($plugin) ? 'testing' : 'ready';
 
             // Hard safety net: never list a plugin that ships with Moodle itself. The block
@@ -503,20 +499,20 @@ class block_aiplugin_nav_payload {
                 $status = 'private';
             }
 
-            // A plugin still in testing never appears in the catalogue — not offered, and
-            // not shown even where the site already runs it. The earlier "keep it if
-            // installed" exemption leaked: mod_bigbluebuttonbn ships with Moodle core, so
-            // is_plugin_installed() is always true for it and a testing-stage entry was
-            // always displayed. Anything genuinely installed remains manageable through
-            // Moodle's own plugin pages, so nothing is lost by hiding it here.
+            // Testing entries stay hidden unless the generated catalogue explicitly marks
+            // one as public testing metadata. Public testing rows are informational only:
+            // the UI renders them disabled and the payload withholds every action URL.
             // Client-specific builds are dropped on the same terms: a strict client-only
             // build must never surface in this block on any site, including the client's
             // own, where it stays reachable through Moodle's normal plugin pages.
-            if ($status === 'testing' || $status === 'private') {
+            $publictesting = $status === 'testing' && !empty($plugin['public_testing']);
+            if (($status === 'testing' && !$publictesting) || $status === 'private') {
                 continue;
             }
 
-            $action = self::resolve_action($plugintype, $pluginname, $plugin, $masterentry);
+            $action = $publictesting
+                ? ['url' => '', 'label' => '']
+                : self::resolve_action($plugintype, $pluginname, $plugin, $masterentry);
 
             $out[] = [
                 'name'      => $plugin['name'],
@@ -532,7 +528,7 @@ class block_aiplugin_nav_payload {
                 // whether an update exists — see refreshUpdates() in amd/src/ui.js.
                 'versionint' => $installed ? $block->get_plugin_numeric_version($plugintype, $pluginname) : null,
                 'update'    => $update,
-                'credits'   => self::plugin_credits(
+                'credits'   => $publictesting ? 0 : self::plugin_credits(
                     $component,
                     $masterentry,
                     $plugin,
@@ -1129,11 +1125,7 @@ class block_aiplugin_nav_payload {
     // get_complete_plugin_registry(), which is likewise not routed through get_string()).
 
     /**
-     * The starting state of the hover help tips for a user who has never used the switch.
-     *
-     * Returned as the string the UI expects, because the AMD module compares the payload
-     * value with "1" rather than coercing it. The setting ships unticked, so tips are off
-     * until an admin turns them on site-wide or the user turns them on for themselves.
+     * The starting state of hover help for a user who has not used the switch.
      *
      * @return string "1" when help tips start on, "0" when they start off.
      */
@@ -1213,9 +1205,7 @@ class block_aiplugin_nav_payload {
                 'desc'   => 'Learn how to use our plugins. Short walkthrough videos covering setup and everyday use.',
                 'price'  => 'Free',
                 'colour' => '#DC2626',
-                // A generic play mark, not the YouTube wordmark or logo: the destination is a
-                // third party's platform and its brand assets are not ours to redraw into the
-                // plugin. The red reads as video without borrowing anyone's identity.
+                // Generic play mark rather than a third-party wordmark.
                 'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
                     . '<rect width="32" height="32" rx="8" fill="#DC2626"/>'
                     . '<path d="M13 11.2l8 4.8-8 4.8V11.2z" fill="white"/>'

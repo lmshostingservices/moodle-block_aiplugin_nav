@@ -23,13 +23,8 @@
  */
 
 // Server-side proxy for plugin version checking.
-// Tries multiple endpoints in order — resilient to DNS/firewall issues on the Moodle server.
-// Called by block_aiplugin_nav.php JS as fallback attempt #2 (after direct browser call fails).
-//
-// FIX-ENDPOINT-ORDER (v2.4.16): Replit URL moved to position #1 because lms-labs.com is
-// Unreachable from Vultr-hosted Moodle servers (datacenter IP blocking). essaygraderai.app
-// (old legacy domain) removed — no longer operational. Timeout reduced from 10s to 5s per
-// Endpoint so total worst-case wait drops from 30s to 10s.
+// Uses the canonical promotion-aware LMS Labs endpoint so Check for updates
+// cannot accept a valid-but-stale manifest from a retired deployment.
 
 define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../config.php');
@@ -40,7 +35,6 @@ require_capability('moodle/site:config', context_system::instance());
 header('Content-Type: application/json; charset=utf-8');
 
 $endpoints = [
-    'https://ai-grader-site-nct185.replit.app/api/plugins/versions',
     'https://lms-labs.com/api/plugins/versions',
 ];
 

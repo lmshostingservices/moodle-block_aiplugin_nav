@@ -2,6 +2,20 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.31] - 2026-09-10
+
+### Added
+- **AI Branched Scenario is now visible in Quick Links as testing metadata.** Its
+  catalogue row is deliberately disabled and exposes no install, update or download
+  action until the plugin is promoted from testing to ready.
+
+### Fixed
+- Generated Quick Links projections now carry the authoritative testing state into
+  the Moodle payload. This prevents a publicly documented testing plugin from being
+  mistaken for a ready plugin merely because its registry entry has no status field.
+- Rebased this release on the live immutable v2.5.30 release so its hover-help default,
+  tutorial link, privacy declaration and prefixed attendance helper remain present.
+
 ## [2.5.30] - 2026-09-09
 
 ### Added
@@ -12,20 +26,19 @@ All notable changes to this plugin will be documented in this file.
 ### Changed
 - **Hover help tips now start switched off.** They were on for every user until the switch was
   touched, which made them intrusive on first use. A new site setting, *Show help tips by
-  default* (Site administration → Plugins → Blocks → AI Dashboard Quick Links), ships unticked
-  and sets the starting state. Anyone who has already used the in-block *Show help tips* switch
-  keeps their own choice; the setting only decides where users who have never touched it begin.
+  default* ships unticked and sets the starting state. Existing user choices are preserved.
 
 ### Fixed
-- `attendance_pct_badge()` in `attendance_report.php` was a global function with no frankenstyle
-  prefix and could collide with another plugin defining the same name. Renamed to
-  `block_aiplugin_nav_attendance_pct_badge()`. No behaviour change.
-- The privacy provider now declares the LMS Labs service as an external location, naming the
-  site ID, API key and site URL that are sent to it. Previously the plugin contacted an external
-  service without declaring it.
-- Removed the leftover `privacy:metadata` string claiming the block stores no personal data. It
-  contradicted the provider, which declares a database table and seven user preferences.
+- Prefixed the attendance percentage helper to avoid global function-name collisions.
+- Declared the LMS Labs version, credit and unlock service as an external privacy location.
+- Removed the contradictory metadata string claiming that the block stores no personal data.
 
+## [2.5.29] - 2026-09-07
+
+### Fixed
+- **Check for updates now reads only the canonical LMS Labs release manifest.** The block
+  can no longer accept a valid-but-stale response from the retired Replit deployment, so
+  newly promoted plugin versions and SHA-bound download links appear immediately.
 
 ## [2.5.28] - 2026-09-02
 

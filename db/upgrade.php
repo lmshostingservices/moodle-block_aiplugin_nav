@@ -108,5 +108,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026083001, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026091000) {
+        // V2.5.31: publish AI Branched Scenario as disabled testing metadata in
+        // Quick Links. No install or download action is exposed. No DB changes.
+        upgrade_block_savepoint(true, 2026091000, 'aiplugin_nav');
+    }
+
     return true;
 }
