@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.34] - 2026-09-10
+
+### Changed
+- Promoted AI Branched Scenario from disabled testing metadata to a ready
+  Quick Links plugin row, following its canonical release promotion.
+- Installed sites now expose its verified Moodle settings section through the
+  Settings panel; uninstalled sites can acquire it through the normal guarded flow.
+
 ## [2.5.33] - 2026-09-10
 
 ### Fixed

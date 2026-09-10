@@ -126,5 +126,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026091002, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026091003) {
+        // V2.5.34: expose the now-ready AI Branched Scenario catalogue and
+        // installed-plugin settings rows. No DB changes.
+        upgrade_block_savepoint(true, 2026091003, 'aiplugin_nav');
+    }
+
     return true;
 }
