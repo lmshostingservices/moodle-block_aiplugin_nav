@@ -77,6 +77,17 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var creditBalance = 0;
     var creditUnlimited = false;
 
+    /**
+     * Testing entries approved for public, informational display.
+     *
+     * This is deliberately a component allowlist rather than a payload boolean:
+     * neither a stale registry nor a manifest response may make an arbitrary
+     * non-ready plugin visible.
+     */
+    var PUBLIC_TESTING_COMPONENTS = {
+        mod_aibranchedscenario: true
+    };
+
     var isTouch = false;
     var reduceMotion = false;
     var rtTimer = null;
@@ -2395,11 +2406,15 @@ pb = parseV(b);
         for (i = 0; i < plugins.length; i++) {
             var q = plugins[i];
             var live = map[q.component];
-            // Unconditional, matching the server: a plugin the update server does not call
-            // ready is removed whether or not this site has it installed. The old rule kept
-            // installed ones, which leaks for anything Moodle reports as installed —
-            // mod_bigbluebuttonbn ships with core, so it was always kept.
             if (live && live.status && live.status !== 'ready') {
+                // Preserve only the one explicitly approved informational testing row.
+                // Requiring both payload and manifest to say "testing" prevents either
+                // source from weakening the other. plugTail() checks q.status first, so
+                // this row remains disabled even if Moodle reports it as installed.
+                if (live.status === 'testing' && q.status === 'testing' &&
+                        PUBLIC_TESTING_COMPONENTS[q.component] === true) {
+                    kept.push(q);
+                }
                 continue;
             }
             kept.push(q);

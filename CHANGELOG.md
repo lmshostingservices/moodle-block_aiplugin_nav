@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.33] - 2026-09-10
+
+### Fixed
+- Kept AI Branched Scenario visible as disabled public testing metadata after
+  the Plugins panel completes its background version refresh.
+- Restricted that exception to the explicit component allowlist while continuing
+  to remove every other non-ready plugin and withholding all testing actions.
+
 ## [2.5.32] - 2026-09-10
 
 ### Fixed

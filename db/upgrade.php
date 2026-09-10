@@ -120,5 +120,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026091001, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026091002) {
+        // V2.5.33: preserve the explicitly approved public-testing catalogue row
+        // after the asynchronous version refresh. No DB changes.
+        upgrade_block_savepoint(true, 2026091002, 'aiplugin_nav');
+    }
+
     return true;
 }
