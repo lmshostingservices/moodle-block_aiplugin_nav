@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.32] - 2026-09-10
+
+### Fixed
+- Added complete Moodle GPL metadata to generated catalogue projections and the
+  refactored bootstrap files.
+- Added explicit source evidence for the generated AI Branched Scenario identity
+  so the exact-ZIP reviewer verifies the same component loaded at runtime.
+
 ## [2.5.31] - 2026-09-10
 
 ### Added

@@ -114,5 +114,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026091000, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026091001) {
+        // V2.5.32: compliance-only follow-up for generated registry and bootstrap
+        // file headers, plus exact reviewer registry evidence. No DB changes.
+        upgrade_block_savepoint(true, 2026091001, 'aiplugin_nav');
+    }
+
     return true;
 }

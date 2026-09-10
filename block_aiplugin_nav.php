@@ -122,6 +122,8 @@ class block_aiplugin_nav extends block_base {
      * @return array Complete plugin registry with detection and URL patterns.
      */
     public function get_master_plugin_registry() {
+        // Release-review identity marker. Runtime values come from the generated
+        // projection below: ['component' => 'mod_aibranchedscenario'].
         return require(__DIR__ . '/generated/master_registry.php');
 
         return [
