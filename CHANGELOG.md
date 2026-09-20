@@ -2,6 +2,23 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.38] - 2026-09-20
+
+### Changed
+- Plugin spotlight is much shorter and sits in the page with space around it: a 28px gap
+  above (below the header row) and below the dark panel (20px on short screens, 18px on
+  phones). The whole section is about 700px on desktop (was about 900px), so it fits on
+  screen with the gaps visible at 1920x911, 1366x768, tablets and phones, with no
+  horizontal scrolling. Smaller slide (steady 420px; 352px on screens under 820px tall, where
+  the feature ticks are hidden), smaller preview and poster cards, tighter row spacing.
+- Details popup fits a 1920x911 screen without an inner scroll bar (shorter banner and "More
+  in" cards); on smaller screens it still scrolls, with the scroll bar hidden.
+
+### Fixed
+- Theme overrides: themes that style block headings (e.g. ".block .card-body h3") shrank the
+  slide title, and a theme resetting div margins could remove the outer gap. The slide and
+  row titles and the outer gap now use selectors that out-rank those theme rules.
+
 ## [2.5.37] - 2026-09-20
 
 ### Changed

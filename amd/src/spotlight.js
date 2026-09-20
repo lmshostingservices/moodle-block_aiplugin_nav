@@ -884,6 +884,8 @@ export const init = opts => {
     const sp = createSpotlight(opts);
     sp.el.wrap = document.createElement('div');
     sp.el.wrap.className = 'ainav2-sp';
+    // The id lets the outer spacing out-rank theme rules such as ".block .card-body div".
+    sp.el.wrap.id = 'ainav2-sp';
     sp.el.wrap.style.setProperty('--sp-dur', (DURATION / 1000) + 's');
     sp.el.wrap.innerHTML = frameHtml(sp);
     opts.mount.appendChild(sp.el.wrap);
