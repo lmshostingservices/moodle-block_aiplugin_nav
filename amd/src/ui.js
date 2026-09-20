@@ -33,8 +33,8 @@
  * @copyright  2025 Essay Grader AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repository'],
-        function($, Ajax, Notification, Str, UserRepository) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repository', 'block_aiplugin_nav/spotlight'],
+        function($, Ajax, Notification, Str, UserRepository, Spotlight) {
 
     'use strict';
 
@@ -69,7 +69,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var faves = {}; // Name -> true.
     var helpOn = true;
     var layouts = {}; // Panel id -> {filt,sort,ptype,pstate,open:[]}.
-    var dismissed = {}; // Component -> true, for featured rows this user has hidden.
     var pickIcon = 'link';
     var customLinks = [];
     var customReports = [];
@@ -85,7 +84,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
      * non-ready plugin visible.
      */
     var PUBLIC_TESTING_COMPONENTS = {
-        mod_aibranchedscenario: true
+        'mod_aibranchedscenario': true
     };
 
     var isTouch = false;
@@ -252,61 +251,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
         }
         helpOn = (h === undefined || h === null) ? true : (String(h) === '1');
 
-        dismissed = {};
-        var dz = parsePref(prefs.dismissed || null);
-        if (Array.isArray(dz)) {
-            for (i = 0; i < dz.length; i++) {
-                dismissed[dz[i]] = true;
-            }
-        }
-    }
-
-    /**
-     * Hide the featured row for this user and remember the choice.
-     *
-     * @param {string} component Frankenstyle component of the dismissed row.
-     */
-    function dismissFeatured(component) {
-        dismissed[component] = true;
-        setPref('block_aiplugin_nav_dismissed', JSON.stringify(Object.keys(dismissed)));
-        var el = document.getElementById('ainav2-featured');
-        if (el) {
-            el.parentNode.removeChild(el);
-        }
-    }
-
-    /**
-     * Markup for the featured row, or an empty string when there is nothing to feature.
-     *
-     * The row is an advertisement, not a control surface: the only link out of it is the
-     * documentation page. Acquiring the plugin still happens on its own row in the Plugins
-     * panel, through the ordinary credit-gated flow, so nothing here can bypass the price.
-     *
-     * @return {string}
-     */
-    function featuredRow() {
-        var f = DATA.featured;
-        if (!f || !f.component || dismissed[f.component]) {
-            return '';
-        }
-        var price = (f.credits > 0) ? fmtNum(f.credits) + ' credits' : 'Free';
-        var docs = f.docs
-            ? '<a class="ainav2-ftdocs" href="' + esc(f.docs) + '" target="_blank" rel="noopener">' +
-                'Read the docs</a>'
-            : '';
-        return '<div class="ainav2-featured" id="ainav2-featured" data-component="' + esc(f.component) + '">' +
-            '<div class="ainav2-fttag">Featured</div>' +
-            '<div class="ainav2-ftbody">' +
-            '<div class="ainav2-ftname">' + esc(f.name) + '</div>' +
-            '<div class="ainav2-ftdesc">' + esc(f.desc || '') + '</div>' +
-            '</div>' +
-            '<div class="ainav2-ftside">' +
-            '<div class="ainav2-ftprice">' + esc(price) + '</div>' +
-            docs +
-            '</div>' +
-            '<button class="ainav2-ftx" type="button" data-dismiss="' + esc(f.component) + '" ' +
-            'aria-label="Hide this featured plugin">\u00d7</button>' +
-            '</div>';
     }
 
     /* ------------------------------------------------------------------ *
@@ -683,7 +627,7 @@ row;
         html += '</div>';
 
         html += '<div class="ainav2-home" id="ainav2-home">';
-        html += featuredRow();
+        html += '  <div class="ainav2-spot" id="ainav2-spot"></div>';
         html += '  <div class="ainav2-corehead" data-help="core" tabindex="0">Moodle</div>';
         html += '  <div class="ainav2-core" id="ainav2-core"></div>';
         html += '  <div class="ainav2-spend" id="ainav2-spend" hidden></div>';
@@ -719,7 +663,8 @@ row;
         html += '</div>';
 
         html += '<div class="ainav2-bfoot">';
-        html += '  <div class="ainav2-fleft"><span><span class="ainav2-dotok"></span>Connected to LMS Labs</span>' +
+        html += '  <div class="ainav2-fleft" id="ainav2-fleft">' +
+            '<span><span class="ainav2-dotok"></span>Connected to LMS Labs</span>' +
             '<label class="ainav2-helptoggle"><input type="checkbox" id="ainav2-helpon"><span class="ainav2-sw"></span>S' +
                 'how help t' +
                 'ips</label></div>';
@@ -1535,6 +1480,29 @@ k;
         els.home.classList.add('ainav2-hide');
         els.panel.classList.add('ainav2-show');
         els.plist.scrollTop = 0;
+    }
+
+    /**
+     * Open the Plugins panel on a single plugin, so its own row (and the normal
+     * credit-gated unlock) is the only way the spotlight's "Get plugin" acts.
+     *
+     * @param {string} name The plugin's name as the Plugins panel lists it.
+     */
+    function openPluginRow(name) {
+        openPanel('plugins');
+        filt = 'all';
+        ptype = 'all';
+        pstate = 'all';
+        pq = String(name || '').trim().toLowerCase();
+        paint([]);
+        var groups = els.plist.querySelectorAll('.ainav2-grp');
+        var k;
+        for (k = 0; k < groups.length; k++) {
+            groups[k].classList.add('ainav2-open');
+        }
+        if (els.root && els.root.scrollIntoView) {
+            els.root.scrollIntoView({block: 'start', behavior: reduceMotion ? 'auto' : 'smooth'});
+        }
     }
 
     /**
@@ -3140,11 +3108,6 @@ n = 0;
                 return;
             }
 
-            var dis = closestAttr(e.target, 'data-dismiss');
-            if (dis) {
-                dismissFeatured(dis.getAttribute('data-dismiss'));
-                return;
-            }
             var add = closestAttr(e.target, 'data-add');
             if (add) {
                 builderModal(add.getAttribute('data-add'));
@@ -3587,6 +3550,17 @@ n = 0;
         refreshUpdates(false);
 
         wireEvents();
+
+        if (DATA.spotlight) {
+            Spotlight.init({
+                mount: document.getElementById('ainav2-spot'),
+                footer: document.getElementById('ainav2-fleft'),
+                data: DATA.spotlight,
+                setPref: setPref,
+                openPlugin: openPluginRow,
+                toast: showToast
+            });
+        }
 
         if (DATA.cancredits) {
             setCredits(0);

@@ -2,6 +2,39 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.35] - 2026-09-20
+
+### Added
+- Plugin spotlight on the home view, replacing the single featured plugin row: a rotating
+  hero (five seconds per plugin, paused on hover, while the details dialog is open and when
+  the tab is hidden) and a numbered poster row with category filters. The row scrolls
+  independently of the hero. Shown to site administrators only.
+- Each promoted plugin shows its description, four key features, credit price, any fixed
+  per-use charge, a details dialog with its documentation link, and a preview image
+  (pix/spotlight/). "Get plugin" opens that plugin's own row in the Plugins panel, so
+  unlocking still runs through the normal credit-gated flow; the spotlight never installs
+  or charges anything itself.
+- The spotlight can be collapsed to a slim bar, or switched off with a new "Show plugin
+  spotlight" switch in the block footer. The choice is stored per user in the
+  block_aiplugin_nav_spotlight preference (declared in lib.php and the privacy provider).
+- New site setting "Plugin spotlight for new users" (open, collapsed or off).
+
+### Changed
+- Promoted plugins come from a bundled editorial snapshot
+  (generated/spotlight_catalogue.json, 48 plugins, 20 September 2026) of publicly listed,
+  owner-approved plugins, joined to the Plugins panel rows for price and install state.
+  RPL Kit and AI SCORM Voiceover are held out pending owner review; they remain available
+  in the Plugins panel as before.
+- AMD build files regenerated with Moodle 4.5's own rollup, Babel and Terser configuration.
+  The 2.5.34 ui.min.js had not been produced by Moodle's build.
+
+### Removed
+- The featured plugin row and its dismiss control. The block_aiplugin_nav_dismissed
+  preference stays declared so values already stored are still exported and deleted.
+
+### Fixed
+- ESLint camelcase warning in amd/src/ui.js.
+
 ## [2.5.34] - 2026-09-10
 
 ### Changed

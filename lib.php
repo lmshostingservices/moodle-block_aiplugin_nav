@@ -68,11 +68,22 @@ function block_aiplugin_nav_user_preferences(): array {
             'default'            => '[]',
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
-        // JSON array of components whose featured row this user has dismissed.
+        // JSON array of components whose featured row this user dismissed. The featured row was
+        // replaced by the plugin spotlight in 2.5.35; the preference stays declared so values
+        // already stored remain covered by the privacy provider.
         'block_aiplugin_nav_dismissed' => [
             'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.
             'null'               => NULL_NOT_ALLOWED,
             'default'            => '[]',
+            'permissioncallback' => [core_user::class, 'is_current_user'],
+        ],
+        // Plugin spotlight state: open, collapsed or off. The default follows the
+        // spotlight_default site setting.
+        'block_aiplugin_nav_spotlight' => [
+            'type'               => PARAM_ALPHA,
+            'null'               => NULL_NOT_ALLOWED,
+            'default'            => \block_aiplugin_nav\local\spotlight::site_default(),
+            'choices'            => \block_aiplugin_nav\local\spotlight::STATES,
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
     ];

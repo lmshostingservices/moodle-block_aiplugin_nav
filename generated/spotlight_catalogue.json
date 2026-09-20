@@ -1,0 +1,982 @@
+{
+  "source": "lms-labs.com editorial catalogue (PLUGIN_EDITORIAL_METADATA + docs pages), condensed",
+  "snapshot": "2026-09-20",
+  "eligibility": "Public catalogue (status ready, not hidden) AND owner-approved for promotion. Held out pending owner review: local_rplkit, local_chirpvoice.",
+  "order": "Positions 1-11 pinned by LMS Labs; remainder follows.",
+  "plugins": [
+    {
+      "component": "mod_aibranchedscenario",
+      "name": "AI Branched Scenario",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#14b8a6",
+      "accent2": "#6366f1",
+      "description": "Turn policies, procedures and learning content into branching decisions with consequences, skill scores and reflective debriefs.",
+      "features": [
+        "Branching decisions",
+        "Consequence feedback",
+        "Skill scoring",
+        "Reflective debriefs"
+      ],
+      "stat": {
+        "value": "Scores",
+        "label": "skills at every decision"
+      },
+      "docs": "https://lms-labs.com/docs/ai-branched-scenario",
+      "usage": "20 credits per scenario generation"
+    },
+    {
+      "component": "format_aicourse",
+      "name": "AI Course Format",
+      "category": "content",
+      "type": "Course format",
+      "accent": "#8b5cf6",
+      "accent2": "#3b82f6",
+      "description": "Present courses with branded cards, course-player navigation, completion details and an optional context-aware AI Tutor.",
+      "features": [
+        "Section and activity cards",
+        "Branded course navigation",
+        "Completion details",
+        "Optional AI Tutor"
+      ],
+      "stat": {
+        "value": "Tutor",
+        "label": "optional and context-aware"
+      },
+      "docs": "https://lms-labs.com/docs/ai-course-format"
+    },
+    {
+      "component": "mod_contentcreator",
+      "name": "AI Content Creator",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#8b5cf6",
+      "accent2": "#ec4899",
+      "description": "Build guided learning journeys or Topics & Text content with activities, narration, images and completion tracking.",
+      "features": [
+        "Guided learning journeys",
+        "Topics & Text mode",
+        "Activities and narration",
+        "Completion tracking"
+      ],
+      "stat": {
+        "value": "2",
+        "label": "modes: journeys or Topics & Text"
+      },
+      "docs": "https://lms-labs.com/docs/ai-content-creator"
+    },
+    {
+      "component": "mod_productexplainer",
+      "name": "AI Slide Flow",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#f97316",
+      "accent2": "#a855f7",
+      "description": "Generate structured product or concept presentations from a PDF or brief, with optional spoken narration.",
+      "features": [
+        "PDF-to-product slides",
+        "Concept-based presentations",
+        "Structured learning slides",
+        "Optional voiceover"
+      ],
+      "stat": {
+        "value": "PDF",
+        "label": "or a brief in, slides out"
+      },
+      "docs": "https://lms-labs.com/docs/product-explainer"
+    },
+    {
+      "component": "mod_aiactivities",
+      "name": "AI Learning Activities",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#22c55e",
+      "accent2": "#0ea5e9",
+      "description": "Turn learning content into interactive revision activities, including matching, sorting, flashcards and workplace scenarios.",
+      "features": [
+        "Eight activity types",
+        "Workplace scenario mode",
+        "Tap and drag interaction",
+        "Completion tracking"
+      ],
+      "stat": {
+        "value": "8",
+        "label": "activity types"
+      },
+      "docs": "https://lms-labs.com/docs/ai-learning-activities"
+    },
+    {
+      "component": "mod_aiknowledgecheck",
+      "name": "AI Knowledge Check",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#a855f7",
+      "accent2": "#22d3ee",
+      "description": "Create AI-generated multiple-choice checks with spoken explanations, attempt tracking and Moodle gradebook integration.",
+      "features": [
+        "AI-generated questions",
+        "Voiceover explanations",
+        "Attempt tracking",
+        "Gradebook integration"
+      ],
+      "stat": {
+        "value": "Voice",
+        "label": "explanations on every answer"
+      },
+      "docs": "https://lms-labs.com/docs/ai-knowledge-check"
+    },
+    {
+      "component": "quiz_aigrader",
+      "name": "AI Essay Grader",
+      "category": "grading",
+      "type": "Quiz report",
+      "accent": "#ff9a1f",
+      "accent2": "#e8453c",
+      "description": "Generate essay feedback against marking criteria and review results within Moodle’s quiz grading workflow.",
+      "features": [
+        "Essay feedback",
+        "Flexible marking criteria",
+        "Quiz report integration",
+        "Gradebook approval"
+      ],
+      "stat": {
+        "value": "Criteria",
+        "label": "based essay feedback"
+      },
+      "docs": "https://lms-labs.com/docs/ai-grader",
+      "includes": "Quiz Access Rule (included companion)"
+    },
+    {
+      "component": "local_aiquizmaker",
+      "name": "AI Quiz Maker",
+      "category": "content",
+      "type": "Admin tool",
+      "accent": "#6366f1",
+      "accent2": "#06b6d4",
+      "description": "Generate quiz and essay questions, map competencies and export questions in Moodle XML format.",
+      "features": [
+        "Quiz and essay questions",
+        "Competency mapping",
+        "Model-response rubrics",
+        "Moodle XML export"
+      ],
+      "stat": {
+        "value": "XML",
+        "label": "straight into your question bank"
+      },
+      "docs": "https://lms-labs.com/docs/ai-quiz-maker"
+    },
+    {
+      "component": "local_beacon",
+      "name": "Beacon",
+      "subtitle": "Reports & Analytics",
+      "category": "reporting",
+      "type": "Admin tool",
+      "accent": "#0ea5e9",
+      "accent2": "#22d3ee",
+      "description": "Explore curated Moodle reports with role-aware views, filters, scheduled delivery and export options.",
+      "features": [
+        "Curated reporting",
+        "Role-aware views",
+        "Scheduled email delivery",
+        "CSV and PDF export"
+      ],
+      "stat": {
+        "value": "Scheduled",
+        "label": "reports by email"
+      },
+      "docs": "https://lms-labs.com/docs/beacon"
+    },
+    {
+      "component": "plagiarism_essayguard",
+      "name": "Essay Guard",
+      "category": "grading",
+      "type": "Plagiarism",
+      "accent": "#ef4444",
+      "accent2": "#7c3aed",
+      "description": "Review writing-process evidence from typing, pasting, pauses and revisions, with risk indicators calculated inside Moodle.",
+      "features": [
+        "Keystroke analysis",
+        "Paste-event monitoring",
+        "Revision behaviour",
+        "Local risk indicators"
+      ],
+      "stat": {
+        "value": "Local",
+        "label": "risk indicators, inside Moodle"
+      },
+      "docs": "https://lms-labs.com/docs/essay-guard"
+    },
+    {
+      "component": "plagiarism_docguard",
+      "name": "DocGuard",
+      "subtitle": "Document Plagiarism Checker",
+      "category": "grading",
+      "type": "Plagiarism",
+      "accent": "#f43f5e",
+      "accent2": "#f59e0b",
+      "description": "Analyse PDF and Word submissions for writing-pattern and cross-student similarity signals, with section-level risk reports.",
+      "features": [
+        "PDF and Word extraction",
+        "Section-level analysis",
+        "Cross-student similarity",
+        "Risk reports"
+      ],
+      "stat": {
+        "value": "Section",
+        "label": "level risk reports"
+      },
+      "docs": "https://lms-labs.com/docs/doc-guard"
+    },
+    {
+      "component": "mod_smartworkbook",
+      "name": "AI Smart Workbook",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#ff7a18",
+      "accent2": "#ff3d77",
+      "description": "Build interactive workbooks with model answers, AI marking and teacher approval before grades reach the gradebook.",
+      "features": [
+        "Multiple question formats",
+        "Model answers",
+        "AI-assisted marking",
+        "Teacher approval"
+      ],
+      "stat": {
+        "value": "AI",
+        "label": "marks, the teacher approves"
+      },
+      "docs": "https://lms-labs.com/docs/smart-workbook"
+    },
+    {
+      "component": "local_rtocompliance",
+      "name": "AI RTO Compliance",
+      "category": "rto",
+      "type": "Admin tool",
+      "accent": "#ff6a0f",
+      "accent2": "#facc15",
+      "description": "Manage RTO compliance workflows, trainer credentials, qualification records, certificates and regulatory reporting in Moodle.",
+      "features": [
+        "Trainer credentials",
+        "Qualification management",
+        "Certificate workflows",
+        "Compliance reporting"
+      ],
+      "stat": {
+        "value": "1",
+        "label": "home for RTO compliance"
+      },
+      "docs": "https://lms-labs.com/docs/rto-compliance"
+    },
+    {
+      "component": "mod_aivideoactivity",
+      "name": "AI Video Activity",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#ef4444",
+      "accent2": "#f97316",
+      "description": "Build video and audio learning activities with transcript-based questions, narration, attempts and grading.",
+      "features": [
+        "YouTube and audio activities",
+        "Nine question types",
+        "Transcript-based questions",
+        "Attempts and grading"
+      ],
+      "stat": {
+        "value": "9",
+        "label": "question types"
+      },
+      "docs": "https://lms-labs.com/docs/ai-video-activity"
+    },
+    {
+      "component": "mod_slideshow",
+      "name": "AI Slideshow",
+      "subtitle": "with Voiceover",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#ec4899",
+      "accent2": "#f59e0b",
+      "description": "Create image and video slideshows with PowerPoint import, text editing, AI narration and completion controls.",
+      "features": [
+        "PowerPoint import",
+        "AI voiceover",
+        "Video slides",
+        "Watch-time gating"
+      ],
+      "stat": {
+        "value": "PPTX",
+        "label": "in, narrated slides out"
+      },
+      "docs": "https://lms-labs.com/docs/slideshow"
+    },
+    {
+      "component": "mod_courseinfo",
+      "name": "AI Course Information",
+      "category": "rto",
+      "type": "Activity",
+      "accent": "#f59e0b",
+      "accent2": "#10b981",
+      "description": "Generate structured course information from Moodle activities, including learner guidance and acknowledgement.",
+      "features": [
+        "Course activity scanning",
+        "Structured learner guides",
+        "Assessment summaries",
+        "Learner acknowledgement"
+      ],
+      "stat": {
+        "value": "Guide",
+        "label": "built from your activities"
+      },
+      "docs": "https://lms-labs.com/docs/course-information",
+      "usage": "100 credits per generation"
+    },
+    {
+      "component": "block_aigrader_dashboard",
+      "name": "AI Essay Grader Dashboard",
+      "category": "block",
+      "type": "Block",
+      "accent": "#fb923c",
+      "accent2": "#f43f5e",
+      "description": "Monitor ungraded essays centrally and receive notifications from a dashboard or another Moodle page.",
+      "features": [
+        "Ungraded essay monitoring",
+        "Central overview",
+        "Email notifications",
+        "Flexible block placement"
+      ],
+      "stat": {
+        "value": "All",
+        "label": "ungraded essays, one view"
+      },
+      "docs": "https://lms-labs.com/docs/dashboard-block"
+    },
+    {
+      "component": "local_downalert",
+      "name": "Site Down Alert",
+      "category": "monitor",
+      "type": "Admin tool",
+      "accent": "#10b981",
+      "accent2": "#ef4444",
+      "description": "Monitor Moodle health and receive alerts for warning conditions or downtime, with a lightweight health endpoint.",
+      "features": [
+        "Scheduled health checks",
+        "Email alerts",
+        "JSON health endpoint",
+        "Server monitor support"
+      ],
+      "stat": {
+        "value": "JSON",
+        "label": "health endpoint"
+      },
+      "docs": "https://lms-labs.com/docs/site-down-alert"
+    },
+    {
+      "component": "block_my_students_progress",
+      "name": "My Students Progress",
+      "category": "block",
+      "type": "Block",
+      "accent": "#3b82f6",
+      "accent2": "#14b8a6",
+      "description": "Give teachers a paginated view of students, course completion and individual activity progress.",
+      "features": [
+        "Teacher progress overview",
+        "Completion rates",
+        "Activity-level indicators",
+        "Paginated student lists"
+      ],
+      "stat": {
+        "value": "Every",
+        "label": "student at a glance"
+      },
+      "docs": "https://lms-labs.com/docs/my-students-progress"
+    },
+    {
+      "component": "block_my_progress",
+      "name": "My Progress",
+      "category": "block",
+      "type": "Block",
+      "accent": "#22c55e",
+      "accent2": "#84cc16",
+      "description": "Show learners course and activity completion with visual progress indicators, filtering and motivational feedback.",
+      "features": [
+        "Course completion views",
+        "Activity status indicators",
+        "Filtering and sorting",
+        "Motivational feedback"
+      ],
+      "stat": {
+        "value": "Live",
+        "label": "completion for learners"
+      },
+      "docs": "https://lms-labs.com/docs/my-progress"
+    },
+    {
+      "component": "local_aiquizremedial",
+      "name": "AI Quiz Remedial",
+      "subtitle": "Learning",
+      "category": "grading",
+      "type": "Admin tool",
+      "accent": "#f59e0b",
+      "accent2": "#ef4444",
+      "description": "Turn incorrect quiz answers into targeted explanations and follow-up checks, with optional narration, images and translations.",
+      "features": [
+        "Wrong-answer remediation",
+        "Follow-up check questions",
+        "Optional audio and images",
+        "Translated revision modules"
+      ],
+      "stat": {
+        "value": "Every",
+        "label": "wrong answer explained"
+      },
+      "docs": "https://lms-labs.com/docs/ai-quiz-remedial",
+      "usage": "From 2 credits per explanation"
+    },
+    {
+      "component": "mod_learningmapping",
+      "name": "AI Mapping",
+      "category": "rto",
+      "type": "Activity",
+      "accent": "#0ea5e9",
+      "accent2": "#a855f7",
+      "description": "Analyse course content against training-package requirements and export mapping, gaps and recommendations.",
+      "features": [
+        "Course-content analysis",
+        "Criteria mapping",
+        "Gap analysis",
+        "PDF, Excel and CSV export"
+      ],
+      "stat": {
+        "value": "Gaps",
+        "label": "found and exported"
+      },
+      "docs": "https://lms-labs.com/docs/learning-mapping",
+      "usage": "100 credits per AI analysis"
+    },
+    {
+      "component": "local_moodlesupport",
+      "name": "AI Support",
+      "category": "monitor",
+      "type": "Admin tool",
+      "accent": "#6366f1",
+      "accent2": "#ec4899",
+      "description": "Give Moodle users permission-aware help with intelligent search, voice input and multilingual support.",
+      "features": [
+        "Intelligent help search",
+        "Voice input",
+        "Permission-aware results",
+        "Multilingual support"
+      ],
+      "stat": {
+        "value": "Voice",
+        "label": "or typed questions"
+      },
+      "docs": "https://lms-labs.com/docs/ai-support"
+    },
+    {
+      "component": "gradingform_benchmarks",
+      "name": "Assignment Benchmarks",
+      "category": "grading",
+      "type": "Grading method",
+      "accent": "#22c55e",
+      "accent2": "#0ea5e9",
+      "description": "Build advanced assignment grading criteria using training.gov.au unit requirements, numbering and bulk entry.",
+      "features": [
+        "TGA unit import",
+        "Performance criteria",
+        "Evidence requirements",
+        "Bulk paste and numbering"
+      ],
+      "stat": {
+        "value": "TGA",
+        "label": "unit import"
+      },
+      "docs": "https://lms-labs.com/docs/benchmarks"
+    },
+    {
+      "component": "auth_simple2fa",
+      "name": "Simple 2FA",
+      "subtitle": "& SSO",
+      "category": "security",
+      "type": "Authentication",
+      "accent": "#10b981",
+      "accent2": "#3b82f6",
+      "description": "Protect selected Moodle roles with two-factor authentication and single sign-on access controls.",
+      "features": [
+        "TOTP authentication",
+        "Single sign-on",
+        "Role-based enforcement",
+        "Authenticator app support"
+      ],
+      "stat": {
+        "value": "TOTP",
+        "label": "plus single sign-on"
+      },
+      "docs": "https://lms-labs.com/docs/simple-2fa"
+    },
+    {
+      "component": "local_mediaoptimiser",
+      "name": "Media Optimiser",
+      "category": "media",
+      "type": "Admin tool",
+      "accent": "#f97316",
+      "accent2": "#06b6d4",
+      "description": "Find oversized, duplicate and unused Moodle media with scheduled scans, impact scores and remediation guidance.",
+      "features": [
+        "Oversized-file detection",
+        "Duplicate and unused files",
+        "Nightly scanning",
+        "Actionable recommendations"
+      ],
+      "stat": {
+        "value": "Nightly",
+        "label": "file-store scans"
+      },
+      "docs": "https://lms-labs.com/docs/media-optimiser"
+    },
+    {
+      "component": "local_cohortbranding",
+      "name": "Cohort Branding",
+      "category": "branding",
+      "type": "Admin tool",
+      "accent": "#ec4899",
+      "accent2": "#8b5cf6",
+      "description": "Give cohorts their own logos, colours and fonts, with priority rules for users belonging to multiple cohorts.",
+      "features": [
+        "Cohort logos",
+        "Custom colours",
+        "Custom fonts",
+        "Multi-cohort priorities"
+      ],
+      "stat": {
+        "value": "1",
+        "label": "site, many brands"
+      },
+      "docs": "https://lms-labs.com/docs/cohort-branding"
+    },
+    {
+      "component": "local_ailogin",
+      "name": "AI Login Designer",
+      "category": "branding",
+      "type": "Admin tool",
+      "accent": "#a855f7",
+      "accent2": "#f97316",
+      "description": "Brand your Moodle login page using preset layouts or an AI-generated design compatible with your theme.",
+      "features": [
+        "Five preset layouts",
+        "AI-generated designs",
+        "Brand customisation",
+        "Theme compatibility"
+      ],
+      "stat": {
+        "value": "5",
+        "label": "layouts, or let AI design one"
+      },
+      "docs": "https://lms-labs.com/docs/ai-login-designer",
+      "usage": "25 credits per AI design"
+    },
+    {
+      "component": "mod_verifyid",
+      "name": "AI Verify ID",
+      "category": "grading",
+      "type": "Activity",
+      "accent": "#0ea5e9",
+      "accent2": "#6366f1",
+      "description": "Compare webcam photos and identity documents using face and name matching against learner profiles.",
+      "features": [
+        "Webcam photo comparison",
+        "ID name extraction",
+        "Profile matching",
+        "Combined match scoring"
+      ],
+      "stat": {
+        "value": "Face",
+        "label": "and name matching"
+      },
+      "docs": "https://lms-labs.com/docs/ai-verify-id"
+    },
+    {
+      "component": "mod_slides",
+      "name": "Slides",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#f43f5e",
+      "accent2": "#f59e0b",
+      "description": "Build slide-based learning sequences with interactive content, video, audio options and completion tracking.",
+      "features": [
+        "Seven slide types",
+        "Matching and flip cards",
+        "Video and audio support",
+        "Completion tracking"
+      ],
+      "stat": {
+        "value": "7",
+        "label": "slide types"
+      },
+      "docs": "https://lms-labs.com/docs/slides"
+    },
+    {
+      "component": "local_workshops",
+      "name": "Workshop Scheduler",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#14b8a6",
+      "accent2": "#3b82f6",
+      "description": "Coordinate workshops, bookings, operational checklists and supporting documents alongside Moodle enrolment data.",
+      "features": [
+        "Workshop scheduling",
+        "Participant bookings",
+        "Operational checklists",
+        "Supporting documents"
+      ],
+      "stat": {
+        "value": "Bookings",
+        "label": "checklists and documents"
+      },
+      "docs": "https://lms-labs.com/docs/workshop-scheduler",
+      "includes": "Workshop Attendance Condition (included companion)"
+    },
+    {
+      "component": "local_groupmanager",
+      "name": "Groups Management",
+      "category": "groups",
+      "type": "Admin tool",
+      "accent": "#3b82f6",
+      "accent2": "#22c55e",
+      "description": "Manage cohort-based course access for rolling intakes, with dates, bulk creation, overrides and reporting.",
+      "features": [
+        "Time-controlled access",
+        "Rolling intake management",
+        "Bulk Quick Import",
+        "Audited overrides"
+      ],
+      "stat": {
+        "value": "Rolling",
+        "label": "intakes, timed access"
+      },
+      "docs": "https://lms-labs.com/docs/groups-management"
+    },
+    {
+      "component": "enrol_prerequisite",
+      "name": "Course Prerequisite",
+      "category": "groups",
+      "type": "Enrolment",
+      "accent": "#f97316",
+      "accent2": "#eab308",
+      "description": "Hide or suspend access to target courses until learners complete the required prerequisite courses.",
+      "features": [
+        "Prerequisite course gates",
+        "AND/OR requirements",
+        "Enrolment suspension",
+        "Staff exemptions"
+      ],
+      "stat": {
+        "value": "AND/OR",
+        "label": "prerequisite rules"
+      },
+      "docs": "https://lms-labs.com/docs/course-prerequisite"
+    },
+    {
+      "component": "local_courseversion",
+      "name": "Course Version Control",
+      "category": "security",
+      "type": "Admin tool",
+      "accent": "#6366f1",
+      "accent2": "#14b8a6",
+      "description": "Track course-material changes with version control, automatic locking and audit trails that protect learner results.",
+      "features": [
+        "Course version control",
+        "Automatic locking",
+        "Change audit trails",
+        "Result protection"
+      ],
+      "stat": {
+        "value": "Auto",
+        "label": "locking protects results"
+      },
+      "docs": "https://lms-labs.com/docs/courseversion"
+    },
+    {
+      "component": "local_paymentunlockassign",
+      "name": "Payment Unlock",
+      "subtitle": "Assignment",
+      "category": "payments",
+      "type": "Admin tool",
+      "accent": "#22c55e",
+      "accent2": "#0ea5e9",
+      "description": "Allow paid reopening of locked assignment attempts, with configurable fees, administrator overrides and audit reporting.",
+      "features": [
+        "Stripe payments",
+        "Configurable attempt fees",
+        "Administrator overrides",
+        "Revenue and audit reporting"
+      ],
+      "stat": {
+        "value": "Stripe",
+        "label": "pay to reopen an attempt"
+      },
+      "docs": "https://lms-labs.com/docs/payment-unlock-assignment"
+    },
+    {
+      "component": "local_courseavailabilitydelay",
+      "name": "Course Availability Delay",
+      "category": "groups",
+      "type": "Admin tool",
+      "accent": "#a855f7",
+      "accent2": "#0ea5e9",
+      "description": "Delay course visibility until a set period after enrolment or a fixed unlock date, with individual overrides.",
+      "features": [
+        "Enrolment-based delays",
+        "Fixed unlock dates",
+        "Per-user overrides",
+        "Bulk CSV import"
+      ],
+      "stat": {
+        "value": "Drip",
+        "label": "courses by date"
+      },
+      "docs": "https://lms-labs.com/docs/course-availability-delay"
+    },
+    {
+      "component": "local_groupcap",
+      "name": "Group Membership Limit",
+      "category": "groups",
+      "type": "Admin tool",
+      "accent": "#ef4444",
+      "accent2": "#f97316",
+      "description": "Enforce group-size limits across self-enrolment, manual additions and bulk membership actions.",
+      "features": [
+        "Per-group member limits",
+        "Self-enrolment protection",
+        "Manual-addition checks",
+        "Bulk-action enforcement"
+      ],
+      "stat": {
+        "value": "Full",
+        "label": "means full"
+      },
+      "docs": "https://lms-labs.com/docs/group-membership-limit"
+    },
+    {
+      "component": "paygw_paddle",
+      "name": "Paddle Payment Gateway",
+      "category": "payments",
+      "type": "Payment gateway",
+      "accent": "#3b82f6",
+      "accent2": "#a855f7",
+      "description": "Connect Moodle enrolments to Paddle checkout, tax handling, refunds and transaction reporting.",
+      "features": [
+        "Hosted checkout",
+        "Tax handling",
+        "Webhook-driven enrolment",
+        "Transaction CSV export"
+      ],
+      "stat": {
+        "value": "Tax",
+        "label": "handled at checkout"
+      },
+      "docs": "https://lms-labs.com/docs/paddle-payment"
+    },
+    {
+      "component": "mod_workplacetask",
+      "name": "Workplace Task",
+      "category": "grading",
+      "type": "Activity",
+      "accent": "#0ea5e9",
+      "accent2": "#22c55e",
+      "description": "Collect workplace evidence and record assessor sign-off, with resubmission and automatic completion when satisfactory.",
+      "features": [
+        "Evidence uploads",
+        "Assessor sign-off",
+        "Resubmission workflow",
+        "Automatic completion"
+      ],
+      "stat": {
+        "value": "Sign-off",
+        "label": "by the assessor"
+      },
+      "docs": "https://lms-labs.com/docs/workplace-task"
+    },
+    {
+      "component": "block_studentactivity",
+      "name": "Student Activity",
+      "subtitle": "Participation evidence",
+      "category": "reporting",
+      "type": "Block",
+      "accent": "#8b5cf6",
+      "accent2": "#22d3ee",
+      "description": "Review per-unit and per-attempt participation evidence with timestamps, engaged time, filters and CSV export.",
+      "features": [
+        "Per-unit evidence",
+        "Per-attempt detail",
+        "Engaged time-on-task",
+        "CSV export"
+      ],
+      "stat": {
+        "value": "CSV",
+        "label": "participation evidence"
+      },
+      "docs": "https://lms-labs.com/docs/student-activity"
+    },
+    {
+      "component": "local_recertify",
+      "name": "Course Recertification",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#f59e0b",
+      "accent2": "#8b5cf6",
+      "description": "Reset completion and optionally grades on a recurring schedule so learners can complete required recertification.",
+      "features": [
+        "Recurring schedules",
+        "Rolling or fixed dates",
+        "Advance warnings",
+        "Configurable reset depth"
+      ],
+      "stat": {
+        "value": "Auto",
+        "label": "recurring resets"
+      },
+      "docs": "https://lms-labs.com/docs/course-recertification"
+    },
+    {
+      "component": "local_completionsuspend",
+      "name": "Completion Auto-Suspend",
+      "category": "groups",
+      "type": "Admin tool",
+      "accent": "#64748b",
+      "accent2": "#f97316",
+      "description": "Suspend learner enrolments after course completion, with course selection, staff protection and an audit trail.",
+      "features": [
+        "Completion-triggered suspension",
+        "Course and category selection",
+        "Simulation mode",
+        "Automatic reactivation"
+      ],
+      "stat": {
+        "value": "Test",
+        "label": "first in simulation mode"
+      },
+      "docs": "https://lms-labs.com/docs/completion-auto-suspend"
+    },
+    {
+      "component": "local_custompage",
+      "name": "Custom Pages",
+      "category": "branding",
+      "type": "Admin tool",
+      "accent": "#06b6d4",
+      "accent2": "#ec4899",
+      "description": "Create and manage custom HTML pages with navigation links and sortable presentation order.",
+      "features": [
+        "Custom HTML pages",
+        "Site navigation links",
+        "Page management interface",
+        "Sortable page order"
+      ],
+      "stat": {
+        "value": "HTML",
+        "label": "pages in your navigation"
+      },
+      "docs": "https://lms-labs.com/docs/custom-pages"
+    },
+    {
+      "component": "local_videocompress",
+      "name": "Video Compress",
+      "category": "media",
+      "type": "Admin tool",
+      "accent": "#f43f5e",
+      "accent2": "#8b5cf6",
+      "description": "Automatically compress uploaded video to reduce storage requirements without manual configuration.",
+      "features": [
+        "Automatic compression",
+        "Upload processing",
+        "720p output",
+        "Zero-configuration setup"
+      ],
+      "stat": {
+        "value": "720p",
+        "label": "automatic output"
+      },
+      "docs": "https://lms-labs.com/docs/video-compress"
+    },
+    {
+      "component": "local_scormcompress",
+      "name": "SCORM Compress",
+      "category": "media",
+      "type": "Admin tool",
+      "accent": "#f59e0b",
+      "accent2": "#14b8a6",
+      "description": "Automatically compress uploaded SCORM packages to reduce storage use and improve delivery.",
+      "features": [
+        "SCORM package compression",
+        "Upload processing",
+        "Reduced storage use",
+        "Zero-configuration setup"
+      ],
+      "stat": {
+        "value": "Auto",
+        "label": "SCORM compression"
+      },
+      "docs": "https://lms-labs.com/docs/scorm-compress"
+    },
+    {
+      "component": "local_activitynav",
+      "name": "Activity Navigation",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#22c55e",
+      "accent2": "#3b82f6",
+      "description": "Add compact previous and next activity controls, with forward navigation governed by completion.",
+      "features": [
+        "Previous and next controls",
+        "Completion-aware progression",
+        "Subsection support",
+        "Tiles compatibility"
+      ],
+      "stat": {
+        "value": "Next",
+        "label": "activity, one click"
+      },
+      "docs": "https://lms-labs.com/docs/activity-navigation"
+    },
+    {
+      "component": "local_sitefont",
+      "name": "Change Site Font",
+      "category": "branding",
+      "type": "Admin tool",
+      "accent": "#8b5cf6",
+      "accent2": "#ec4899",
+      "description": "Control site-wide typography with selectable fonts, body sizing, heading scales, weights and line height.",
+      "features": [
+        "Font selection",
+        "Body and heading scales",
+        "Font-weight controls",
+        "Line-height controls"
+      ],
+      "stat": {
+        "value": "Type",
+        "label": "scale under control"
+      },
+      "docs": "https://lms-labs.com/docs/change-site-font"
+    },
+    {
+      "component": "local_lmshomepage",
+      "name": "LMS Home Page",
+      "category": "branding",
+      "type": "Admin tool",
+      "accent": "#ff6a0f",
+      "accent2": "#ec4899",
+      "description": "Replace Moodle’s front page with a branded, role-aware learning portal featuring live indicators and a course catalogue.",
+      "features": [
+        "Role-aware portal",
+        "Personalised greetings",
+        "Live KPI cards",
+        "Course catalogue"
+      ],
+      "stat": {
+        "value": "Role",
+        "label": "aware learning portal"
+      },
+      "docs": "https://lms-labs.com/docs/lms-home-page"
+    }
+  ]
+}

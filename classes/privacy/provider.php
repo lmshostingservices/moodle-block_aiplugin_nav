@@ -62,6 +62,7 @@ class provider implements
         'block_aiplugin_nav_help',
         'block_aiplugin_nav_spend',
         'block_aiplugin_nav_dismissed',
+        'block_aiplugin_nav_spotlight',
     ];
 
     /**
@@ -113,6 +114,10 @@ class provider implements
         $collection->add_user_preference(
             'block_aiplugin_nav_dismissed',
             'privacy:metadata:preference:block_aiplugin_nav_dismissed'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_spotlight',
+            'privacy:metadata:preference:block_aiplugin_nav_spotlight'
         );
 
         return $collection;

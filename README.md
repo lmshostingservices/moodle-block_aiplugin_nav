@@ -11,6 +11,8 @@ updating the LMS Labs plugin suite from one place.
 - Supports individual updates and Update All, with testing releases excluded.
 - Displays the site's shared LMS Labs AI-credit balance.
 - Uses the active Moodle theme colour and supports narrow dashboard regions.
+- Plugin spotlight for site administrators: a rotating showcase of LMS Labs plugins
+  that each user can collapse or switch off, with a site-wide default in the block settings.
 
 Quick Links itself is free and consumes no AI credits. AI credits are shared by
 the AI-powered plugins connected to the same LMS Labs Site ID.

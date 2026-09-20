@@ -56,4 +56,22 @@ if ($hassiteconfig) {
         get_string('helptips_default_desc', 'block_aiplugin_nav'),
         0
     ));
+
+    $settings->add(new admin_setting_heading(
+        'block_aiplugin_nav/spotlight_header',
+        get_string('spotlight_settings_header', 'block_aiplugin_nav'),
+        get_string('spotlight_settings_desc', 'block_aiplugin_nav')
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'block_aiplugin_nav/spotlight_default',
+        get_string('spotlight_default', 'block_aiplugin_nav'),
+        get_string('spotlight_default_desc', 'block_aiplugin_nav'),
+        'open',
+        [
+            'open' => get_string('spotlight_state_open', 'block_aiplugin_nav'),
+            'collapsed' => get_string('spotlight_state_collapsed', 'block_aiplugin_nav'),
+            'off' => get_string('spotlight_state_off', 'block_aiplugin_nav'),
+        ]
+    ));
 }
