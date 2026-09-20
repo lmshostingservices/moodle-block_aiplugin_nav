@@ -9,6 +9,74 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Plugin spotlight fonts, bundled in fonts/ (SIL OFL 1.1, see thirdpartylibs.xml). Moodle
+   resolves the [[font:...]] placeholders, so no external font service is contacted. */
+
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|archivo-latin-wdth.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "Public Sans";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|public-sans-latin-400.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "Public Sans";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|public-sans-latin-500.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "Public Sans";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|public-sans-latin-600.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "Public Sans";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|public-sans-latin-700.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "Public Sans";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|public-sans-latin-800.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|ibm-plex-mono-latin-500.woff2]]") format("woff2");
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("[[font:block_aiplugin_nav|ibm-plex-mono-latin-600.woff2]]") format("woff2");
+}
+
 /* Container - Full width horizontal bar */
 
 /* Brand/Logo */
@@ -3356,7 +3424,7 @@
 .ainav2 .ainav2-sp-hero {
     position: relative;
     display: grid;
-    min-height: 420px;
+    min-height: 480px;
     overflow: hidden;
 }
 
@@ -3519,7 +3587,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
     gap: 28px;
     align-items: center;
-    padding: 68px 60px 50px 40px;
+    padding: 70px 56px 54px 40px;
 }
 
 .ainav2 .ainav2-sp-copyslot,
@@ -3542,7 +3610,7 @@
 
 .ainav2 .ainav2-sp-shotwrap {
     width: 100%;
-    max-width: 400px;
+    max-width: 560px;
 }
 
 /* Hero copy: children rise in, staggered. */
@@ -3794,9 +3862,8 @@
 .ainav2 .ainav2-sp-tilt {
     transform:
         perspective(1500px)
-        rotateY(calc(-15deg + var(--sp-mx) * 7deg))
-        rotateX(calc(7deg - var(--sp-my) * 5deg))
-        rotateZ(0.6deg);
+        rotateY(calc(-8deg + var(--sp-mx) * 5deg))
+        rotateX(calc(3deg - var(--sp-my) * 3deg));
     transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -4163,8 +4230,8 @@
 .ainav2 .ainav2-sp-card {
     position: relative;
     z-index: 1;
-    width: 104px;
-    height: 146px;
+    width: 120px;
+    height: 160px;
     overflow: hidden;
     border-radius: 8px;
     background: #171b23;
@@ -4223,8 +4290,11 @@
 
 .ainav2 .ainav2-sp-cardtitle {
     display: block;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
     font-family: Archivo, "Public Sans", system-ui, sans-serif;
-    font-size: 15.5px;
+    font-size: 14px;
     font-weight: 800;
     font-stretch: 88%;
     line-height: 1.02;
@@ -4735,7 +4805,7 @@
     }
 
     .ainav2 .ainav2-sp-hero {
-        min-height: 352px;
+        min-height: 372px;
     }
 
     .ainav2 .ainav2-sp-stage {
@@ -4748,6 +4818,6 @@
     }
 
     .ainav2 .ainav2-sp-shotwrap {
-        max-width: 360px;
+        max-width: 400px;
     }
 }

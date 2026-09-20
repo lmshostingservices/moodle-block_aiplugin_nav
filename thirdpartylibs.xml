@@ -1,3 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <libraries>
+    <library>
+        <location>fonts/archivo-latin-wdth.woff2</location>
+        <name>Archivo (variable, latin subset)</name>
+        <description>Display font for the plugin spotlight. From @fontsource-variable/archivo.</description>
+        <version>5.3.0</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://github.com/Omnibus-Type/Archivo</repository>
+        <copyrights>
+            <copyright>2020 The Archivo Project Authors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>fonts/public-sans-latin-400.woff2</location>
+        <location>fonts/public-sans-latin-500.woff2</location>
+        <location>fonts/public-sans-latin-600.woff2</location>
+        <location>fonts/public-sans-latin-700.woff2</location>
+        <location>fonts/public-sans-latin-800.woff2</location>
+        <name>Public Sans (latin subset)</name>
+        <description>Body font for the plugin spotlight. From @fontsource/public-sans.</description>
+        <version>5.3.0</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://github.com/uswds/public-sans</repository>
+        <copyrights>
+            <copyright>2015 The Public Sans Project Authors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>fonts/ibm-plex-mono-latin-500.woff2</location>
+        <location>fonts/ibm-plex-mono-latin-600.woff2</location>
+        <name>IBM Plex Mono (latin subset)</name>
+        <description>Monospace font for the plugin spotlight. From @fontsource/ibm-plex-mono.</description>
+        <version>5.3.0</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://github.com/IBM/plex</repository>
+        <copyrights>
+            <copyright>2017 IBM Corp.</copyright>
+        </copyrights>
+    </library>
 </libraries>

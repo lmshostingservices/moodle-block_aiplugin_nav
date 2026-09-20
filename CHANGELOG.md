@@ -2,6 +2,21 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.39] - 2026-09-20
+
+### Fixed
+- Plugin spotlight fonts were never loaded: the spotlight is designed in Archivo, Public Sans
+  and IBM Plex Mono, but the block only loaded Inter, so sites fell back to a wider system
+  font. Titles looked different from the design and poster names broke mid-word
+  ("BRANCHE-D", "ACTIVITIE-S"). The three fonts are now bundled in fonts/ (latin subset,
+  about 200 KB, SIL OFL 1.1, listed in thirdpartylibs.xml) and served by Moodle through
+  [[font:block_aiplugin_nav|...]]; no external font service is contacted.
+- Fuzzy preview: the plugin preview was drawn at 400px from a 1120px image with a strong 3D
+  tilt, which blurred the mock-up text. It is now up to 560px wide (400px on screens under
+  820px tall) with a gentler tilt, and the slide is a little taller (480px) to fit it. The
+  whole section still fits a 1920x911 screen with the gaps above and below.
+- Poster names never break inside a word, and cards are slightly wider (120x160).
+
 ## [2.5.38] - 2026-09-20
 
 ### Changed
