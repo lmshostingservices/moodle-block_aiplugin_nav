@@ -56,6 +56,9 @@ foreach ($endpoints as $url) {
         // Validate it looks like our expected JSON before passing through.
         $decoded = json_decode($response, true);
         if (isset($decoded['success']) && $decoded['success'] && isset($decoded['plugins'])) {
+            // Keep the server-side copy current too, so prices, versions and spotlight
+            // readiness on the next page view match what LMS Labs says right now.
+            \block_aiplugin_nav\local\live_feed::store(\block_aiplugin_nav\local\live_feed::VERSIONS, $decoded);
             echo $response;
             exit;
         }

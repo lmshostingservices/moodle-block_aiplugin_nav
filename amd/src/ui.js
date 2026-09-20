@@ -64,6 +64,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var pq = ''; // Per-panel search term (Plugins/Settings/Manage/Reports).
 
     var checkState = 'idle'; // 'idle' | 'checking' | 'done' | 'failed'.
+    var spotlight = null; // The plugin spotlight controller, when the spotlight is shown.
     var lastCheck = null; // When the last successful check finished.
     var spend = []; // Recent credit spends: [{n: name, c: credits, t: unixtime}].
     var faves = {}; // Name -> true.
@@ -999,10 +1000,10 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
         if (creditUnlimited) {
             cmsg = 'Unlimited plan — every plugin unlocks at no extra cost.';
         } else if (level === 'ok') {
-            cmsg = 'Most plugins unlock for 500 credits. ' +
+            cmsg = 'Most plugins unlock for 50 credits. ' +
                 'Already bought on the Moodle Marketplace? Yours at no cost.';
         } else if (level === 'warn') {
-            cmsg = 'Running low. Most plugins unlock for 500 credits — ' +
+            cmsg = 'Running low. Most plugins unlock for 50 credits — ' +
                 'or free if you bought them on the Moodle Marketplace.';
         }
         els.cmsg.textContent = cmsg;
@@ -2474,6 +2475,7 @@ n = 0;
                     return;
                 }
                 var plugins = dropUnreleased(DATA.plugins || [], map);
+                Spotlight.live(spotlight, map);
                 var n = markUpdates(plugins, map);
                 DATA.counts = DATA.counts || {};
                 DATA.counts.updates = n;
@@ -3552,7 +3554,7 @@ n = 0;
         wireEvents();
 
         if (DATA.spotlight) {
-            Spotlight.init({
+            spotlight = Spotlight.init({
                 mount: document.getElementById('ainav2-spot'),
                 footer: document.getElementById('ainav2-fleft'),
                 data: DATA.spotlight,

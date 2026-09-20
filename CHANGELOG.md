@@ -2,6 +2,51 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.36] - 2026-09-20
+
+### Added
+- Live plugin data from LMS Labs (classes/local/live_feed.php), so versions, prices and
+  spotlight content come from one source of truth instead of this release:
+  - The LMS Labs versions feed (/api/plugins/versions) now drives unlock prices in the
+    Plugins panel and the spotlight, each plugin's latest release number (shown in the
+    spotlight), and readiness (a plugin the feed marks as not ready is never promoted).
+    Uploading a new release to LMS Labs is enough; the update check stores the feed on every
+    admin page view, and the spotlight updates in place as soon as the check returns.
+  - The LMS Labs spotlight feed (/api/plugins/spotlight) drives which plugins are promoted
+    (spotlightEligible), their order, copy, features and preview images (served from LMS
+    Labs). Until that feed is available, the bundled snapshot is used as a fallback.
+  - New hourly scheduled task "Refresh plugin data from LMS Labs" and application cache
+    "livefeed". A cached feed is used for up to a day; pages never wait on LMS Labs.
+- The spotlight and its details dialog show the latest release and the installed version.
+
+### Fixed
+- The live price cache the payload read (plugin_status_cache_data) was never written, so
+  prices always came from the fallback. Prices now come from the versions feed.
+- Plugin spotlight: the collapsed bar's "Show" label turned black on the black bar on hover.
+  The block's own button reset (and theme button:hover rules) out-ranked the spotlight's
+  colours; every spotlight button now pins its text colour for hover, focus and active.
+- Plugin spotlight: the button for installed plugins now says "Settings" when it opens the
+  plugin's settings page, matching the Plugins panel row, and "Open" only when it opens a
+  plugin page. Plugins with nothing to open show no button.
+- Prices: the offline fallback price was still the old 500 credits, so the spotlight, its
+  details dialog and the Plugins panel showed 500 whenever the live price from LMS Labs was
+  not cached. The fallback is now 50 credits (RTO Compliance 20,000; Central Config and
+  Quick Links free). A live price from LMS Labs still takes precedence.
+- The credits card now says "Most plugins unlock for 50 credits".
+- Plugin spotlight details dialog: no longer taller than the window. It keeps a gap above
+  (clear of the Moodle navbar) and below, scrolls inside with the close button always in
+  view, has a lighter border, and its "More in" cards have a border and shadow so they stand
+  out from the dark dialog. Installed plugins no longer show an unlock price or the
+  Marketplace note.
+- Plugin spotlight hero is slightly shorter (460px, was 500px).
+- Collapsed spotlight bar: removed the row of coloured squares, which served no purpose.
+
+### Changed
+- Spotlight snapshot: Workplace Task and Custom Pages are held out of the spotlight pending
+  owner review (46 plugins). They still appear normally in the Plugins panel.
+- New AI Slideshow preview image: a narrated slide with the imported PPTX slide strip, AI
+  voiceover indicator, live caption and watch-time completion.
+
 ## [2.5.35] - 2026-09-20
 
 ### Added

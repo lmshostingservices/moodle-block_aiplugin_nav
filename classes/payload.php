@@ -456,6 +456,9 @@ class block_aiplugin_nav_payload {
         // version-check HTTP call here. If the cache is cold/absent we fall back to
         // is_plugin_installed()/get_plugin_version() only, with update always false — see
         // payload_notes.md ("update detection").
+        // Live versions/prices from LMS Labs (null until the feed has been fetched once).
+        $livemap = \block_aiplugin_nav\local\live_feed::versions() ?? [];
+
         $statusmap = null;
         $cachetime = (int) get_config('block_aiplugin_nav', 'plugin_status_cache_time');
         if ($cachetime && (time() - $cachetime) < 300) {
@@ -531,7 +534,8 @@ class block_aiplugin_nav_payload {
                     $component,
                     $masterentry,
                     $plugin,
-                    $statusmap[$component] ?? null
+                    $statusmap[$component] ?? null,
+                    $livemap[$component] ?? null
                 ),
                 'status'    => $status,
                 'gotourl'   => $action['url'],
@@ -837,7 +841,15 @@ class block_aiplugin_nav_payload {
     ];
 
     /** @var int Standard unlock price when a plugin carries no explicit credits_required. */
-    private const DEFAULT_CREDITS = 500;
+    private const DEFAULT_CREDITS = 50;
+
+    /**
+     * @var array Offline fallback prices for plugins that are not on the standard price.
+     * Used only when neither the version-check service nor the registry supplies a price.
+     */
+    private const FALLBACK_CREDITS = [
+        'local_rtocompliance' => 20000,
+    ];
 
     /**
      * @var array Components that really are free. Listed explicitly so that "free" is a
@@ -883,18 +895,24 @@ class block_aiplugin_nav_payload {
      * @param array $plugin Entry from get_complete_plugin_registry().
      * @param array|null $livestatus This component's entry from the version-check service,
      *                               which is authoritative on price when it carries one.
+     * @param array|null $livefeed This component's entry from the LMS Labs versions feed, if cached.
      * @return int Credits required to unlock.
      */
     private static function plugin_credits(
         string $component,
         ?array $masterentry,
         array $plugin,
-        ?array $livestatus = null
+        ?array $livestatus = null,
+        ?array $livefeed = null
     ): int {
         // LMS Labs is the authority on price. Prices held in this file cannot be changed
         // without shipping a new plugin release to every client site, so a site running an
-        // older build would keep charging an old price. When the version-check service
+        // older build would keep charging an old price. When the LMS Labs versions feed
         // supplies a price, it wins; the values below are only the offline fallback.
+        $live = \block_aiplugin_nav\local\live_feed::credits($livefeed);
+        if ($live !== null) {
+            return $live;
+        }
         foreach (['credits', 'credits_required', 'credit_cost'] as $key) {
             if (isset($livestatus[$key]) && is_numeric($livestatus[$key])) {
                 return (int) $livestatus[$key];
@@ -908,7 +926,7 @@ class block_aiplugin_nav_payload {
         if (in_array($component, self::FREE_COMPONENTS, true)) {
             return 0;
         }
-        return self::DEFAULT_CREDITS;
+        return self::FALLBACK_CREDITS[$component] ?? self::DEFAULT_CREDITS;
     }
 
     /**

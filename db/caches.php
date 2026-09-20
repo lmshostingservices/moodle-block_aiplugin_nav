@@ -15,22 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details for the AI Dashboard Quick Links block.
- *
- * The release history lives in CHANGELOG.md.
+ * Cache definitions for the AI Dashboard Quick Links block.
  *
  * @package    block_aiplugin_nav
- * @copyright  2025 Essay Grader AI
+ * @copyright  2026 LMS Labs
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'block_aiplugin_nav';
-// Ten-digit Marketplace scheme: YYYYMMDDXX.
-$plugin->version = 2026092001;
-$plugin->release = 'v2.5.36';
-$plugin->release_prev = '2.5.35';
-$plugin->requires = 2022041900;
-$plugin->supported = [400, 502];
-$plugin->maturity = MATURITY_STABLE;
+$definitions = [
+    // LMS Labs feeds (versions, prices, spotlight content). See \block_aiplugin_nav\local\live_feed.
+    'livefeed' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 2,
+    ],
+];

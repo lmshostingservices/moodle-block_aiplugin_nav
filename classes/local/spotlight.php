@@ -27,13 +27,20 @@ namespace block_aiplugin_nav\local;
 /**
  * Builds the spotlight model the block's JavaScript renders.
  *
- * Promotion is deliberately separate from installed-plugin navigation. The list of what is
- * promoted comes from a bundled editorial snapshot (generated/spotlight_catalogue.json), which
- * holds only plugins that are publicly listed and owner-approved for promotion. The release
- * feed's "ready" flag is not treated as approval. Each snapshot entry is then joined to the row
- * the Plugins panel already built for it, so the spotlight can never show a plugin the panel
- * would not list, and price, install state and the open link always agree with that row.
- * A plugin held out of the spotlight still appears normally in the Plugins panel.
+ * Promotion is deliberately separate from installed-plugin navigation. LMS Labs is the source
+ * of truth for everything shown:
+ * - What is promoted, in what order, and its copy, features and preview image come from the
+ *   LMS Labs spotlight feed (live_feed::SPOTLIGHT). Only entries with spotlightEligible true
+ *   are shown; the release feed's "ready" flag is not treated as approval.
+ * - The latest release number and readiness come from the LMS Labs versions feed
+ *   (live_feed::VERSIONS), so a new upload shows its version without a block release. A
+ *   plugin the versions feed marks as not ready is never promoted.
+ * - Price, install state and the open link come from the Plugins panel row, which takes its
+ *   price from the same versions feed.
+ * Until the spotlight feed has been fetched (or when it is over a day old) the bundled
+ * snapshot generated/spotlight_catalogue.json is used instead, as an offline fallback only.
+ * Each entry is joined to its Plugins panel row, so the spotlight can never show a plugin the
+ * panel would not list. A plugin held out of the spotlight still appears in the Plugins panel.
  *
  * @package    block_aiplugin_nav
  * @copyright  2026 LMS Labs
@@ -80,7 +87,9 @@ class spotlight {
         'get',
         'includes',
         'installed',
+        'installedversion',
         'kicker',
+        'latest',
         'morein',
         'moreinfo',
         'next',
@@ -101,6 +110,7 @@ class spotlight {
         'screenshot',
         'scrollleft',
         'scrollright',
+        'settings',
         'show',
         'status',
         'statusinstalled',
@@ -109,6 +119,7 @@ class spotlight {
         'type',
         'usage',
         'usageprefix',
+        'version',
     ];
 
     /** @var string The only host the documentation links may point at. */
@@ -129,13 +140,24 @@ class spotlight {
             }
         }
 
+        $feed = live_feed::spotlight();
+        $entries = $feed === null ? self::catalogue() : array_filter($feed, function($entry) {
+            return is_array($entry) && ($entry['spotlightEligible'] ?? false) === true;
+        });
+        $versions = live_feed::versions() ?? [];
+
         $items = [];
-        foreach (self::catalogue() as $entry) {
-            $row = $rows[$entry['component'] ?? ''] ?? null;
+        foreach ($entries as $entry) {
+            $component = (string) ($entry['component'] ?? '');
+            $row = $rows[$component] ?? null;
             if ($row === null || ($row['status'] ?? 'ready') !== 'ready') {
                 continue;
             }
-            $item = self::item($entry, $row, $output);
+            $release = $versions[$component] ?? null;
+            if (live_feed::not_ready($release)) {
+                continue;
+            }
+            $item = self::item($entry, $row, $output, $release);
             if ($item !== null) {
                 $item['rank'] = count($items) + 1;
                 $items[] = $item;
@@ -148,6 +170,7 @@ class spotlight {
 
         return [
             'state' => self::user_state(),
+            'source' => $feed === null ? 'bundled' : 'live',
             'items' => $items,
             'categories' => self::category_labels(),
             'strings' => self::strings(),
@@ -206,9 +229,10 @@ class spotlight {
      * @param array $entry The snapshot entry.
      * @param array $row The matching Plugins panel row.
      * @param \renderer_base $output Renderer used to resolve the preview image URL.
+     * @param array|null $release The component's versions feed entry, if any.
      * @return array|null The item, or null when the entry is unusable.
      */
-    private static function item(array $entry, array $row, \renderer_base $output): ?array {
+    private static function item(array $entry, array $row, \renderer_base $output, ?array $release): ?array {
         $component = clean_param($entry['component'] ?? '', PARAM_COMPONENT);
         $category = (string) ($entry['category'] ?? '');
         if ($component === '' || !in_array($category, self::CATEGORIES, true)) {
@@ -220,9 +244,17 @@ class spotlight {
             $docs = '';
         }
 
-        $image = '';
-        if (is_readable(__DIR__ . '/../../pix/spotlight/' . $component . '.jpg')) {
+        // Preview image: the one LMS Labs publishes, else the bundled one.
+        $image = live_feed::image_url($entry['image'] ?? '');
+        if ($image === '' && is_readable(__DIR__ . '/../../pix/spotlight/' . $component . '.jpg')) {
             $image = $output->image_url('spotlight/' . $component, 'block_aiplugin_nav')->out(false);
+        }
+
+        // Same destination and label as the Plugins panel row: 'settings' rows link to the
+        // plugin's settings page, 'none' rows have nothing to open.
+        $gotourl = '';
+        if (!empty($row['installed']) && ($row['action'] ?? '') !== 'none') {
+            $gotourl = (string) ($row['gotourl'] ?? '');
         }
 
         $features = [];
@@ -249,7 +281,10 @@ class spotlight {
             'pluginname' => (string) $row['name'],
             'credits' => (int) ($row['credits'] ?? 0),
             'installed' => !empty($row['installed']),
-            'gotourl' => !empty($row['installed']) ? (string) ($row['gotourl'] ?? '') : '',
+            'gotourl' => $gotourl,
+            'latest' => live_feed::release($release),
+            'installedversion' => !empty($row['installed']) ? live_feed::release(['version' => $row['version'] ?? '']) : '',
+            'action' => $gotourl !== '' && ($row['action'] ?? '') === 'settings' ? 'settings' : 'open',
         ];
     }
 

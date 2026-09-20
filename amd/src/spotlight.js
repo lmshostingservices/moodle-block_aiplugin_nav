@@ -41,6 +41,7 @@ const ICONS = {
     check: 'M20 6 9 17l-5-5',
     down: 'M12 3v12M7 10l5 5 5-5M5 21h14',
     open: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6',
+    settings: 'M20 7h-9M14 17H5M17 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
     info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
     docs: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5',
     close: 'M18 6 6 18M6 6l12 12',
@@ -144,10 +145,18 @@ function createSpotlight(opts) {
 
     const title = item => (item.subtitle ? '<em>' + esc(item.subtitle) + '</em>' : '') + esc(item.name);
 
+    const openHtml = item => {
+        if (!item.gotourl) {
+            return '';
+        }
+        const label = item.action === 'settings' ? 'settings' : 'open';
+        return '<button type="button" class="ainav2-sp-btn ainav2-sp-btnp" data-sp-act="open" data-sp-c="' +
+            esc(item.component) + '">' + icon(label) + esc(str(label)) + '</button>';
+    };
+
     const ctaHtml = (item, inModal) => {
         const main = item.installed
-            ? '<button type="button" class="ainav2-sp-btn ainav2-sp-btnp" data-sp-act="open" data-sp-c="' + esc(item.component) +
-                '">' + icon('open') + esc(str('open')) + '</button>'
+            ? openHtml(item)
             : '<button type="button" class="ainav2-sp-btn ainav2-sp-btnp" data-sp-act="get" data-sp-c="' + esc(item.component) +
                 '">' + icon('down') + esc(str('get')) + '<span class="ainav2-sp-price">' +
                 esc(item.credits > 0 ? str('creditsshort', fmt(item.credits)) : '') + '</span></button>';
@@ -167,7 +176,9 @@ function createSpotlight(opts) {
             ? '<span class="ainav2-sp-chip ainav2-sp-chipok">' + icon('check', 3) + esc(str('installed')) + '</span>'
             : '') +
         '<span class="ainav2-sp-chip">' + esc(data.categories[item.cat] || '') + '</span>' +
-        (item.type ? '<span class="ainav2-sp-chip">' + esc(item.type) + '</span>' : '') + '</div>';
+        (item.type ? '<span class="ainav2-sp-chip">' + esc(item.type) + '</span>' : '') +
+        '<span class="ainav2-sp-chip" data-sp-ver="' + esc(item.component) + '"' + (item.latest ? '' : ' hidden') + '>' +
+        esc(item.latest ? str('version', item.latest) : '') + '</span></div>';
 
     const features = item => '<ul class="ainav2-sp-feats">' + item.features.map(f =>
         '<li>' + icon('check', 3) + '<span>' + esc(f) + '</span></li>').join('') + '</ul>';
@@ -459,10 +470,13 @@ function find(sp, component) {
 function modalHtml(sp, item) {
     const more = sp.all.filter(i => i.cat === item.cat && i.component !== item.component).slice(0, 3);
     const row = (label, value) => '<dt>' + esc(label) + '</dt><dd>' + value + '</dd>';
-    const price = item.credits > 0 ? esc(sp.str('pricevalue', fmt(item.credits))) : '';
-    return '<div class="ainav2-sp-mban">' + '<div class="ainav2-sp-mshot">' + sp.shot(item) + '</div>' +
-        '<button type="button" class="ainav2-sp-ib ainav2-sp-mx" data-sp-act="close" aria-label="' + esc(sp.str('close')) + '">' +
-        icon('close', 2.4) + '</button>' +
+    // An installed plugin is already unlocked, so it has no price to show.
+    const price = !item.installed && item.credits > 0 ? esc(sp.str('pricevalue', fmt(item.credits))) : '';
+    // The close button sits outside the scrolling area so it stays in view.
+    return '<button type="button" class="ainav2-sp-ib ainav2-sp-mx" data-sp-act="close" ' +
+        'aria-label="' + esc(sp.str('close')) + '">' +
+        icon('close', 2.4) + '</button><div class="ainav2-sp-mscroll">' +
+        '<div class="ainav2-sp-mban">' + '<div class="ainav2-sp-mshot">' + sp.shot(item) + '</div>' +
         '<div class="ainav2-sp-mhead">' + sp.rankLine(item) + '<h3 class="ainav2-sp-title" id="ainav2-sp-mtitle">' +
         sp.title(item) + '</h3></div></div>' +
         '<div class="ainav2-sp-mbody">' + sp.chips(item) + '<div class="ainav2-sp-mgrid"><div><p class="ainav2-sp-desc">' +
@@ -471,17 +485,19 @@ function modalHtml(sp, item) {
         (item.usage ? row(sp.str('usage'), esc(item.usage)) : '') +
         (item.docs ? row(sp.str('docslabel'), '<code>' + esc(item.docs.replace('https://', '')) + '</code>') : '') +
         (item.type ? row(sp.str('type'), esc(item.type)) : '') +
+        (item.latest ? row(sp.str('latest'), esc(sp.str('version', item.latest))) : '') +
+        (item.installedversion ? row(sp.str('installedversion'), esc(sp.str('version', item.installedversion))) : '') +
         row(sp.str('component'), '<code>' + esc(item.component) + '</code>') +
         row(sp.str('status'), esc(sp.str(item.installed ? 'statusinstalled' : 'statusnot'))) +
         (item.includes ? row(sp.str('includes'), esc(item.includes)) : '') + '</dl></div>' +
         '<div class="ainav2-sp-mcta">' + sp.ctaHtml(item, true) + '</div>' +
-        '<div class="ainav2-sp-mnote">' + esc(sp.str('creditnote')) + '</div>' +
+        (item.installed ? '' : '<div class="ainav2-sp-mnote">' + esc(sp.str('creditnote')) + '</div>') +
         (more.length ? '<div class="ainav2-sp-more"><h4>' + esc(sp.str('morein', sp.data.categories[item.cat])) + '</h4>' +
             '<div class="ainav2-sp-moreg">' + more.map(m => '<button type="button" class="ainav2-sp-mc" data-sp-act="info" ' +
             'data-sp-c="' + esc(m.component) + '" style="' + colourVars(m) + '"><span class="ainav2-sp-mcart">' + sp.shot(m) +
             '</span><span class="ainav2-sp-mctx"><b>' + esc(sp.str('rank', m.rank) + ' ' + m.name) + '</b><small>' +
             esc(sp.priceLabel(m, 'short')) +
-            '</small></span></button>').join('') + '</div></div>' : '') + '</div>';
+            '</small></span></button>').join('') + '</div></div>' : '') + '</div></div>';
 }
 
 /**
@@ -658,11 +674,10 @@ function onPointer(sp, e) {
  */
 function frameHtml(sp) {
     const t = k => esc(sp.str(k));
-    const mini = sp.all.slice(0, 6).map(i => '<i style="' + colourVars(i) + '"></i>').join('');
     return '<button type="button" class="ainav2-sp-bar" data-sp-bar="1" aria-expanded="false">' +
         '<span class="ainav2-sp-badge">' + t('all') + '<b>' + sp.all.length + '</b></span>' +
         '<span class="ainav2-sp-bartxt"><b>' + t('carousel') + '</b> · <span data-sp-now="1"></span></span>' +
-        '<span class="ainav2-sp-barmini">' + mini + '</span><span class="ainav2-sp-bargo">' + t('show') + icon('chevdown', 2.4) +
+        '<span class="ainav2-sp-bargo">' + t('show') + icon('chevdown', 2.4) +
         '</span></button>' +
         '<section class="ainav2-sp-cinema" aria-roledescription="carousel" aria-label="' + t('carousel') + '">' +
         '<div class="ainav2-sp-hero"><div class="ainav2-sp-bgs"></div><div class="ainav2-sp-beams"></div>' +
@@ -802,6 +817,66 @@ function wireTouch(sp) {
  * @param {Object} opts See createSpotlight().
  * @return {?Object} The controller, or null when there is nothing to show.
  */
+/**
+ * A release number from the LMS Labs versions feed, without a leading v.
+ *
+ * @param {*} value
+ * @return {string} The release, or '' when missing or malformed.
+ */
+function cleanRelease(value) {
+    const v = String(value || '').trim().replace(/^v/i, '');
+    return /^\d+(\.\d+){0,3}([-+][0-9A-Za-z.]+)?$/.test(v) ? v : '';
+}
+
+/**
+ * Apply the LMS Labs versions feed the block's update check has just fetched.
+ *
+ * Shows each plugin's latest release as soon as LMS Labs publishes it, and drops any plugin
+ * the feed marks as not ready. The server applies the same feed on the next page view.
+ *
+ * @param {Object|null} sp Controller returned by init().
+ * @param {Object} map The feed's plugins, keyed by component.
+ */
+export const live = (sp, map) => {
+    if (!sp || !map) {
+        return;
+    }
+    let removed = false;
+    for (let i = sp.all.length - 1; i >= 0; i--) {
+        const item = sp.all[i];
+        const entry = map[item.component];
+        if (!entry) {
+            continue;
+        }
+        if (entry.status && entry.status !== 'ready') {
+            sp.all.splice(i, 1);
+            removed = true;
+            continue;
+        }
+        const latest = cleanRelease(entry.version);
+        if (latest && latest !== item.latest) {
+            item.latest = latest;
+            sp.el.wrap.querySelectorAll('[data-sp-ver="' + item.component + '"]').forEach(chip => {
+                chip.textContent = sp.str('version', latest);
+                chip.hidden = false;
+            });
+        }
+    }
+    if (!sp.all.length) {
+        sp.el.wrap.hidden = true;
+        return;
+    }
+    if (removed) {
+        sp.all.forEach((item, i) => {
+            item.rank = i + 1;
+        });
+        sp.el.wrap.querySelectorAll('.ainav2-sp-badge b').forEach(b => {
+            b.textContent = sp.all.length;
+        });
+        setFilter(sp, sp.all.some(i => i.cat === sp.st.filter) ? sp.st.filter : 'all');
+    }
+};
+
 export const init = opts => {
     if (!opts || !opts.mount || !opts.data || !opts.data.items || !opts.data.items.length) {
         return null;

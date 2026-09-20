@@ -1,7 +1,7 @@
 {
   "source": "lms-labs.com editorial catalogue (PLUGIN_EDITORIAL_METADATA + docs pages), condensed",
   "snapshot": "2026-09-20",
-  "eligibility": "Public catalogue (status ready, not hidden) AND owner-approved for promotion. Held out pending owner review: local_rplkit, local_chirpvoice.",
+  "eligibility": "Public catalogue (status ready, not hidden) AND owner-approved for promotion. Held out pending owner review: local_rplkit, local_chirpvoice, mod_workplacetask, local_custompage.",
   "order": "Positions 1-11 pinned by LMS Labs; remainder follows.",
   "plugins": [
     {
@@ -778,26 +778,6 @@
       "docs": "https://lms-labs.com/docs/paddle-payment"
     },
     {
-      "component": "mod_workplacetask",
-      "name": "Workplace Task",
-      "category": "grading",
-      "type": "Activity",
-      "accent": "#0ea5e9",
-      "accent2": "#22c55e",
-      "description": "Collect workplace evidence and record assessor sign-off, with resubmission and automatic completion when satisfactory.",
-      "features": [
-        "Evidence uploads",
-        "Assessor sign-off",
-        "Resubmission workflow",
-        "Automatic completion"
-      ],
-      "stat": {
-        "value": "Sign-off",
-        "label": "by the assessor"
-      },
-      "docs": "https://lms-labs.com/docs/workplace-task"
-    },
-    {
       "component": "block_studentactivity",
       "name": "Student Activity",
       "subtitle": "Participation evidence",
@@ -857,26 +837,6 @@
         "label": "first in simulation mode"
       },
       "docs": "https://lms-labs.com/docs/completion-auto-suspend"
-    },
-    {
-      "component": "local_custompage",
-      "name": "Custom Pages",
-      "category": "branding",
-      "type": "Admin tool",
-      "accent": "#06b6d4",
-      "accent2": "#ec4899",
-      "description": "Create and manage custom HTML pages with navigation links and sortable presentation order.",
-      "features": [
-        "Custom HTML pages",
-        "Site navigation links",
-        "Page management interface",
-        "Sortable page order"
-      ],
-      "stat": {
-        "value": "HTML",
-        "label": "pages in your navigation"
-      },
-      "docs": "https://lms-labs.com/docs/custom-pages"
     },
     {
       "component": "local_videocompress",

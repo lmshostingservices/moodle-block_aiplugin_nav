@@ -35,4 +35,13 @@ $tasks = [
         'dayofweek' => '*',
         'disabled' => 1,
     ],
+    [
+        'classname' => 'block_aiplugin_nav\task\refresh_live_feed_task',
+        'blocking' => 0,
+        'minute' => 'R',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];
