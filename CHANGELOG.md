@@ -2,6 +2,15 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.37] - 2026-09-20
+
+### Changed
+- Plugin spotlight spacing: padding above and below everything. The top bar sits 24px in,
+  the slide copy and preview start below it and stop above the progress bar, the preview is
+  sized to fit inside the slide, and the poster row has room underneath. The slide keeps one
+  steady height (532px) so the page does not jump between slides, and grows only if live
+  copy is unusually long rather than overlapping the progress bar.
+
 ## [2.5.36] - 2026-09-20
 
 ### Added
@@ -38,7 +47,6 @@ All notable changes to this plugin will be documented in this file.
   view, has a lighter border, and its "More in" cards have a border and shadow so they stand
   out from the dark dialog. Installed plugins no longer show an unlock price or the
   Marketplace note.
-- Plugin spotlight hero is slightly shorter (460px, was 500px).
 - Collapsed spotlight bar: removed the row of coloured squares, which served no purpose.
 
 ### Changed

@@ -3355,7 +3355,8 @@
 /* Hero. */
 .ainav2 .ainav2-sp-hero {
     position: relative;
-    height: 460px;
+    display: grid;
+    min-height: 532px;
     overflow: hidden;
 }
 
@@ -3431,9 +3432,9 @@
 .ainav2 .ainav2-sp-top {
     position: absolute;
     z-index: 5;
-    top: 14px;
-    right: 14px;
-    left: 22px;
+    top: 24px;
+    right: 24px;
+    left: 40px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -3512,14 +3513,13 @@
 }
 
 .ainav2 .ainav2-sp-stage {
-    position: absolute;
+    position: relative;
     z-index: 2;
-    inset: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
     gap: 28px;
     align-items: center;
-    padding: 32px 64px 70px 40px;
+    padding: 76px 64px 64px 40px;
 }
 
 .ainav2 .ainav2-sp-copyslot,
@@ -3533,6 +3533,16 @@
 .ainav2 .ainav2-sp-copy,
 .ainav2 .ainav2-sp-shotwrap {
     grid-area: 1 / 1;
+}
+
+/* Keep the preview inside the stage, clear of the top bar and the progress bar. */
+.ainav2 .ainav2-sp-shotslot {
+    justify-items: center;
+}
+
+.ainav2 .ainav2-sp-shotwrap {
+    width: 100%;
+    max-width: 500px;
 }
 
 /* Hero copy: children rise in, staggered. */
@@ -3913,8 +3923,8 @@
 .ainav2 .ainav2-sp-foot {
     position: absolute;
     z-index: 6;
-    right: 22px;
-    bottom: 18px;
+    right: 24px;
+    bottom: 28px;
     left: 40px;
     display: flex;
     align-items: center;
@@ -4024,7 +4034,7 @@
 .ainav2 .ainav2-sp-rowwrap {
     position: relative;
     z-index: 3;
-    padding: 4px 0 18px;
+    padding: 8px 0 34px;
     background: linear-gradient(180deg, transparent, var(--sp-cin) 20px);
 }
 
@@ -4503,17 +4513,25 @@
 
 /* Narrow column: stack, and put the preview behind the copy. */
 .ainav2 .ainav2-sp-narrow .ainav2-sp-hero {
-    height: 520px;
+    min-height: 560px;
+}
+
+.ainav2 .ainav2-sp-narrow .ainav2-sp-top {
+    left: 22px;
 }
 
 .ainav2 .ainav2-sp-narrow .ainav2-sp-stage {
     grid-template-columns: 1fr;
-    padding: 56px 22px 70px;
+    padding: 76px 22px 64px;
+}
+
+.ainav2 .ainav2-sp-narrow .ainav2-sp-shotwrap {
+    max-width: none;
 }
 
 .ainav2 .ainav2-sp-narrow .ainav2-sp-shotslot {
     position: absolute;
-    top: 40px;
+    top: 70px;
     right: -18%;
     width: 78%;
     height: auto;
@@ -4549,7 +4567,7 @@
 }
 
 .ainav2 .ainav2-sp-tiny .ainav2-sp-hero {
-    height: 540px;
+    min-height: 580px;
 }
 
 .ainav2 .ainav2-sp-tiny .ainav2-sp-title {
