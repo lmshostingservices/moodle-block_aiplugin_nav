@@ -2,6 +2,22 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.40] - 2026-09-26
+
+### Fixed
+- PHP-FPM workers could hang and crash (SIGSEGV) under load on dashboards where a site
+  administrator sees the block. To decide whether to show each plugin's Settings button,
+  the block built Moodle's full admin settings tree inside get_content(), on every page
+  render. Building that tree runs every installed plugin's settings.php, and some make
+  outbound HTTP calls (mod_hvp checks the H5P hub), so one unreachable host could block
+  every worker at once. The block no longer touches the admin tree at all:
+  - The Settings link is built from Moodle's own settings section name for the plugin,
+    shown only when the plugin ships a settings.php. It no longer calls
+    plugininfo::get_settings_url(), which builds the admin tree internally.
+  - Settings URLs declared in the plugin registry are used as-is for site administrators
+    instead of being checked against the admin tree.
+  - admin_section_exists() is removed.
+
 ## [2.5.39] - 2026-09-20
 
 ### Fixed

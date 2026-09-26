@@ -601,19 +601,20 @@ class block_aiplugin_nav_payload {
     }
 
     /**
-     * A verified Settings destination, or no action at all.
+     * A Settings destination, or no action at all.
      *
      * Every row used to get a Settings button whether or not the plugin had a settings
      * page, pointing at a section name this class guessed from the plugin type. A plugin
      * that declares no settings has no such section, so Moodle answered with its
-     * "Incorrect section" error — the button was an error link by construction.
+     * "Incorrect section" error. The section name is now taken from Moodle's own
+     * plugininfo::get_settings_section_name(), and the button is only offered when the
+     * plugin actually ships a settings.php.
      *
-     * The section name is no longer guessed either. Moodle already derives it per plugin
-     * type in each plugininfo class, so plugininfo_base::get_settings_url() is asked
-     * instead: it returns the real URL when the plugin registered a settings page and
-     * null when it did not. That both removes the error links and removes the need for a
-     * hand-maintained table of section-name prefixes for the plugin types where
-     * "<type>_<name>" is only a convention.
+     * Nothing here may touch the admin settings tree. admin_get_root() - which
+     * plugininfo::get_settings_url() calls internally - includes every installed
+     * plugin's settings.php, and some of those make outbound HTTP calls (mod_hvp checks
+     * the H5P hub). This runs inside get_content() on every page render, so one
+     * unreachable remote host could block every PHP worker at once.
      *
      * @param string $plugintype Moodle plugin type, e.g. 'mod', 'local'.
      * @param string $pluginname Plugin name without its type prefix.
@@ -634,20 +635,23 @@ class block_aiplugin_nav_payload {
             return ['url' => $url, 'label' => 'settings'];
         }
 
-        // A URL declared in the master registry is only honoured if it names a section
-        // that actually exists in this site's admin tree.
-        if ($declared !== null && $declared !== '') {
-            $section = self::section_of($declared);
-            if ($section !== null && self::admin_section_exists($section)) {
-                return ['url' => $declared, 'label' => 'settings'];
-            }
+        // A URL declared in the master registry is trusted as-is. If the section is
+        // missing on a particular site the admin gets Moodle's section error, which is
+        // far cheaper than loading the admin tree on every render to rule it out.
+        if ($declared !== null && $declared !== '' && self::section_of($declared) !== null) {
+            return ['url' => $declared, 'label' => 'settings'];
         }
 
         return $none;
     }
 
     /**
-     * The settings page URL Moodle itself publishes for a plugin, or null if it has none.
+     * The settings page URL for a plugin, or null if it has none.
+     *
+     * Deliberately not plugininfo::get_settings_url(): that calls admin_get_root(),
+     * which must never run from get_content() (see settings_action()). The section
+     * name comes from Moodle's plugininfo class and the plugin must ship a settings.php,
+     * which is the same file Moodle's own load_settings() requires.
      *
      * @param string $plugintype Moodle plugin type.
      * @param string $pluginname Plugin name without its type prefix.
@@ -656,11 +660,18 @@ class block_aiplugin_nav_payload {
     private static function plugin_settings_url(string $plugintype, string $pluginname): ?string {
         try {
             $info = \core_plugin_manager::instance()->get_plugin_info($plugintype . '_' . $pluginname);
-            if ($info === null || !method_exists($info, 'get_settings_url')) {
+            if ($info === null || !method_exists($info, 'get_settings_section_name')) {
                 return null;
             }
-            $url = $info->get_settings_url();
-            return $url === null ? null : $url->out(false);
+            $section = $info->get_settings_section_name();
+            if (!is_string($section) || $section === '') {
+                return null;
+            }
+            $file = $info->full_path('settings.php');
+            if ($file === '' || !file_exists($file)) {
+                return null;
+            }
+            return (new \moodle_url('/admin/settings.php', ['section' => $section]))->out(false);
         } catch (\Throwable $e) {
             // A broken or half-installed plugin must not take the dashboard down with it.
             return null;
@@ -690,7 +701,8 @@ class block_aiplugin_nav_payload {
      * A registry settings URL, made absolute, or null if it leads nowhere.
      *
      * Non-settings URLs are passed through unchanged; a /admin/settings.php URL is kept
-     * only when its section exists in this site's admin tree.
+     * for site administrators only. Its section is not checked against the admin tree,
+     * because building that tree runs every plugin's settings.php (see settings_action()).
      *
      * @param string $relative Site-relative URL from the master registry, may be empty.
      * @return string|null Absolute URL, or null when nothing should be linked.
@@ -712,25 +724,7 @@ class block_aiplugin_nav_payload {
             return null;
         }
 
-        return self::admin_section_exists($section) ? $absolute : null;
-    }
-
-    /**
-     * Whether a named section exists in this site's admin settings tree.
-     *
-     * @param string $section Section name, as used by /admin/settings.php?section=.
-     * @return bool
-     */
-    private static function admin_section_exists(string $section): bool {
-        global $CFG;
-
-        require_once($CFG->libdir . '/adminlib.php');
-
-        try {
-            return admin_get_root()->locate($section) !== null;
-        } catch (\Throwable $e) {
-            return false;
-        }
+        return $absolute;
     }
 
     // The "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
