@@ -87,6 +87,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var PUBLIC_TESTING_COMPONENTS = {
         'mod_aibranchedscenario': true
     };
+    var RELEASE_GATED_COMPONENTS = {
+        'mod_aianatomy': true,
+        'mod_aiinteractivevideo': true,
+        'mod_aisoftskills': true,
+        'mod_ailanguageteacher': true,
+        'mod_vocabmastery': true
+    };
 
     var isTouch = false;
     var reduceMotion = false;
@@ -466,6 +473,11 @@ row;
      * @return {string}
      */
     function plugTail(it) {
+        if (it.status === 'pending') {
+            return '<span class="ainav2-state ainav2-testing">Release pending</span>' +
+                '<button class="ainav2-get ainav2-testing-disabled" type="button" disabled ' +
+                'title="Not ready to install">Unavailable</button>';
+        }
         if (it.status === 'testing') {
             return '<span class="ainav2-state ainav2-testing">In testing</span>' +
                 '<button class="ainav2-get ainav2-testing-disabled" type="button" disabled ' +
@@ -568,6 +580,9 @@ row;
     function plugCostLabel(it) {
         if (!it) {
             return '';
+        }
+        if (it.status === 'pending') {
+            return 'Release pending';
         }
         if (it.installed) {
             return '';
@@ -1119,7 +1134,7 @@ name;
     function statusOptsFor() {
         if (current === 'plugins') {
             return [['all', 'All'], ['installed', 'Installed'], ['update', 'Updates'], ['free', 'Free'],
-                ['paid', 'Credit-gated'], ['testing', 'In testing']];
+                ['paid', 'Credit-gated'], ['testing', 'In testing'], ['pending', 'Release pending']];
         }
         // Settings and Reports have no real status data behind them — the payload sets
         // configured=false and live=false for every row — so offering "Configured" and
@@ -1135,6 +1150,9 @@ name;
      * @return {string}
      */
     function pluginStatus(it) {
+        if (it.status === 'pending') {
+            return 'pending';
+        }
         if (it.status === 'testing') {
             return 'testing';
         }
@@ -2375,6 +2393,17 @@ pb = parseV(b);
         for (i = 0; i < plugins.length; i++) {
             var q = plugins[i];
             var live = map[q.component];
+            if (RELEASE_GATED_COMPONENTS[q.component] === true &&
+                    (!live || live.status !== 'ready' || !/^\d+(\.\d+){0,3}([-+][0-9A-Za-z.]+)?$/.test(
+                        String(live.version || '').replace(/^v/i, '')) ||
+                    live.zipExists !== true || !live.downloadUrl)) {
+                q.status = 'pending';
+                q.credits = 0;
+                q.gotourl = '';
+                q.update = false;
+                kept.push(q);
+                continue;
+            }
             if (live && live.status && live.status !== 'ready') {
                 // Preserve only the one explicitly approved informational testing row.
                 // Requiring both payload and manifest to say "testing" prevents either

@@ -155,7 +155,9 @@ function createSpotlight(opts) {
     };
 
     const ctaHtml = (item, inModal) => {
-        const main = item.installed
+        const main = item.pending
+            ? '<span class="ainav2-sp-btn ainav2-sp-btng">Release pending · not ready to install</span>'
+            : item.installed
             ? openHtml(item)
             : '<button type="button" class="ainav2-sp-btn ainav2-sp-btnp" data-sp-act="get" data-sp-c="' + esc(item.component) +
                 '">' + icon('down') + esc(str('get')) + '<span class="ainav2-sp-price">' +
@@ -172,6 +174,7 @@ function createSpotlight(opts) {
     };
 
     const chips = item => '<div class="ainav2-sp-chips">' +
+        (item.pending ? '<span class="ainav2-sp-chip">Release pending · not ready to install</span>' : '') +
         (item.installed
             ? '<span class="ainav2-sp-chip ainav2-sp-chipok">' + icon('check', 3) + esc(str('installed')) + '</span>'
             : '') +
@@ -188,6 +191,9 @@ function createSpotlight(opts) {
         : '') + '</div>';
 
     const priceLabel = (item, key) => {
+        if (item.pending) {
+            return 'Release pending';
+        }
         if (item.installed) {
             return str(key === 'credits' ? 'onsite' : 'installed');
         }
@@ -214,7 +220,8 @@ function copyHtml(sp, item) {
         '<p class="ainav2-sp-desc">' + esc(item.desc) + '</p>' +
         sp.features(item) +
         '<div class="ainav2-sp-cta">' + sp.ctaHtml(item, false) +
-        (item.usage ? '<span class="ainav2-sp-usage">' + esc(sp.str('usageprefix', item.usage)) + '</span>' : '') + '</div>';
+        (!item.pending && item.usage ?
+            '<span class="ainav2-sp-usage">' + esc(sp.str('usageprefix', item.usage)) + '</span>' : '') + '</div>';
 }
 
 /**
@@ -471,7 +478,8 @@ function modalHtml(sp, item) {
     const more = sp.all.filter(i => i.cat === item.cat && i.component !== item.component).slice(0, 3);
     const row = (label, value) => '<dt>' + esc(label) + '</dt><dd>' + value + '</dd>';
     // An installed plugin is already unlocked, so it has no price to show.
-    const price = !item.installed && item.credits > 0 ? esc(sp.str('pricevalue', fmt(item.credits))) : '';
+    const price = !item.pending && !item.installed && item.credits > 0 ?
+        esc(sp.str('pricevalue', fmt(item.credits))) : '';
     // The close button sits outside the scrolling area so it stays in view.
     return '<button type="button" class="ainav2-sp-ib ainav2-sp-mx" data-sp-act="close" ' +
         'aria-label="' + esc(sp.str('close')) + '">' +
@@ -482,16 +490,17 @@ function modalHtml(sp, item) {
         '<div class="ainav2-sp-mbody">' + sp.chips(item) + '<div class="ainav2-sp-mgrid"><div><p class="ainav2-sp-desc">' +
         esc(item.desc) + '</p>' + sp.features(item) + '</div><dl class="ainav2-sp-dl">' +
         (price ? row(sp.str('price'), price) : '') +
-        (item.usage ? row(sp.str('usage'), esc(item.usage)) : '') +
+        (!item.pending && item.usage ? row(sp.str('usage'), esc(item.usage)) : '') +
         (item.docs ? row(sp.str('docslabel'), '<code>' + esc(item.docs.replace('https://', '')) + '</code>') : '') +
         (item.type ? row(sp.str('type'), esc(item.type)) : '') +
         (item.latest ? row(sp.str('latest'), esc(sp.str('version', item.latest))) : '') +
         (item.installedversion ? row(sp.str('installedversion'), esc(sp.str('version', item.installedversion))) : '') +
         row(sp.str('component'), '<code>' + esc(item.component) + '</code>') +
-        row(sp.str('status'), esc(sp.str(item.installed ? 'statusinstalled' : 'statusnot'))) +
+        row(sp.str('status'), item.pending ? 'Release pending · not ready to install' :
+            esc(sp.str(item.installed ? 'statusinstalled' : 'statusnot'))) +
         (item.includes ? row(sp.str('includes'), esc(item.includes)) : '') + '</dl></div>' +
         '<div class="ainav2-sp-mcta">' + sp.ctaHtml(item, true) + '</div>' +
-        (item.installed ? '' : '<div class="ainav2-sp-mnote">' + esc(sp.str('creditnote')) + '</div>') +
+        (item.installed || item.pending ? '' : '<div class="ainav2-sp-mnote">' + esc(sp.str('creditnote')) + '</div>') +
         (more.length ? '<div class="ainav2-sp-more"><h4>' + esc(sp.str('morein', sp.data.categories[item.cat])) + '</h4>' +
             '<div class="ainav2-sp-moreg">' + more.map(m => '<button type="button" class="ainav2-sp-mc" data-sp-act="info" ' +
             'data-sp-c="' + esc(m.component) + '" style="' + colourVars(m) + '"><span class="ainav2-sp-mcart">' + sp.shot(m) +
@@ -558,7 +567,7 @@ function act(sp, action, component) {
         openModal(sp, component);
     } else if (item && action === 'open' && item.gotourl) {
         window.location.href = item.gotourl;
-    } else if (item) {
+    } else if (item && !item.pending && item.pluginname) {
         // Get (and Open without a direct link) both go to the plugin's own row in the
         // Plugins panel, where unlocking runs through the normal credit-gated flow.
         closeModal(sp);
@@ -831,8 +840,8 @@ function cleanRelease(value) {
 /**
  * Apply the LMS Labs versions feed the block's update check has just fetched.
  *
- * Shows each plugin's latest release as soon as LMS Labs publishes it, and drops any plugin
- * the feed marks as not ready. The server applies the same feed on the next page view.
+ * Shows each plugin's latest release as soon as LMS Labs publishes it. A withdrawn
+ * release remains a docs-only preview rather than becoming an install action.
  *
  * @param {Object|null} sp Controller returned by init().
  * @param {Object} map The feed's plugins, keyed by component.
@@ -841,20 +850,22 @@ export const live = (sp, map) => {
     if (!sp || !map) {
         return;
     }
-    let removed = false;
     for (let i = sp.all.length - 1; i >= 0; i--) {
         const item = sp.all[i];
         const entry = map[item.component];
         if (!entry) {
             continue;
         }
-        if (entry.status && entry.status !== 'ready') {
-            sp.all.splice(i, 1);
-            removed = true;
+        const latest = cleanRelease(entry.version);
+        if (entry.status !== 'ready' || !latest || entry.zipExists !== true || !entry.downloadUrl) {
+            item.pending = true;
+            item.credits = 0;
+            item.latest = '';
+            item.gotourl = '';
+            setFilter(sp, sp.st.filter);
             continue;
         }
-        const latest = cleanRelease(entry.version);
-        if (latest && latest !== item.latest) {
+        if (!item.pending && latest && latest !== item.latest) {
             item.latest = latest;
             sp.el.wrap.querySelectorAll('[data-sp-ver="' + item.component + '"]').forEach(chip => {
                 chip.textContent = sp.str('version', latest);
@@ -865,15 +876,6 @@ export const live = (sp, map) => {
     if (!sp.all.length) {
         sp.el.wrap.hidden = true;
         return;
-    }
-    if (removed) {
-        sp.all.forEach((item, i) => {
-            item.rank = i + 1;
-        });
-        sp.el.wrap.querySelectorAll('.ainav2-sp-badge b').forEach(b => {
-            b.textContent = sp.all.length;
-        });
-        setFilter(sp, sp.all.some(i => i.cat === sp.st.filter) ? sp.st.filter : 'all');
     }
 };
 

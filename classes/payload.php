@@ -44,6 +44,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_aiplugin_nav_payload {
+    /** @var string[] Newly approved previews must never be offered before a real downloadable release exists. */
+    private const RELEASE_GATED_COMPONENTS = [
+        'mod_aianatomy', 'mod_aiinteractivevideo', 'mod_aisoftskills',
+        'mod_ailanguageteacher', 'mod_vocabmastery',
+    ];
     // CATEGORY MAPPING — 21 legacy category values (from get_complete_plugin_registry() /
     // get_master_plugin_registry()) mapped onto the 7 new contract categories
     // (assess, content, media, rto, access, training, site).
@@ -206,6 +211,11 @@ class block_aiplugin_nav_payload {
         'RTO Compliance Settings' => 'rto-compliance',
         'RTO Compliance dashboard' => 'rto-compliance',
         'AI Dashboard Quick Links' => 'ai-dashboard-quick-links',
+        'AI Anatomy' => 'ai-anatomy',
+        'AI Interactive Video' => 'ai-interactive-video',
+        'AI Soft Skills' => 'ai-soft-skills',
+        'AI Language Training' => 'ai-language-teacher',
+        'AI Vocab Master' => 'ai-vocab-master',
         'AI Login Designer' => 'ai-login-designer',
         'Beacon — Reports & Analytics' => 'beacon',
         'Certificate Pro' => 'rto-compliance',
@@ -500,6 +510,17 @@ class block_aiplugin_nav_payload {
             if ($status === 'ready' && in_array($component, self::PRIVATE_COMPONENTS, true)) {
                 $status = 'private';
             }
+            // A ready catalogue identity is not an installable release. The versions
+            // service can advertise status=ready with version=not-found, zipExists=false.
+            // Keep its row as a truthful preview without an unlock or a price.
+            $release = $livemap[$component] ?? null;
+            $pendingrelease = in_array($component, self::RELEASE_GATED_COMPONENTS, true) && !$installed
+                && (!is_array($release) || ($release['status'] ?? '') !== 'ready'
+                    || \block_aiplugin_nav\local\live_feed::release($release) === ''
+                    || ($release['zipExists'] ?? false) !== true || empty($release['downloadUrl']));
+            if ($pendingrelease) {
+                $status = 'pending';
+            }
 
             // Testing entries stay hidden unless the generated catalogue explicitly marks
             // one as public testing metadata. Public testing rows are informational only:
@@ -512,7 +533,7 @@ class block_aiplugin_nav_payload {
                 continue;
             }
 
-            $action = $publictesting
+            $action = $publictesting || $pendingrelease
                 ? ['url' => '', 'label' => '']
                 : self::resolve_action($plugintype, $pluginname, $plugin, $masterentry);
 
@@ -530,7 +551,7 @@ class block_aiplugin_nav_payload {
                 // whether an update exists — see refreshUpdates() in amd/src/ui.js.
                 'versionint' => $installed ? $block->get_plugin_numeric_version($plugintype, $pluginname) : null,
                 'update'    => $update,
-                'credits'   => $publictesting ? 0 : self::plugin_credits(
+                'credits'   => $publictesting || $pendingrelease ? 0 : self::plugin_credits(
                     $component,
                     $masterentry,
                     $plugin,

@@ -34,13 +34,13 @@ namespace block_aiplugin_nav\local;
  *   are shown; the release feed's "ready" flag is not treated as approval.
  * - The latest release number and readiness come from the LMS Labs versions feed
  *   (live_feed::VERSIONS), so a new upload shows its version without a block release. A
- *   plugin the versions feed marks as not ready is never promoted.
+ *   A pending release can still be previewed, but never offered for installation.
  * - Price, install state and the open link come from the Plugins panel row, which takes its
  *   price from the same versions feed.
  * Until the spotlight feed has been fetched (or when it is over a day old) the bundled
  * snapshot generated/spotlight_catalogue.json is used instead, as an offline fallback only.
- * Each entry is joined to its Plugins panel row, so the spotlight can never show a plugin the
- * panel would not list. A plugin held out of the spotlight still appears in the Plugins panel.
+ * A plugin held out of the spotlight still appears in the Plugins panel. New, explicitly
+ * approved promotional entries may precede their release/Plugins panel registration.
  *
  * @package    block_aiplugin_nav
  * @copyright  2026 LMS Labs
@@ -141,7 +141,7 @@ class spotlight {
         }
 
         $feed = live_feed::spotlight();
-        $entries = $feed === null ? self::catalogue() : array_filter($feed, function($entry) {
+        $entries = $feed === null ? self::catalogue() : array_filter($feed, function ($entry) {
             return is_array($entry) && ($entry['spotlightEligible'] ?? false) === true;
         });
         $versions = live_feed::versions() ?? [];
@@ -150,11 +150,11 @@ class spotlight {
         foreach ($entries as $entry) {
             $component = (string) ($entry['component'] ?? '');
             $row = $rows[$component] ?? null;
-            if ($row === null || ($row['status'] ?? 'ready') !== 'ready') {
-                continue;
-            }
+            // A missing or testing local row is still an approved docs-only preview.
+            // It is not an install/unlock authority.
             $release = $versions[$component] ?? null;
-            if (live_feed::not_ready($release)) {
+            if ($feed !== null && (!is_array($entry) || ($entry['status'] ?? '') !== 'ready'
+                    || ($entry['hidden'] ?? true) !== false)) {
                 continue;
             }
             $item = self::item($entry, $row, $output, $release);
@@ -227,17 +227,22 @@ class spotlight {
      * charges. Values that end up in markup or CSS are validated here.
      *
      * @param array $entry The snapshot entry.
-     * @param array $row The matching Plugins panel row.
+     * @param array|null $row The matching Plugins panel row, if registered yet.
      * @param \renderer_base $output Renderer used to resolve the preview image URL.
      * @param array|null $release The component's versions feed entry, if any.
      * @return array|null The item, or null when the entry is unusable.
      */
-    private static function item(array $entry, array $row, \renderer_base $output, ?array $release): ?array {
+    private static function item(array $entry, ?array $row, \renderer_base $output, ?array $release): ?array {
         $component = clean_param($entry['component'] ?? '', PARAM_COMPONENT);
         $category = (string) ($entry['category'] ?? '');
-        if ($component === '' || !in_array($category, self::CATEGORIES, true)) {
+        if ($component === '' || $component !== ($entry['component'] ?? '') ||
+                !in_array($category, self::CATEGORIES, true)) {
             return null;
         }
+        $pending = $row === null || ($row['status'] ?? '') !== 'ready'
+            || $release === null || ($release['status'] ?? '') !== 'ready'
+            || live_feed::release($release) === '' || ($release['zipExists'] ?? false) !== true
+            || empty($release['downloadUrl']);
 
         $docs = (string) ($entry['docs'] ?? '');
         if (strpos($docs, self::DOCS_PREFIX) !== 0) {
@@ -253,7 +258,7 @@ class spotlight {
         // Same destination and label as the Plugins panel row: 'settings' rows link to the
         // plugin's settings page, 'none' rows have nothing to open.
         $gotourl = '';
-        if (!empty($row['installed']) && ($row['action'] ?? '') !== 'none') {
+        if (!$pending && !empty($row['installed']) && ($row['action'] ?? '') !== 'none') {
             $gotourl = (string) ($row['gotourl'] ?? '');
         }
 
@@ -264,7 +269,7 @@ class spotlight {
 
         return [
             'component' => $component,
-            'name' => (string) ($entry['name'] ?? $row['name']),
+            'name' => (string) ($entry['name'] ?? ($row['name'] ?? '')),
             'subtitle' => (string) ($entry['subtitle'] ?? ''),
             'cat' => $category,
             'type' => (string) ($entry['type'] ?? ''),
@@ -278,11 +283,12 @@ class spotlight {
             'includes' => (string) ($entry['includes'] ?? ''),
             'docs' => $docs,
             'image' => $image,
-            'pluginname' => (string) $row['name'],
-            'credits' => (int) ($row['credits'] ?? 0),
+            'pluginname' => (string) ($row['name'] ?? ''),
+            'credits' => $pending ? 0 : (int) ($row['credits'] ?? 0),
             'installed' => !empty($row['installed']),
             'gotourl' => $gotourl,
-            'latest' => live_feed::release($release),
+            'latest' => $pending ? '' : live_feed::release($release),
+            'pending' => $pending,
             'installedversion' => !empty($row['installed']) ? live_feed::release(['version' => $row['version'] ?? '']) : '',
             'action' => $gotourl !== '' && ($row['action'] ?? '') === 'settings' ? 'settings' : 'open',
         ];

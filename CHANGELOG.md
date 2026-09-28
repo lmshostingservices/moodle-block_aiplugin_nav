@@ -2,6 +2,23 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.41] - 2026-09-28
+
+### Changed
+- Promote five owner-approved activities from the live LMS Labs spotlight feed:
+  AI Anatomy, AI Interactive Video, AI Soft Skills, AI Language Training and
+  AI Vocab Master. They can be previewed before a release/Plugins-panel row
+  exists, but remain explicitly marked release pending and have no Get, price,
+  unlock or download action until both local catalogue and release are ready.
+- List all five in Plugins as release-pending rows with verified documentation
+  links. An upstream `ready` placeholder with `version=not-found` or no ZIP
+  never displays a price or permits acquisition; credit pricing is shown only
+  once an actual downloadable release is published.
+- Merge only these five canonical generated Quick Links entries into the
+  v2.5.40 installed catalogue, preserving all other installed registry data.
+  The hourly feed refresh, artwork, filters, details and collapse preferences
+  continue to work unchanged.
+
 ## [2.5.40] - 2026-09-26
 
 ### Fixed
