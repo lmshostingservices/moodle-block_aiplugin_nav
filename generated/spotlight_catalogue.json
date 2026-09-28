@@ -1,6 +1,6 @@
 {
   "source": "lms-labs.com editorial catalogue (PLUGIN_EDITORIAL_METADATA + docs pages), condensed",
-  "snapshot": "2026-09-20",
+  "snapshot": "2026-09-28",
   "eligibility": "Public catalogue (status ready, not hidden) AND owner-approved for promotion. Held out pending owner review: local_rplkit, local_chirpvoice, mod_workplacetask, local_custompage.",
   "order": "Positions 1-11 pinned by LMS Labs; remainder follows.",
   "plugins": [
@@ -937,6 +937,76 @@
         "label": "aware learning portal"
       },
       "docs": "https://lms-labs.com/docs/lms-home-page"
+    },
+    {
+      "component": "mod_aianatomy",
+      "name": "AI Anatomy",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#06b6d4",
+      "accent2": "#6366f1",
+      "description": "Explore interactive 3D anatomy packs in Moodle with text questions and speech-supported learning content.",
+      "features": ["Verified 3D anatomy packs", "Study, practice and test modes", "Teacher-approved AI teaching drafts", "Optional stored voiceover"],
+      "stat": {"value": "3D", "label": "verified anatomy to explore"},
+      "docs": "https://lms-labs.com/docs/ai-anatomy",
+      "usage": "3 credits per AI text draft; 1 credit per generated speech clip",
+      "image": "https://lms-labs.com/spotlight/mod_aianatomy.jpg"
+    },
+    {
+      "component": "mod_aiinteractivevideo",
+      "name": "AI Interactive Video",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#ef4444",
+      "accent2": "#f97316",
+      "description": "Turn a YouTube video and timestamped transcript into an interactive activity with eight question types, editable questions, learner attempts and reporting.",
+      "features": ["YouTube and transcript lessons", "Eight interaction types", "Replay-on-error feedback", "Gradebook and learner reports"],
+      "stat": {"value": "8", "label": "video interaction types"},
+      "docs": "https://lms-labs.com/docs/ai-interactive-video",
+      "usage": "100 credits per AI creation or re-creation",
+      "image": "https://lms-labs.com/spotlight/mod_aiinteractivevideo.jpg"
+    },
+    {
+      "component": "mod_aisoftskills",
+      "name": "AI Soft Skills",
+      "category": "training",
+      "type": "Activity",
+      "accent": "#14b8a6",
+      "accent2": "#8b5cf6",
+      "description": "Author branching workplace lessons manually, with separate AI-assisted scene script drafts and optional scene images.",
+      "features": ["Workplace scene drafting", "Interactive soft-skills practice", "Optional generated scene images", "Teacher review of AI drafts"],
+      "stat": {"value": "Scenes", "label": "for workplace practice"},
+      "docs": "https://lms-labs.com/docs/ai-soft-skills",
+      "usage": "3 credits per AI scene draft; 5 credits per generated image",
+      "image": "https://lms-labs.com/spotlight/mod_aisoftskills.jpg"
+    },
+    {
+      "component": "mod_ailanguageteacher",
+      "name": "AI Language Training",
+      "category": "training",
+      "type": "Activity",
+      "accent": "#6366f1",
+      "accent2": "#06b6d4",
+      "description": "Create language lesson text drafts and synthesize selected phrases as separate voice operations. Speech recognition and automatic pronunciation assessment are not included.",
+      "features": ["AI lesson drafting", "Teacher-requested phrase audio", "Speaking practice with browser recognition", "No paid speech-to-text"],
+      "stat": {"value": "Speak", "label": "and practise new languages"},
+      "docs": "https://lms-labs.com/docs/ai-language-teacher",
+      "usage": "3 credits per AI lesson draft; 1 credit per generated speech clip (no paid speech-to-text)",
+      "image": "https://lms-labs.com/spotlight/mod_ailanguageteacher.jpg"
+    },
+    {
+      "component": "mod_vocabmastery",
+      "name": "AI Vocab Master",
+      "category": "training",
+      "type": "Activity",
+      "accent": "#22c55e",
+      "accent2": "#0ea5e9",
+      "description": "Import your own vocabulary and practise it locally in Moodle, without AI generation, speech-provider calls or metered practice.",
+      "features": ["Word, Excel and CSV imports", "Flashcards and weighted practice", "Mastery checks and progress", "Local practice with no AI usage"],
+      "stat": {"value": "Local", "label": "vocabulary practice, no AI usage"},
+      "docs": "https://lms-labs.com/docs/ai-vocab-master",
+      "usage": "No AI usage credits",
+      "image": "https://lms-labs.com/spotlight/mod_vocabmastery.jpg"
     }
   ]
 }

@@ -2,6 +2,21 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.43] - 2026-09-28
+
+### Changed
+- Bundle the five approved activities in the same spotlight catalogue format
+  as every other plugin, so AI Anatomy, AI Interactive Video, AI Soft Skills,
+  AI Language Training and AI Vocab Master have the regular Quick Links hero,
+  poster row, filters and details even before the first spotlight-feed refresh.
+  Their live editorial copy, release readiness and acquisition controls still
+  come from the existing feeds and Plugins panel; no bespoke five-plugin
+  presentation or download shortcut is introduced.
+- Advance the block release and Moodle numeric version so the existing
+  Check for updates flow detects this release on installed sites.
+- Include the new Label Diagram registry entry from the concurrent generated
+  registry update, without changing any existing entries.
+
 ## [2.5.41] - 2026-09-28
 
 ### Changed
