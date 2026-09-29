@@ -627,8 +627,12 @@ row;
         if (DATA.cancredits) {
             html += '  <div class="ainav2-creditbox ainav2-ok" id="ainav2-creditbox" data-help="credits">';
             html += '    <div class="ainav2-creditrow"><span class="ainav2-lamp"></span>' +
-                '<div class="ainav2-amt" id="ainav2-camt">0</div><div class="ainav2-lab">credits</div>' +
-                '<button class="ainav2-topup" type="button" id="ainav2-ctop">Top up</button></div>';
+                '<div class="ainav2-amt" id="ainav2-camt">—</div><div class="ainav2-lab">credits</div>' +
+                '<a class="ainav2-topup" id="ainav2-ctop" target="_blank" rel="nofollow noopener noreferrer" ' +
+                'referrerpolicy="no-referrer" href="https://lms-labs.com/pricing?siteId=' +
+                encodeURIComponent(DATA.creditsSiteId || '') + '">Buy credits</a></div>' +
+                '<button class="ainav2-btn" type="button" id="ainav2-creditrefresh">Refresh credits</button>' +
+                '<div class="ainav2-small" id="ainav2-creditstatus" role="status" aria-live="polite"></div>';
             html += '    <div class="ainav2-meterlab" id="ainav2-cmsg"></div>';
             html += '  </div>';
         }
@@ -1008,7 +1012,7 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
             level = 'warn';
         }
         els.creditbox.className = 'ainav2-creditbox ainav2-' + level;
-        els.camt.textContent = creditUnlimited ? 'Unlimited' : fmtNum(n);
+        els.camt.textContent = creditUnlimited ? 'Unlimited' : n.toLocaleString(undefined, {maximumFractionDigits: 20});
         els.ctop.classList.toggle('ainav2-urgent', level === 'low');
         els.ctop.textContent = level === 'low' ? 'Top up now' : 'Top up';
         var cmsg = 'Credits are low. Consider topping up.';
@@ -1030,29 +1034,134 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
     /**
      * Fetch the live credit balance from the server.
      */
-    function loadCredits() {
-        if (!DATA.cancredits) {
+    var creditCleanup = null;
+    var creditBusy = false;
+    var creditKnown = false;
+    var creditTimer = null;
+    var creditFailures = 0;
+    var creditEpoch = 0;
+
+    function creditStatus(message) {
+        var node = document.getElementById('ainav2-creditstatus');
+        if (node) {
+            node.textContent = message;
+        }
+    }
+
+    function scheduleCredits() {
+        clearTimeout(creditTimer);
+        if (!document.hidden && document.getElementById('ainav2-creditrefresh')) {
+            creditTimer = setTimeout(function() {
+                loadCredits(false);
+            }, Math.min(300000, 60000 * Math.pow(2, creditFailures)));
+        }
+    }
+
+    function loadCredits(force) {
+        if (!DATA.cancredits || creditBusy || document.hidden) {
             return;
+        }
+        clearTimeout(creditTimer);
+        creditBusy = true;
+        var epoch = creditEpoch;
+        creditStatus(creditKnown ? 'Refreshing — showing last known balance…' : 'Loading balance…');
+        function finish(ok) {
+            creditBusy = false;
+            creditFailures = ok ? 0 : Math.min(creditFailures + 1, 3);
+            creditStatus(ok ? 'Balance updated.' :
+                (creditKnown ? 'Refresh failed — showing last known balance. Try Refresh credits.' :
+                    'Balance unavailable. Try Refresh credits.'));
+            scheduleCredits();
         }
         Ajax.call([{
             methodname: 'block_aiplugin_nav_get_credits',
-            args: {},
+            args: {force: !!force},
             done: function(response) {
-                if (!response || !response.success || response.credits === '') {
+                if (epoch !== creditEpoch) {
                     return;
                 }
-                if (response.credits === 'unlimited' || response.credits === '-1' || response.credits === -1) {
+                var raw = response && (response.creditsRaw !== undefined ? response.creditsRaw : response.credits);
+                var unlimited = raw === 'unlimited' || raw === '-1' || raw === -1;
+                var valid = (typeof raw === 'number' || typeof raw === 'string') &&
+                    /^\d+(?:\.\d+)?$/.test(String(raw)) && isFinite(Number(raw)) && Number(raw) >= 0;
+                if (!response || !response.success || (!unlimited && !valid)) {
+                    finish(false);
+                    return;
+                }
+                if (unlimited) {
                     creditUnlimited = true;
                     setCredits(0);
                 } else {
                     creditUnlimited = false;
-                    setCredits(parseInt(response.credits, 10) || 0);
+                    setCredits(Number(raw));
                 }
+                creditKnown = true;
+                finish(true);
             },
             fail: function() {
-                // Silent fail - the traffic light simply keeps its default state.
+                if (epoch === creditEpoch) {
+                    finish(false);
+                }
             }
         }]);
+    }
+
+    function startCredits() {
+        if (creditCleanup) {
+            creditCleanup();
+        }
+        creditKnown = false;
+        var debounce = null;
+        var lastReturn = 0;
+        function refresh() {
+            clearTimeout(debounce);
+            if (document.hidden) {
+                clearTimeout(creditTimer);
+                return;
+            }
+            debounce = setTimeout(function() {
+                if (Date.now() - lastReturn >= 1500) {
+                    lastReturn = Date.now();
+                    loadCredits(true);
+                }
+            }, 250);
+        }
+        var button = document.getElementById('ainav2-creditrefresh');
+        function manual() {
+            loadCredits(true);
+        }
+        function hide(event) {
+            if (event.persisted) {
+                clearTimeout(debounce);
+                clearTimeout(creditTimer);
+            } else {
+                creditCleanup();
+            }
+        }
+        var observer = new MutationObserver(function() {
+            if (!document.documentElement.contains(button)) {
+                creditCleanup();
+            }
+        });
+        observer.observe(document.documentElement, {childList: true, subtree: true});
+        button.addEventListener('click', manual);
+        window.addEventListener('focus', refresh);
+        document.addEventListener('visibilitychange', refresh);
+        window.addEventListener('pageshow', refresh);
+        creditCleanup = function() {
+            creditEpoch++;
+            creditBusy = false;
+            clearTimeout(debounce);
+            clearTimeout(creditTimer);
+            button.removeEventListener('click', manual);
+            window.removeEventListener('focus', refresh);
+            document.removeEventListener('visibilitychange', refresh);
+            window.removeEventListener('pageshow', refresh);
+            window.removeEventListener('pagehide', hide);
+            observer.disconnect();
+        };
+        window.addEventListener('pagehide', hide);
+        loadCredits(false);
     }
 
     /* ------------------------------------------------------------------ *
@@ -3371,12 +3480,13 @@ n = 0;
             });
         }
 
-        if (els.ctop) {
+        if (els.ctop && els.ctop.tagName !== 'A') {
             els.ctop.addEventListener('click', function() {
                 // Credits are bought from LMS Labs, not from the Moodle site. This used to
                 // open <wwwroot>/local/lmslabs/credits.php, a path no plugin provides, so
                 // the button led to a 404.
-                window.open(DATA.topupurl || 'https://lms-labs.com/pricing', '_blank', 'noopener');
+                window.open('https://lms-labs.com/pricing?siteId=' +
+                    encodeURIComponent(DATA.creditsSiteId || ''), '_blank', 'noopener,noreferrer');
             });
         }
     }
@@ -3594,8 +3704,7 @@ n = 0;
         }
 
         if (DATA.cancredits) {
-            setCredits(0);
-            loadCredits();
+            startCredits();
         }
 
         if (DATA.manage && DATA.manage.length) {

@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.44] - 2026-09-29
+
+### Fixed
+- Scope validated credit balances to Central Config credentials with a short cache.
+- Refresh credits on demand, returning to the page and while visible; preserve
+  last-known balances on errors and display fractional and unlimited balances.
+- Prefill Buy credits with the configured site identifier without exposing the API key.
+
 ## [2.5.43] - 2026-09-28
 
 ### Changed

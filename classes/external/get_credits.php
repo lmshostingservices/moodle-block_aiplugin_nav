@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External service to fetch credits balance (with 5-minute cache).
+ * External service to fetch credits balance with an identity-scoped short cache.
  *
  * @package    block_aiplugin_nav
  * @copyright  2025 Essay Grader AI
@@ -35,7 +35,7 @@ use external_single_structure;
 
 /**
  * External service to fetch credit balance from lms-labs.com.
- * Results are cached for 5 minutes to avoid blocking page renders.
+ * Validated results are cached for 30 seconds per credential pair.
  */
 class get_credits extends external_api {
     /**
@@ -44,17 +44,21 @@ class get_credits extends external_api {
      * @return external_function_parameters
      */
     public static function execute_parameters() {
-        return new external_function_parameters([]);
+        return new external_function_parameters([
+            'force' => new external_value(PARAM_BOOL, 'Refresh balance now', VALUE_DEFAULT, false),
+        ]);
     }
 
     /**
-     * Fetch credits balance with 5-minute server-side cache.
+     * Fetch credit balance, optionally bypassing the normal short cache.
      *
      * @return array Credits info.
      */
-    public static function execute() {
+    public static function execute($force = false) {
         global $CFG, $DB, $USER;
 
+        $params = self::validate_parameters(self::execute_parameters(), ['force' => $force]);
+        $force = $params['force'];
         $context = \context_system::instance();
         self::validate_context($context);
 
@@ -83,21 +87,6 @@ class get_credits extends external_api {
         // SESSION LOCK: Release before external credits API call (up to 10 s timeout).
         \core\session\manager::write_close();
 
-        // Check 5-minute cache stored in plugin config.
-        $cached    = get_config('block_aiplugin_nav', 'credits_cache');
-        $cachedat  = (int) get_config('block_aiplugin_nav', 'credits_cached_at');
-
-        if ($cached !== false && !empty($cached) && (time() - $cachedat) < 300) {
-            $data = json_decode($cached, true);
-            if ($data && isset($data['credits'])) {
-                return [
-                    'credits' => (string) $data['credits'],
-                    'cached'  => true,
-                    'success' => true,
-                ];
-            }
-        }
-
         // Load AI Grader Central Config library.
         $aiconfiglib = $CFG->dirroot . '/local/aiconfig/lib.php';
         if (file_exists($aiconfiglib)) {
@@ -116,6 +105,18 @@ class get_credits extends external_api {
 
         if (empty($siteid) || empty($apikey)) {
             return ['credits' => '', 'cached' => false, 'success' => false];
+        }
+
+        // Resolve identity before cache lookup. Never use the legacy global balance.
+        $cachekey = 'balance_' . hash('sha256', json_encode([$siteid, $apikey]));
+        $cached = json_decode(get_config('block_aiplugin_nav', $cachekey) ?: '', true);
+        $age = time() - (int)($cached['at'] ?? 0);
+        // Two seconds coalesces focus/visibility and concurrent manual refreshes.
+        if ($cached && $age >= 0 && $age < ($force ? 2 : 30)) {
+            $balance = self::normalise($cached['data'] ?? []);
+            if ($balance !== null) {
+                return $balance + ['cached' => true, 'success' => true];
+            }
         }
 
         // Make API request — try endpoints in order (Replit first: always reachable from
@@ -138,7 +139,7 @@ class get_credits extends external_api {
                 'CURLOPT_TIMEOUT'        => 5,
                 'CURLOPT_CONNECTTIMEOUT' => 3,
                 'CURLOPT_SSL_VERIFYPEER' => true,
-                'CURLOPT_FOLLOWLOCATION' => true,
+                'CURLOPT_FOLLOWLOCATION' => false,
             ]);
             $curl->setHeader(['Accept: application/json']);
             $response = $curl->get($url);
@@ -146,8 +147,9 @@ class get_credits extends external_api {
 
             if ($httpcode === 200 && !empty($response)) {
                 $decoded = json_decode($response, true);
-                if ($decoded && isset($decoded['credits'])) {
-                    $data = $decoded;
+                $balance = self::normalise($decoded);
+                if ($balance !== null) {
+                    $data = $balance;
                     break;
                 }
             }
@@ -158,15 +160,28 @@ class get_credits extends external_api {
             return ['credits' => '', 'cached' => false, 'success' => false];
         }
 
-        // Store result in 5-minute cache.
-        set_config('credits_cache', json_encode($data), 'block_aiplugin_nav');
-        set_config('credits_cached_at', time(), 'block_aiplugin_nav');
+        // Cache only validated successful responses, scoped to the credential pair.
+        set_config($cachekey, json_encode(['at' => time(), 'data' => $data]), 'block_aiplugin_nav');
 
-        return [
-            'credits' => (string) $data['credits'],
-            'cached'  => false,
-            'success' => true,
-        ];
+        return $data + ['cached' => false, 'success' => true];
+    }
+
+    /** Validate balances without rounding fractional credits or inventing zero. */
+    private static function normalise($data) {
+        if (!is_array($data) || (isset($data['success']) && $data['success'] !== true)) {
+            return null;
+        }
+        $raw = $data['creditsRaw'] ?? $data['credits'] ?? null;
+        if ($raw === 'unlimited' || $raw === -1 || $raw === '-1' || $raw === -1.0) {
+            return ['credits' => 'unlimited', 'creditsRaw' => '-1', 'isUnlimited' => true];
+        }
+        if ((!is_string($raw) && !is_int($raw) && !is_float($raw)) ||
+                !preg_match('/^\d+(?:\.\d+)?$/D', (string)$raw) ||
+                !is_finite((float)$raw) || (float)$raw < 0 ||
+                (!empty($data['isUnlimited']))) {
+            return null;
+        }
+        return ['credits' => (string)$raw, 'creditsRaw' => (string)$raw, 'isUnlimited' => false];
     }
 
     /**
@@ -177,6 +192,8 @@ class get_credits extends external_api {
     public static function execute_returns() {
         return new external_single_structure([
             'credits' => new external_value(PARAM_TEXT, 'Credits balance, or empty string if unavailable'),
+            'creditsRaw' => new external_value(PARAM_TEXT, 'Unrounded balance', VALUE_OPTIONAL),
+            'isUnlimited' => new external_value(PARAM_BOOL, 'Unlimited account', VALUE_OPTIONAL),
             'cached'  => new external_value(PARAM_BOOL, 'Whether result came from cache'),
             'success' => new external_value(PARAM_BOOL, 'Whether credits were fetched successfully'),
         ]);

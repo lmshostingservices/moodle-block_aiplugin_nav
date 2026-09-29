@@ -132,5 +132,12 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026091003, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026092900) {
+        // V2.5.44: discard the unscoped legacy credit cache. No schema changes.
+        unset_config('credits_cache', 'block_aiplugin_nav');
+        unset_config('credits_cached_at', 'block_aiplugin_nav');
+        upgrade_block_savepoint(true, 2026092900, 'aiplugin_nav');
+    }
+
     return true;
 }

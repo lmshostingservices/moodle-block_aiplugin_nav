@@ -283,6 +283,12 @@ class block_aiplugin_nav_payload {
         global $CFG, $USER;
 
         $isadmin = has_capability('moodle/site:config', context_system::instance());
+        $configlib = $CFG->dirroot . '/local/aiconfig/lib.php';
+        if (file_exists($configlib)) {
+            require_once($configlib);
+        }
+        $creditssiteid = function_exists('local_aiconfig_get_siteid') ?
+            trim(local_aiconfig_get_siteid('block_aiplugin_nav') ?? '') : '';
         $cancredits = $isadmin
             || $block->user_has_role_shortname($USER->id, 'editingteacher')
             || $block->user_has_role_shortname($USER->id, 'teacher')
@@ -335,7 +341,8 @@ class block_aiplugin_nav_payload {
             'supporturl' => self::build_support_url($block),
             // Where "Top up" goes. It pointed at /local/lmslabs/credits.php on the Moodle
             // site — a path no LMS Labs plugin provides, so the button opened a 404.
-            'topupurl'   => 'https://lms-labs.com/pricing',
+            'topupurl'   => 'https://lms-labs.com/pricing?siteId=' . rawurlencode($creditssiteid),
+            'creditsSiteId' => $cancredits ? $creditssiteid : '',
             'prefs'      => [
                 'faves'  => json_decode(get_user_preferences('block_aiplugin_nav_faves', '[]'), true) ?: [],
                 'layout' => json_decode(get_user_preferences('block_aiplugin_nav_layout', '{}'), true) ?: new stdClass(),
