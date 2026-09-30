@@ -126,6 +126,17 @@ class spotlight {
     private const DOCS_PREFIX = 'https://lms-labs.com/docs/';
 
     /**
+     * Plugins shown text-only in the spotlight.
+     *
+     * No preview image is ever used for these: not the live feed's image, not an image from a
+     * cached copy of the feed, not the bundled catalogue's image and not a bundled
+     * pix/spotlight file.
+     *
+     * @var string[]
+     */
+    public const TEXT_ONLY_COMPONENTS = ['mod_vocabmastery'];
+
+    /**
      * Build the spotlight model, or null when there is nothing to promote.
      *
      * @param array $plugins The already-built Plugins panel rows. Empty for non-admins.
@@ -249,10 +260,14 @@ class spotlight {
             $docs = '';
         }
 
-        // Preview image: the one LMS Labs publishes, else the bundled one.
-        $image = live_feed::image_url($entry['image'] ?? '');
-        if ($image === '' && is_readable(__DIR__ . '/../../pix/spotlight/' . $component . '.jpg')) {
-            $image = $output->image_url('spotlight/' . $component, 'block_aiplugin_nav')->out(false);
+        // Preview image: the one LMS Labs publishes, else the bundled one. Text-only plugins
+        // get neither, whatever the feed, its cache or the bundled files contain.
+        $image = '';
+        if (!in_array($component, self::TEXT_ONLY_COMPONENTS, true)) {
+            $image = live_feed::image_url($entry['image'] ?? '');
+            if ($image === '' && is_readable(__DIR__ . '/../../pix/spotlight/' . $component . '.jpg')) {
+                $image = $output->image_url('spotlight/' . $component, 'block_aiplugin_nav')->out(false);
+            }
         }
 
         // Same destination and label as the Plugins panel row: 'settings' rows link to the

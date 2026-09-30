@@ -2,6 +2,15 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.46] - 2026-09-30
+
+### Changed
+- AI Vocab Master (mod_vocabmastery) is shown text-only in the plugin spotlight: its hero
+  and poster card never show a preview image. The guard is applied on the server when the
+  spotlight is built, so it covers the live LMS Labs feed, a cached copy of that feed, the
+  bundled catalogue and any bundled pix/spotlight file. All other plugins' artwork, and the
+  Membership Portal card, are unchanged.
+
 ## [2.5.45] - 2026-09-30
 
 ### Added
