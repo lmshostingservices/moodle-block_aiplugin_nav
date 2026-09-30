@@ -2,6 +2,15 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.45] - 2026-09-30
+
+### Added
+- Membership Portal card in the "Our software" row on the home view, linking to
+  https://www.lmshostingservices.com/membership-portal. A branded member hub for associations
+  and professional bodies: profiles, CPD tracking, events, learning, community, mentoring and a
+  job board. $100 USD/month with a 7-day free trial. It also appears in the block's search
+  results, like the other product cards.
+
 ## [2.5.44] - 2026-09-29
 
 ### Fixed

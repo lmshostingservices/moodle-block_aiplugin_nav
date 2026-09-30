@@ -1202,6 +1202,24 @@ class block_aiplugin_nav_payload {
                     . '<path d="M13 11.2l8 4.8-8 4.8V11.2z" fill="white"/>'
                     . '</svg>',
             ],
+            [
+                'name'   => 'Membership Portal',
+                'url'    => 'https://www.lmshostingservices.com/membership-portal',
+                'kind'   => 'Members',
+                'desc'   => 'A branded member hub for associations and professional bodies: profiles, CPD tracking, '
+                    . 'events, learning, community, mentoring and a job board in one place.',
+                'price'  => '$100 USD/month · 7-day free trial',
+                'colour' => '#0D9488',
+                // Generic member-group mark.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#0D9488"/>'
+                    . '<circle cx="16" cy="12" r="3.6" fill="white"/>'
+                    . '<path d="M9.5 23.5c0-3.6 2.9-6.1 6.5-6.1s6.5 2.5 6.5 6.1" stroke="white" stroke-width="2.2" '
+                    . 'stroke-linecap="round"/>'
+                    . '<circle cx="8.6" cy="14.2" r="2.2" fill="white" fill-opacity="0.75"/>'
+                    . '<circle cx="23.4" cy="14.2" r="2.2" fill="white" fill-opacity="0.75"/>'
+                    . '</svg>',
+            ],
         ];
     }
 
