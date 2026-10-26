@@ -1,0 +1,12 @@
+{
+  "name": "quicklinks-native-install-ci",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:quicklinks-native-install": "node scripts/quicklinks-native-install.mjs"
+  },
+  "dependencies": {
+    "adm-zip": "0.5.16"
+  }
+}
