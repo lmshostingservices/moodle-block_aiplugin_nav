@@ -64,6 +64,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var pq = ''; // Per-panel search term (Plugins/Settings/Manage/Reports).
 
     var checkState = 'idle'; // 'idle' | 'checking' | 'done' | 'failed'.
+    var updateRows = []; // Verified comparison rows from the last successful check.
+    var updateDetailsPinned = false;
+    var updateDetailsTimer = null;
+    var suppressUpdateDetailsFocus = null; // A one-shot guard for intentional focus restoration only.
     var spotlight = null; // The plugin spotlight controller, when the spotlight is shown.
     var lastCheck = null; // When the last successful check finished.
     var spend = []; // Recent credit spends: [{n: name, c: credits, t: unixtime}].
@@ -796,11 +800,15 @@ out = '';
         var counts = DATA.counts || {};
         var installed = counts.installed || 0;
         var updates = counts.updates || 0;
+        var updateSummary = checkState === 'done' ? updates + ' updates' :
+            (checkState === 'checking' ? 'checking updates' :
+                (checkState === 'failed' ? 'update check failed' : 'updates not checked'));
         var cards = [];
         if (isAdmin() && DATA.plugins && DATA.plugins.length) {
             cards.push({
                 id: 'plugins', label: 'Plugins', n: DATA.plugins.length, unit: 'available',
-                sub: installed + ' installed · ' + updates + ' updates', flag: updates > 0 ? String(updates) : ''
+                sub: installed + ' installed · ' + updateSummary,
+                flag: checkState === 'done' && updates > 0 ? String(updates) : ''
             });
         }
         if (isAdmin() && DATA.settings && DATA.settings.length) {
@@ -943,7 +951,10 @@ desc;
             ' title="Check the update server now">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
             '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>' +
-            (checkState === 'checking' ? 'Checking' : 'Check for updates') + '</button></div>';
+            (checkState === 'checking' ? 'Checking' : 'Check for updates') + '</button>' +
+            '<button class="ainav2-update-details" type="button" data-update-details="1" ' +
+            'aria-expanded="false" aria-controls="ainav2-update-popover">Details</button>' +
+            renderUpdateDetails() + '</div>';
         out += '<div class="ainav2-alert ainav2-calm" data-help="health" tabindex="0">' +
             '<div class="ainav2-aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
             '<path d="m5 13 4 4L19 7"/></svg></div>' +
@@ -951,6 +962,213 @@ desc;
             '<span class="ainav2-atitle">installed &amp; healthy</span></div><div class="ainav2-adesc">No conflicts</div></div>' +
             '<span class="ainav2-pulse" title="All healthy"></span></div>';
         els.strip.innerHTML = out;
+    }
+
+    /**
+     * Render comparison details from only the rows verified by markUpdates().
+     * No catalogue or guessed versions are used here.
+     *
+     * @return {string}
+     */
+    function renderUpdateDetails() {
+        var body = '';
+        var i;
+        if (checkState === 'checking') {
+            body = '<p class="ainav2-update-message" role="status">Checking installed plugin versions…</p>';
+        } else if (checkState === 'failed') {
+            body = '<p class="ainav2-update-message ainav2-update-error" role="alert">' +
+                'The update check failed. No version comparison is available.</p>';
+        } else if (checkState === 'idle') {
+            body = '<p class="ainav2-update-message">Run a check to compare installed and available versions.</p>';
+        } else if (!updateRows.length) {
+            body = '<p class="ainav2-update-message">No plugin updates are available.</p>';
+        } else {
+            body = '<div class="ainav2-update-tablewrap"><table class="ainav2-update-table">' +
+                '<thead><tr><th scope="col">Plugin</th><th scope="col">Installed · FROM</th>' +
+                '<th scope="col">Available · TO</th></tr></thead><tbody>';
+            for (i = 0; i < updateRows.length; i++) {
+                body += '<tr><th scope="row">' + esc(updateRows[i].name) + '</th>' +
+                    '<td><code>' + esc(updateRows[i].from) + '</code></td>' +
+                    '<td><code>' + esc(updateRows[i].to) + '</code></td></tr>';
+            }
+            body += '</tbody></table></div>';
+        }
+        return '<div class="ainav2-update-popover" id="ainav2-update-popover" role="region" ' +
+            'aria-label="Plugin update details" hidden>' +
+            '<div class="ainav2-update-pophead"><strong>Version changes</strong>' +
+            '<button class="ainav2-update-close" type="button" data-update-close="1" aria-label="Close update details">×</button></div>' +
+            body + '</div>';
+    }
+
+    /**
+     * Place the details popover beside its trigger while keeping it inside the viewport.
+     *
+     * @param {Element} trigger
+     * @param {Element} popover
+     */
+    function positionUpdateDetails(trigger, popover) {
+        var rect = trigger.getBoundingClientRect();
+        var width = Math.min(420, Math.max(260, window.innerWidth - 24));
+        var left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
+        var top = rect.bottom + 8;
+        popover.style.width = width + 'px';
+        popover.style.left = left + 'px';
+        popover.style.maxHeight = Math.max(150, window.innerHeight - 24) + 'px';
+        if (top + Math.min(popover.offsetHeight || 300, window.innerHeight - 24) > window.innerHeight - 12) {
+            top = Math.max(12, rect.top - Math.min(popover.offsetHeight || 300, window.innerHeight - 24) - 8);
+        }
+        popover.style.top = top + 'px';
+    }
+
+    /**
+     * Open or close the version details popup and synchronize its accessible state.
+     *
+     * @param {boolean} open
+     * @param {Element} [trigger]
+     */
+    function setUpdateDetails(open, trigger) {
+        if (!els.strip) {
+            return;
+        }
+        var button = trigger || els.strip.querySelector('[data-update-details]');
+        var popup = els.strip.querySelector('#ainav2-update-popover');
+        if (!button || !popup) {
+            return;
+        }
+        if (open) {
+            popup.hidden = false;
+            popup.classList.add('ainav2-update-popover-open');
+            button.setAttribute('aria-expanded', 'true');
+            positionUpdateDetails(button, popup);
+        } else {
+            popup.hidden = true;
+            popup.classList.remove('ainav2-update-popover-open');
+            button.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    /**
+     * Restore focus after a dismissal without letting that restoration reopen the popup.
+     *
+     * @param {Element} trigger
+     */
+    function restoreUpdateDetailsFocus(trigger) {
+        if (trigger && document.activeElement !== trigger) {
+            suppressUpdateDetailsFocus = trigger;
+            trigger.focus();
+        }
+    }
+
+    /**
+     * Wire hover, keyboard, and click/tap behavior for the details popup.
+     */
+    function wireUpdateDetails() {
+        els.strip.addEventListener('click', function(e) {
+            var details = closestAttr(e.target, 'data-update-details');
+            if (details) {
+                e.preventDefault();
+                e.stopPropagation();
+                updateDetailsPinned = !updateDetailsPinned;
+                setUpdateDetails(updateDetailsPinned, details);
+                return;
+            }
+            if (closestAttr(e.target, 'data-update-close')) {
+                e.preventDefault();
+                e.stopPropagation();
+                updateDetailsPinned = false;
+                setUpdateDetails(false);
+                restoreUpdateDetailsFocus(els.strip.querySelector('[data-update-details]'));
+                return;
+            }
+            if (closestAttr(e.target, 'data-recheck')) {
+                refreshUpdates(true);
+                return;
+            }
+            if (closestAttr(e.target, 'data-updateall')) {
+                updateAll();
+                return;
+            }
+            if (closestAttr(e.target, 'data-openupdates')) {
+                openUpdatesPanel();
+            }
+        });
+
+        els.strip.addEventListener('mouseover', function(e) {
+            var button = closestAttr(e.target, 'data-update-details');
+            var popup = closestAttr(e.target, 'id') && e.target.id === 'ainav2-update-popover' ?
+                e.target : closestClass(e.target, 'ainav2-update-popover');
+            if (button || popup) {
+                clearTimeout(updateDetailsTimer);
+                setUpdateDetails(true, button || els.strip.querySelector('[data-update-details]'));
+            }
+        });
+        els.strip.addEventListener('mouseout', function(e) {
+            var button = closestAttr(e.target, 'data-update-details');
+            var popup = closestClass(e.target, 'ainav2-update-popover');
+            if ((button || popup) && !updateDetailsPinned &&
+                    !(e.relatedTarget && (button && button.contains(e.relatedTarget) ||
+                        popup && popup.contains(e.relatedTarget)))) {
+                clearTimeout(updateDetailsTimer);
+                updateDetailsTimer = setTimeout(function() {
+                    var trigger = els.strip.querySelector('[data-update-details]');
+                    var panel = els.strip.querySelector('#ainav2-update-popover');
+                    if (!updateDetailsPinned && trigger && panel &&
+                            !trigger.contains(document.activeElement) && !panel.contains(document.activeElement)) {
+                        setUpdateDetails(false, trigger);
+                    }
+                }, 140);
+            }
+        });
+        els.strip.addEventListener('focusin', function(e) {
+            var button = closestAttr(e.target, 'data-update-details');
+            var popup = closestClass(e.target, 'ainav2-update-popover');
+            if (button || popup) {
+                if (button && button === suppressUpdateDetailsFocus) {
+                    suppressUpdateDetailsFocus = null;
+                    return;
+                }
+                clearTimeout(updateDetailsTimer);
+                setUpdateDetails(true, button || els.strip.querySelector('[data-update-details]'));
+            }
+        });
+        els.strip.addEventListener('focusout', function(e) {
+            var button = closestAttr(e.target, 'data-update-details');
+            var popup = closestClass(e.target, 'ainav2-update-popover');
+            if ((button || popup) && !updateDetailsPinned) {
+                clearTimeout(updateDetailsTimer);
+                updateDetailsTimer = setTimeout(function() {
+                    var trigger = els.strip.querySelector('[data-update-details]');
+                    var panel = els.strip.querySelector('#ainav2-update-popover');
+                    if (trigger && panel && !trigger.contains(document.activeElement) &&
+                            !panel.contains(document.activeElement)) {
+                        setUpdateDetails(false, trigger);
+                    }
+                }, 0);
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            var popup = els.strip.querySelector('#ainav2-update-popover');
+            if (e.key === 'Escape' && popup && !popup.hidden) {
+                e.preventDefault();
+                updateDetailsPinned = false;
+                setUpdateDetails(false);
+                restoreUpdateDetailsFocus(els.strip.querySelector('[data-update-details]'));
+            }
+        });
+        window.addEventListener('resize', function() {
+            var trigger = els.strip.querySelector('[data-update-details]');
+            var popup = els.strip.querySelector('#ainav2-update-popover');
+            if (trigger && popup && !popup.hidden) {
+                positionUpdateDetails(trigger, popup);
+            }
+        });
+        window.addEventListener('scroll', function() {
+            var trigger = els.strip.querySelector('[data-update-details]');
+            var popup = els.strip.querySelector('#ainav2-update-popover');
+            if (trigger && popup && !popup.hidden) {
+                positionUpdateDetails(trigger, popup);
+            }
+        }, true);
     }
 
     /**
@@ -2561,8 +2779,11 @@ pb = parseV(b);
     function markUpdates(plugins, map) {
         var i,
 n = 0;
+        updateRows = [];
         for (i = 0; i < plugins.length; i++) {
             var p = plugins[i];
+            p.update = false;
+            p.latestversion = '';
             var latest = map[p.component];
             if (!p.installed || !latest) {
                 continue;
@@ -2585,6 +2806,7 @@ n = 0;
             }
             p.update = true;
             p.latestversion = latest.version || '';
+            updateRows.push({name: p.name || p.component, from: p.version || '', to: latest.version || ''});
         }
         for (i = 0; i < plugins.length; i++) {
             if (plugins[i].update) {
@@ -2592,6 +2814,18 @@ n = 0;
             }
         }
         return n;
+    }
+
+    /**
+     * Remove comparison markers from an earlier check before a new request begins.
+     */
+    function clearUpdateMarkers() {
+        var plugins = DATA.plugins || [];
+        var i;
+        for (i = 0; i < plugins.length; i++) {
+            plugins[i].update = false;
+            plugins[i].latestversion = '';
+        }
     }
 
     /**
@@ -2606,25 +2840,47 @@ n = 0;
         if (checkState === 'checking') {
             return;
         }
+        updateRows = [];
+        updateDetailsPinned = false;
+        clearUpdateMarkers();
         checkState = 'checking';
-        if (manual) {
-            renderStrip();
+        renderStrip();
+        renderCards();
+        if (current) {
+            paint();
         }
         $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
             .fail(function() {
                 // A failed check is not the same as "everything is current". Say so rather
                 // than leaving a zero on screen that looks like good news.
                 checkState = 'failed';
+                updateRows = [];
+                if (DATA.counts) {
+                    delete DATA.counts.updates;
+                }
+                renderCards();
                 renderStrip();
+                if (current) {
+                    paint();
+                }
                 if (manual) {
                     showToast('Could not reach the update server. Try again shortly.');
                 }
             })
             .done(function(data) {
-                var map = (data && data.plugins) || null;
+                var map = data && data.success === true && data.plugins && typeof data.plugins === 'object' ?
+                    data.plugins : null;
                 if (!map) {
                     checkState = 'failed';
+                    updateRows = [];
+                    if (DATA.counts) {
+                        delete DATA.counts.updates;
+                    }
+                    renderCards();
                     renderStrip();
+                    if (current) {
+                        paint();
+                    }
                     if (manual) {
                         showToast('The update server returned nothing usable.');
                     }
@@ -3146,6 +3402,7 @@ n = 0;
      * Attach every delegated event listener. Called once from init().
      */
     function wireEvents() {
+        wireUpdateDetails();
         els.cards.addEventListener('click', function(e) {
             var c = closestWithAttr(e.target, 'data-id');
             if (c) {
@@ -3326,17 +3583,6 @@ n = 0;
                 spend = [];
                 saveSpend();
                 renderSpend();
-            }
-        });
-
-        els.strip.addEventListener('click', function(e) {
-            // The support card is a real link (see buildStrip) — let it navigate.
-            if (closestAttr(e.target, 'data-recheck')) {
-                refreshUpdates(true);
-                return;
-            }
-            if (closestAttr(e.target, 'data-updateall')) {
-                updateAll();
             }
         });
 

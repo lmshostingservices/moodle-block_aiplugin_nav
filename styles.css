@@ -1281,6 +1281,153 @@
     border-color: var(--sc);
     box-shadow: var(--e2);
 }
+
+/* Verified version comparison popup. Fixed positioning keeps it clear of the
+   compact status strip; ui.js clamps it to the viewport after opening. */
+.ainav2 .ainav2-update-details {
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 5px 9px;
+    background: var(--surface);
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.ainav2 .ainav2-update-details:hover,
+.ainav2 .ainav2-update-details[aria-expanded="true"] {
+    border-color: var(--sc);
+    color: var(--sc);
+    background: var(--surface-2);
+}
+.ainav2 .ainav2-update-details:focus-visible,
+.ainav2 .ainav2-update-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.ainav2 .ainav2-update-popover {
+    position: fixed;
+    z-index: 10000;
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    overflow: auto;
+    padding: 13px 14px 14px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--e3);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .14s ease, transform .14s ease;
+}
+.ainav2 .ainav2-update-popover[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-update-popover-open {
+    opacity: 1;
+    transform: translateY(0);
+}
+.ainav2 .ainav2-update-pophead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--line-soft);
+    font-family: Archivo, sans-serif;
+    font-size: 14px;
+}
+.ainav2 .ainav2-update-close {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+}
+.ainav2 .ainav2-update-tablewrap {
+    max-height: min(54vh, 360px);
+    overflow: auto;
+}
+.ainav2 .ainav2-update-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    text-align: left;
+}
+.ainav2 .ainav2-update-table th,
+.ainav2 .ainav2-update-table td {
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+}
+.ainav2 .ainav2-update-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.ainav2 .ainav2-update-table tbody th {
+    min-width: 120px;
+    color: var(--ink);
+    font-weight: 600;
+}
+.ainav2 .ainav2-update-table code {
+    color: var(--accent-ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    white-space: nowrap;
+}
+.ainav2 .ainav2-update-message {
+    margin: 11px 0 1px;
+    color: var(--ink-2);
+    font-size: 13px;
+}
+.ainav2 .ainav2-update-error {
+    color: var(--warn);
+}
+@media (max-width: 520px) {
+    .ainav2 .ainav2-update-table {
+        min-width: 0;
+    }
+    .ainav2 .ainav2-update-table th,
+    .ainav2 .ainav2-update-table td {
+        padding: 7px 5px;
+    }
+    .ainav2 .ainav2-update-table thead th {
+        white-space: normal;
+        line-height: 1.25;
+    }
+    .ainav2 .ainav2-update-table tbody th {
+        min-width: 78px;
+    }
+    .ainav2 .ainav2-update-table code {
+        font-size: 10.5px;
+    }
+    .ainav2 .ainav2-update-popover {
+        padding: 11px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ainav2 .ainav2-update-popover {
+        transition: none;
+        transform: none;
+    }
+}
 .ainav2 .ainav2-alert.ainav2-calm {
     --sc: var(--ok);
 }

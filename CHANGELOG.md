@@ -2,6 +2,16 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.70] - 2026-10-26
+
+### Added
+- Preview available plugin updates with installed and available versions.
+- Open update details by hover, keyboard focus or tap; close with Escape.
+
+### Fixed
+- Clear stale update rows when a new check starts or a check fails.
+- Distinguish failed checks from a successful check with no updates.
+
 ## [2.5.69] - 2026-10-26
 
 ### Changed
