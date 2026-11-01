@@ -2,6 +2,11 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.76] - 2026-11-01
+
+### Fixed
+- Read installed Moodle Admin Tools from `admin/tool`, so Quick Links can detect their installed versions and available updates.
+
 ## [2.5.75] - 2026-11-01
 
 ### Changed

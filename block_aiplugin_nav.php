@@ -1647,6 +1647,8 @@ class block_aiplugin_nav extends block_base {
             'mod' => 'mod',
             'local' => 'local',
             'block' => 'blocks',
+            // Moodle admin tools are installed under admin/tool, not tool.
+            'tool' => 'admin/tool',
             'quizaccess' => 'mod/quiz/accessrule',
             'enrol' => 'enrol',
             'format' => 'course/format',
