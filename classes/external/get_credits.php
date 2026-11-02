@@ -108,8 +108,13 @@ class get_credits extends external_api {
         }
 
         // Resolve identity before cache lookup. Never use the legacy global balance.
+        // The balance lives in a MUC application cache, not in plugin config: every
+        // set_config() purges Moodle's site-wide config cache, which made every user's next
+        // request reload configuration from the database each time a balance was stored.
+        $cache = \cache::make('block_aiplugin_nav', 'credits');
         $cachekey = 'balance_' . hash('sha256', json_encode([$siteid, $apikey]));
-        $cached = json_decode(get_config('block_aiplugin_nav', $cachekey) ?: '', true);
+        $cached = $cache->get($cachekey);
+        $cached = is_array($cached) ? $cached : null;
         $age = time() - (int)($cached['at'] ?? 0);
         // Two seconds coalesces focus/visibility and concurrent manual refreshes.
         if ($cached && $age >= 0 && $age < ($force ? 2 : 30)) {
@@ -161,7 +166,7 @@ class get_credits extends external_api {
         }
 
         // Cache only validated successful responses, scoped to the credential pair.
-        set_config($cachekey, json_encode(['at' => time(), 'data' => $data]), 'block_aiplugin_nav');
+        $cache->set($cachekey, ['at' => time(), 'data' => $data]);
 
         return $data + ['cached' => false, 'success' => true];
     }

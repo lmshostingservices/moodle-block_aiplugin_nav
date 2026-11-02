@@ -2,6 +2,19 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.77] - 2026-11-03
+
+### Performance
+- Remove an unused Google Fonts import (Inter) from `styles.css`. Moodle adds every plugin's stylesheet to the theme's CSS, so it was an external, render-blocking request on every page of the site, including pages without the block.
+- Store the credit balance in a Moodle application cache instead of plugin config. Each `set_config()` cleared Moodle's site-wide config cache, so every balance refresh made every user's next request reload configuration from the database. The upgrade removes the old `balance_*` config rows.
+- Refreshing the balance when a teacher or admin returns to the tab now uses the 30-second server cache. Only the Refresh credits button forces a live fetch.
+- The Settings panel no longer builds the full admin settings tree on every page view. Which settings pages exist is cached until plugins change (and for at most an hour); each admin's access is still checked on every view.
+- The automatic update check (`check_versions.php`) releases the session lock before contacting LMS Labs, so the admin's next page is not held up, and answers from a stored copy of the versions feed under 15 minutes old. Check for updates and installs still fetch live.
+
+### Build
+- AMD files are regenerated with Moodle core grunt (byte-identical under Moodle 4.5 and 5.2). The 2.5.76 `amd/build` files were not core grunt output, so `spotlight.min.js` also changes although its source does not.
+- Fix the nine ESLint errors in the credits code of `amd/src/ui.js` (missing JSDoc, one over-long line).
+
 ## [2.5.76] - 2026-11-01
 
 ### Fixed

@@ -25,6 +25,12 @@
 // Server-side proxy for plugin version checking.
 // Uses the canonical promotion-aware LMS Labs endpoint so Check for updates
 // cannot accept a valid-but-stale manifest from a retired deployment.
+//
+// The block calls this on every admin page view. That automatic check is answered from
+// the copy of the versions feed stored by the last check or by the hourly refresh task
+// when that copy is under 15 minutes old, so LMS Labs is contacted at most once per
+// window rather than once per page. "Check for updates" and installs pass refresh=1 and
+// always get a live answer.
 
 define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../config.php');
@@ -32,7 +38,27 @@ require_once(__DIR__ . '/../../config.php');
 require_login(null, false);
 require_capability('moodle/site:config', context_system::instance());
 
+$refresh = optional_param('refresh', 0, PARAM_BOOL);
+
+// Nothing below writes to the session. Release the lock now so the admin's next page is
+// never queued behind the outbound request, which can take up to eight seconds.
+\core\session\manager::write_close();
+
 header('Content-Type: application/json; charset=utf-8');
+
+/** @var int Seconds a stored copy of the versions feed answers an automatic check. */
+const BLOCK_AIPLUGIN_NAV_VERSIONS_RECENT = 900;
+
+if (!$refresh) {
+    $recent = \block_aiplugin_nav\local\live_feed::recent(
+        \block_aiplugin_nav\local\live_feed::VERSIONS,
+        BLOCK_AIPLUGIN_NAV_VERSIONS_RECENT
+    );
+    if ($recent !== null) {
+        echo json_encode(['success' => true, 'plugins' => $recent, 'cached' => true], JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+}
 
 $endpoints = [
     'https://lms-labs.com/api/plugins/versions',

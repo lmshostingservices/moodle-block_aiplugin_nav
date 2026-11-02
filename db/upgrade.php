@@ -29,6 +29,8 @@
  * @return bool True on success.
  */
 function xmldb_block_aiplugin_nav_upgrade($oldversion) {
+    global $DB;
+
     if ($oldversion < 2026081100) {
         // BASELINE-10DIGIT (v2.4.50): Collapsed savepoint for sites upgrading
         // from the baseline reset. No DB schema changes.
@@ -137,6 +139,21 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         unset_config('credits_cache', 'block_aiplugin_nav');
         unset_config('credits_cached_at', 'block_aiplugin_nav');
         upgrade_block_savepoint(true, 2026092900, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026110300) {
+        // V2.5.77: credit balances moved from plugin config to the credits MUC cache.
+        // Remove the per-credential balance_* rows the old code stored. No schema changes.
+        $names = $DB->get_fieldset_select(
+            'config_plugins',
+            'name',
+            'plugin = :plugin AND ' . $DB->sql_like('name', ':prefix'),
+            ['plugin' => 'block_aiplugin_nav', 'prefix' => $DB->sql_like_escape('balance_') . '%']
+        );
+        foreach ($names as $name) {
+            unset_config($name, 'block_aiplugin_nav');
+        }
+        upgrade_block_savepoint(true, 2026110300, 'aiplugin_nav');
     }
 
     return true;

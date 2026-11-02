@@ -733,12 +733,16 @@ class block_aiplugin_nav_payload {
         return (is_string($section) && $section !== '') ? $section : null;
     }
 
+    /** @var array|null Admin section => access details, loaded once per request. */
+    private static $adminsections = null;
+
     /**
      * A registry settings URL, made absolute, or null if it leads nowhere.
      *
      * Non-settings URLs are passed through unchanged; a /admin/settings.php URL is kept
-     * for site administrators only. Its section is not checked against the admin tree,
-     * because building that tree runs every plugin's settings.php (see settings_action()).
+     * for site administrators only, and only when its section exists on this site and the
+     * user may open it. That is decided from load_admin_sections(), not by building the
+     * admin tree here (see settings_action()).
      *
      * @param string $relative Site-relative URL from the master registry, may be empty.
      * @return string|null Absolute URL, or null when nothing should be linked.
@@ -764,23 +768,96 @@ class block_aiplugin_nav_payload {
     }
 
     /**
-     * Whether a named section exists in this site's admin settings tree.
+     * Whether a named section exists in this site's admin settings tree and the user may open it.
+     *
+     * Same answer as admin_get_root()->locate($section)->check_access() for an
+     * admin_settingpage, read from the details load_admin_sections() recorded.
      *
      * @param string $section Section name, as used by /admin/settings.php?section=.
      * @return bool
      */
     private static function admin_section_exists(string $section): bool {
-        global $CFG;
-
-        require_once($CFG->libdir . '/adminlib.php');
-
-        try {
-            $page = admin_get_root()->locate($section);
-            // The admin/settings.php endpoint cannot render categories or external admin pages.
-            return $page instanceof \admin_settingpage && $page->check_access();
-        } catch (\Throwable $e) {
+        $entry = self::$adminsections[$section] ?? null;
+        if ($entry === null) {
             return false;
         }
+        $context = $entry['contextid'] ? \context::instance_by_id($entry['contextid'], IGNORE_MISSING) : false;
+        if (!$context) {
+            $context = \context_system::instance();
+        }
+        return has_any_capability($entry['caps'], $context);
+    }
+
+    /**
+     * Record which of the registry's settings sections exist, and what each requires.
+     *
+     * Building the admin tree with admin_get_root() runs every installed plugin's settings.php
+     * and takes from hundreds of milliseconds to seconds; some of those files make outbound
+     * HTTP calls. It used to run on every page view that showed the block to an admin. It now
+     * runs only when the cache below is empty: after a plugin is installed, upgraded or removed
+     * (the key includes Moodle's all-versions hash), after a cache purge, or after an hour.
+     * Capabilities are still checked per user on every view, in admin_section_exists().
+     *
+     * @param block_aiplugin_nav $block The block instance.
+     * @param array $masterregistry The master plugin registry.
+     * @return array Section => ['caps' => string[], 'contextid' => int] for sections that exist.
+     */
+    private static function load_admin_sections(block_aiplugin_nav $block, array $masterregistry): array {
+        global $CFG;
+
+        $wanted = [];
+        foreach ($masterregistry as $plugin) {
+            if (
+                empty($plugin['plugin_type']) || empty($plugin['plugin_name'])
+                || !$block->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])
+            ) {
+                continue;
+            }
+            $urls = [(string) ($plugin['settings_url'] ?? '')];
+            foreach ($plugin['additional_settings'] ?? [] as $setting) {
+                $urls[] = (string) ($setting['url'] ?? '');
+            }
+            foreach ($urls as $url) {
+                $section = $url === '' ? null : self::section_of($CFG->wwwroot . $url);
+                if ($section !== null) {
+                    $wanted[$section] = true;
+                }
+            }
+        }
+        if (!$wanted) {
+            return [];
+        }
+        $wanted = array_keys($wanted);
+        sort($wanted, SORT_STRING);
+
+        $cache = \cache::make('block_aiplugin_nav', 'adminsections');
+        $key = 's' . sha1(($CFG->allversionshash ?? '') . '|' . implode(',', $wanted));
+        $map = $cache->get($key);
+        if (is_array($map)) {
+            return $map;
+        }
+
+        require_once($CFG->libdir . '/adminlib.php');
+        $map = [];
+        try {
+            $root = admin_get_root();
+            foreach ($wanted as $section) {
+                $page = $root->locate($section);
+                // The admin/settings.php endpoint cannot render categories or external admin pages.
+                if ($page instanceof \admin_settingpage) {
+                    $map[$section] = [
+                        'caps' => array_values((array) $page->req_capability),
+                        'contextid' => empty($page->context) ? 0 : (int) $page->context->id,
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Not cached, so the next view tries again. No settings rows rather than a broken block.
+            debugging('block_aiplugin_nav: could not read the admin tree: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return [];
+        }
+        $cache->set($key, $map);
+        return $map;
     }
 
     // The "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
@@ -814,6 +891,8 @@ class block_aiplugin_nav_payload {
         $settings = [];
         $manage   = [];
         $reports  = [];
+
+        self::$adminsections = self::load_admin_sections($block, $masterregistry);
 
         foreach ($masterregistry as $component => $plugin) {
             if (!$block->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])) {

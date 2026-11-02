@@ -7,8 +7,6 @@
  * @copyright  2025 Essay Grader AI
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 /* Plugin spotlight fonts, bundled in fonts/ (SIL OFL 1.1, see thirdpartylibs.xml). Moodle
    resolves the [[font:...]] placeholders, so no external font service is contacted. */
 

@@ -98,6 +98,25 @@ class live_feed {
     }
 
     /**
+     * A feed's cached plugins, only when they were fetched within the last $maxage seconds.
+     *
+     * Used by check_versions.php to answer the automatic update check without calling
+     * LMS Labs on every admin page view.
+     *
+     * @param string $feed self::VERSIONS or self::SPOTLIGHT.
+     * @param int $maxage Maximum age in seconds.
+     * @return array|null
+     */
+    public static function recent(string $feed, int $maxage): ?array {
+        $entry = self::cache()->get($feed);
+        if (!is_array($entry) || !isset($entry['plugins']) || !is_array($entry['plugins']) || !$entry['plugins']) {
+            return null;
+        }
+        $age = time() - (int) ($entry['fetched'] ?? 0);
+        return ($age >= 0 && $age < $maxage) ? $entry['plugins'] : null;
+    }
+
+    /**
      * Fetch a feed from LMS Labs and cache it.
      *
      * @param string $feed self::VERSIONS or self::SPOTLIGHT.
