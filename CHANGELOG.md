@@ -2,6 +2,12 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.92] - 2026-11-09
+
+### Changed
+- Refresh Quick Links and Spotlight from the approved public LMS Labs catalogue.
+- Preserve approved prices and exclude hidden, testing and private products.
+
 ## [2.5.91] - 2026-11-09
 - Correct Course Report completion totals and progress states for learners with multiple completed activities.
 - Standardise the guardian, student, and report pages with Moodle's normal page layout.
