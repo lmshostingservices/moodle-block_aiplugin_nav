@@ -155,13 +155,23 @@ function createSpotlight(opts) {
     };
 
     const ctaHtml = (item, inModal) => {
+        const priceUnavailable = item.acquisitionMode === 'price-unavailable' ||
+            (item.acquisitionMode === 'credit-unlock' && !hasKnownPaidCreditPrice(item));
+        const usdPrice = validatedUsdValue(item.acquisitionPriceUsd);
         const main = item.pending
             ? '<span class="ainav2-sp-btn ainav2-sp-btng">Release pending · not ready to install</span>'
             : item.installed
             ? openHtml(item)
+            : priceUnavailable
+            ? '<span class="ainav2-sp-btn ainav2-sp-btng">Price unavailable · acquisition disabled</span>'
+            : item.acquisitionMode === 'usd-purchase'
+            ? (usdPrice === null || usdPrice <= 0
+                ? '<span class="ainav2-sp-btn ainav2-sp-btng">Price unavailable · acquisition disabled</span>'
+                : '<a class="ainav2-sp-btn ainav2-sp-btnp" href="' + esc(item.docs || 'https://lms-labs.com/plugins') +
+                    '" target="_blank" rel="noopener">' + icon('docs') + 'View pricing · $' + usdPrice.toFixed(2) + ' USD</a>')
             : '<button type="button" class="ainav2-sp-btn ainav2-sp-btnp" data-sp-act="get" data-sp-c="' + esc(item.component) +
                 '">' + icon('down') + esc(str('get')) + '<span class="ainav2-sp-price">' +
-                esc(item.credits > 0 ? str('creditsshort', fmt(item.credits)) : '') + '</span></button>';
+                esc(hasKnownPaidCreditPrice(item) ? str('creditsshort', fmt(item.credits)) : '') + '</span></button>';
         if (!inModal) {
             return main + '<button type="button" class="ainav2-sp-btn ainav2-sp-btng" data-sp-act="info" data-sp-c="' +
                 esc(item.component) + '">' + icon('info') + esc(str('moreinfo')) + '</button>';
@@ -198,7 +208,14 @@ function createSpotlight(opts) {
         if (item.installed) {
             return str(key === 'credits' ? 'onsite' : 'installed');
         }
-        return item.credits > 0 ? str('credits', fmt(item.credits)) : '';
+        if (item.acquisitionMode === 'free') {
+            return 'Free';
+        }
+        if (item.acquisitionMode === 'usd-purchase') {
+            const amount = validatedUsdValue(item.acquisitionPriceUsd);
+            return amount === null || amount <= 0 ? 'Price unavailable' : '$' + amount.toFixed(2) + ' USD';
+        }
+        return hasKnownPaidCreditPrice(item) ? str('credits', fmt(item.credits)) : 'Price unavailable';
     };
 
     const rankLine = item => '<div class="ainav2-sp-rank"><span class="ainav2-sp-n">' + esc(str('rank', item.rank)) +
@@ -469,6 +486,30 @@ function setState(sp, state, save) {
  */
 function find(sp, component) {
     return sp.all.find(i => i.component === component) || null;
+}
+
+function validatedCreditValue(value) {
+    if (typeof value === 'number') {
+        return Number.isSafeInteger(value) && value >= 0 ? value : null;
+    }
+    if (typeof value === 'string' && /^(?:0|[1-9][0-9]*)$/.test(value.trim())) {
+        const parsed = Number(value.trim());
+        return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+    }
+    return null;
+}
+
+function hasKnownPaidCreditPrice(item) {
+    const credits = item ? validatedCreditValue(item.credits) : null;
+    return !!item && item.acquisitionMode === 'credit-unlock' && credits !== null && credits > 0;
+}
+
+function validatedUsdValue(value) {
+    if ((typeof value !== 'number' && typeof value !== 'string') || String(value).trim() === '') {
+        return null;
+    }
+    const amount = Number(value);
+    return Number.isFinite(amount) && amount >= 0 ? Math.round(amount * 100) / 100 : null;
 }
 
 /**
@@ -876,10 +917,62 @@ export const live = (sp, map) => {
                 chip.hidden = false;
             });
         }
+        if (Object.prototype.hasOwnProperty.call(entry, 'acquisitionMode')) {
+            item.acquisitionMode = entry.acquisitionMode;
+            if (entry.acquisitionMode === 'free') {
+                item.credits = 0;
+                item.acquisitionPriceUsd = 0;
+            } else if (entry.acquisitionMode === 'credit-unlock') {
+                const credits = Object.prototype.hasOwnProperty.call(entry, 'credits')
+                    ? validatedCreditValue(entry.credits) : null;
+                if (credits === null || credits <= 0) {
+                    item.acquisitionMode = 'price-unavailable';
+                    item.credits = null;
+                    item.acquisitionPriceUsd = null;
+                } else {
+                    item.credits = credits;
+                    item.acquisitionPriceUsd = Math.round((credits / 10) * 100) / 100;
+                }
+            } else if (entry.acquisitionMode === 'usd-purchase') {
+                const price = Object.prototype.hasOwnProperty.call(entry, 'acquisitionPriceUsd')
+                    ? validatedUsdValue(entry.acquisitionPriceUsd) : null;
+                item.acquisitionPriceUsd = price;
+                if (price === null || price <= 0) {
+                    item.acquisitionMode = 'price-unavailable';
+                    item.credits = null;
+                }
+            } else {
+                item.acquisitionMode = 'price-unavailable';
+                item.credits = null;
+                item.acquisitionPriceUsd = null;
+            }
+        } else if (['credits', 'creditsRequired', 'credits_required', 'credit_cost'].some(key =>
+            Object.prototype.hasOwnProperty.call(entry, key))) {
+            const key = ['credits', 'creditsRequired', 'credits_required', 'credit_cost'].find(name =>
+                Object.prototype.hasOwnProperty.call(entry, name));
+            const credits = validatedCreditValue(entry[key]);
+            if (credits === null) {
+                item.acquisitionMode = 'price-unavailable';
+                item.credits = null;
+                item.acquisitionPriceUsd = null;
+            } else {
+                item.acquisitionMode = credits === 0 ? 'free' : 'credit-unlock';
+                item.credits = credits;
+                item.acquisitionPriceUsd = Math.round((credits / 10) * 100) / 100;
+            }
+        }
     }
     if (!sp.all.length) {
         sp.el.wrap.hidden = true;
         return;
+    }
+    setFilter(sp, sp.st.filter);
+    render(sp, sp.st.cur);
+};
+
+export const refresh = sp => {
+    if (sp && sp.st) {
+        render(sp, sp.st.cur || 0);
     }
 };
 

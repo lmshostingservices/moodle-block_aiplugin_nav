@@ -196,14 +196,36 @@ class plugin_unlock extends external_api {
         // means the API did not say; the UI then reports only what it can prove.
         $source = (string) ($data['entitlementSource'] ?? $data['source'] ?? '');
 
-        // Invalidate the credits cache so the block re-fetches the updated balance.
-        // Any unlock that was not already in place may have moved the balance. The old
-        // guard also required creditsConsumed > 0, but the API never sends that field, so
-        // it was always false and the cache was never cleared — leaving the block showing
-        // a pre-unlock balance for up to five minutes after a customer spent credits.
+        // Refresh the credential-scoped balance cache after a new unlock. Prefer the
+        // authoritative remaining balance from this response so the next display does
+        // not need another external API request.
         if (!$alreadyunlocked) {
             set_config('credits_cache', '', 'block_aiplugin_nav');
             set_config('credits_cached_at', 0, 'block_aiplugin_nav');
+
+            $cachekey = 'balance_' . hash('sha256', json_encode([$siteid, $apikey]));
+            $rawbalance = trim($remainingcredits);
+            $normalisedbalance = strtolower($rawbalance);
+            $balance = null;
+            if ($normalisedbalance === 'unlimited' || $normalisedbalance === '-1') {
+                $balance = [
+                    'credits' => 'unlimited',
+                    'creditsRaw' => '-1',
+                    'isUnlimited' => true,
+                ];
+            } else if (preg_match('/^\d+(?:\.\d+)?$/D', $rawbalance) && is_finite((float)$rawbalance)) {
+                $balance = [
+                    'credits' => $rawbalance,
+                    'creditsRaw' => $rawbalance,
+                    'isUnlimited' => false,
+                ];
+            }
+
+            if ($balance !== null) {
+                set_config($cachekey, json_encode(['at' => time(), 'data' => $balance]), 'block_aiplugin_nav');
+            } else {
+                unset_config($cachekey, 'block_aiplugin_nav');
+            }
         }
 
         return [

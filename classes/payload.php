@@ -205,6 +205,7 @@ class block_aiplugin_nav_payload {
         'AI SCORM Voiceover' => 'ai-voiceover',
         'AI Video Conference' => 'ai-video-conference',
         'AI Course Format' => 'ai-course-format',
+        'Label Diagram' => 'label-diagram',
         'AI Training Matrix HCM' => 'training-matrix',
         'AI Slideshow with Voiceover' => 'slideshow',
         'AI Quiz Remedial Learning' => 'ai-quiz-remedial',
@@ -338,7 +339,7 @@ class block_aiplugin_nav_payload {
             'custom'     => self::build_custom_links($block),
             'customreports' => self::build_custom_reports($block),
             'products'   => self::build_products(),
-            'spotlight'  => \block_aiplugin_nav\local\spotlight::build($plugins, $block->page->get_renderer('core')),
+            'spotlight'  => self::build_spotlight($plugins, $block->page->get_renderer('core')),
             'help'       => self::build_help(),
             'proxyurl'   => $CFG->wwwroot . '/blocks/aiplugin_nav/check_versions.php',
             'supporturl' => self::build_support_url($block),
@@ -357,6 +358,41 @@ class block_aiplugin_nav_payload {
                 'updates'   => $updatecount,
             ],
         ];
+    }
+
+    /**
+     * Add the authoritative acquisition contract from the Plugins rows to spotlight items.
+     *
+     * @param array $plugins The already-built Plugins rows.
+     * @param \renderer_base $renderer Renderer used for spotlight artwork.
+     * @return array|null
+     */
+    private static function build_spotlight(array $plugins, \renderer_base $renderer): ?array {
+        $spotlight = \block_aiplugin_nav\local\spotlight::build($plugins, $renderer);
+        if (!is_array($spotlight) || empty($spotlight['items'])) {
+            return $spotlight;
+        }
+
+        $rows = [];
+        foreach ($plugins as $p) {
+            if (!empty($p['component'])) {
+                $rows[$p['component']] = $p;
+            }
+        }
+        foreach ($spotlight['items'] as &$item) {
+            $p = $rows[$item['component'] ?? ''] ?? [];
+            if (!array_key_exists('acquisitionMode', $p)) {
+                $p['acquisitionMode'] = 'price-unavailable';
+            }
+            $item = array_merge($item, [
+                'acquisitionMode' => $p['acquisitionMode'],
+                'acquisitionPriceUsd' => $p['acquisitionPriceUsd'] ?? null,
+                'marketplacePriceUsd' => $p['marketplacePriceUsd'] ?? null,
+                'credits' => $p['credits'] ?? null,
+            ]);
+        }
+        unset($item);
+        return $spotlight;
     }
 
     // Fixed contract vocabularies (categories / catorder / ptypes). Labels are user-facing
@@ -552,6 +588,21 @@ class block_aiplugin_nav_payload {
                 ? ['url' => '', 'label' => '']
                 : self::resolve_action($plugintype, $pluginname, $plugin, $masterentry);
 
+            $livefeed = $livemap[$component] ?? null;
+            $credits = $publictesting || $pendingrelease ? null : self::plugin_credits(
+                $component,
+                $masterentry,
+                $plugin,
+                $statusmap[$component] ?? null,
+                $livefeed
+            );
+            $acquisition = self::acquisition_contract($livefeed, $credits);
+            if ($publictesting || $pendingrelease) {
+                $acquisition['mode'] = 'price-unavailable';
+                $acquisition['priceUsd'] = null;
+                $credits = null;
+            }
+
             $out[] = [
                 'name'      => $plugin['name'],
                 'component' => $component,
@@ -566,13 +617,11 @@ class block_aiplugin_nav_payload {
                 // whether an update exists — see refreshUpdates() in amd/src/ui.js.
                 'versionint' => $installed ? $block->get_plugin_numeric_version($plugintype, $pluginname) : null,
                 'update'    => $update,
-                'credits'   => $publictesting || $pendingrelease ? 0 : self::plugin_credits(
-                    $component,
-                    $masterentry,
-                    $plugin,
-                    $statusmap[$component] ?? null,
-                    $livemap[$component] ?? null
-                ),
+                'credits'   => $credits,
+                'acquisitionMode' => $acquisition['mode'],
+                'acquisitionPriceUsd' => $acquisition['priceUsd'],
+                'marketplacePriceUsd' => $acquisition['marketplacePriceUsd'],
+                'marketplacePricingStatus' => $acquisition['marketplacePricingStatus'],
                 'status'    => $status,
                 'gotourl'   => $action['url'],
                 'action'    => $action['label'],
@@ -733,16 +782,12 @@ class block_aiplugin_nav_payload {
         return (is_string($section) && $section !== '') ? $section : null;
     }
 
-    /** @var array|null Admin section => access details, loaded once per request. */
-    private static $adminsections = null;
-
     /**
      * A registry settings URL, made absolute, or null if it leads nowhere.
      *
      * Non-settings URLs are passed through unchanged; a /admin/settings.php URL is kept
-     * for site administrators only, and only when its section exists on this site and the
-     * user may open it. That is decided from load_admin_sections(), not by building the
-     * admin tree here (see settings_action()).
+     * for site administrators only. Its section is not checked against the admin tree,
+     * because building that tree runs every plugin's settings.php (see settings_action()).
      *
      * @param string $relative Site-relative URL from the master registry, may be empty.
      * @return string|null Absolute URL, or null when nothing should be linked.
@@ -768,96 +813,23 @@ class block_aiplugin_nav_payload {
     }
 
     /**
-     * Whether a named section exists in this site's admin settings tree and the user may open it.
-     *
-     * Same answer as admin_get_root()->locate($section)->check_access() for an
-     * admin_settingpage, read from the details load_admin_sections() recorded.
+     * Whether a named section exists in this site's admin settings tree.
      *
      * @param string $section Section name, as used by /admin/settings.php?section=.
      * @return bool
      */
     private static function admin_section_exists(string $section): bool {
-        $entry = self::$adminsections[$section] ?? null;
-        if ($entry === null) {
-            return false;
-        }
-        $context = $entry['contextid'] ? \context::instance_by_id($entry['contextid'], IGNORE_MISSING) : false;
-        if (!$context) {
-            $context = \context_system::instance();
-        }
-        return has_any_capability($entry['caps'], $context);
-    }
-
-    /**
-     * Record which of the registry's settings sections exist, and what each requires.
-     *
-     * Building the admin tree with admin_get_root() runs every installed plugin's settings.php
-     * and takes from hundreds of milliseconds to seconds; some of those files make outbound
-     * HTTP calls. It used to run on every page view that showed the block to an admin. It now
-     * runs only when the cache below is empty: after a plugin is installed, upgraded or removed
-     * (the key includes Moodle's all-versions hash), after a cache purge, or after an hour.
-     * Capabilities are still checked per user on every view, in admin_section_exists().
-     *
-     * @param block_aiplugin_nav $block The block instance.
-     * @param array $masterregistry The master plugin registry.
-     * @return array Section => ['caps' => string[], 'contextid' => int] for sections that exist.
-     */
-    private static function load_admin_sections(block_aiplugin_nav $block, array $masterregistry): array {
         global $CFG;
 
-        $wanted = [];
-        foreach ($masterregistry as $plugin) {
-            if (
-                empty($plugin['plugin_type']) || empty($plugin['plugin_name'])
-                || !$block->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])
-            ) {
-                continue;
-            }
-            $urls = [(string) ($plugin['settings_url'] ?? '')];
-            foreach ($plugin['additional_settings'] ?? [] as $setting) {
-                $urls[] = (string) ($setting['url'] ?? '');
-            }
-            foreach ($urls as $url) {
-                $section = $url === '' ? null : self::section_of($CFG->wwwroot . $url);
-                if ($section !== null) {
-                    $wanted[$section] = true;
-                }
-            }
-        }
-        if (!$wanted) {
-            return [];
-        }
-        $wanted = array_keys($wanted);
-        sort($wanted, SORT_STRING);
-
-        $cache = \cache::make('block_aiplugin_nav', 'adminsections');
-        $key = 's' . sha1(($CFG->allversionshash ?? '') . '|' . implode(',', $wanted));
-        $map = $cache->get($key);
-        if (is_array($map)) {
-            return $map;
-        }
-
         require_once($CFG->libdir . '/adminlib.php');
-        $map = [];
+
         try {
-            $root = admin_get_root();
-            foreach ($wanted as $section) {
-                $page = $root->locate($section);
-                // The admin/settings.php endpoint cannot render categories or external admin pages.
-                if ($page instanceof \admin_settingpage) {
-                    $map[$section] = [
-                        'caps' => array_values((array) $page->req_capability),
-                        'contextid' => empty($page->context) ? 0 : (int) $page->context->id,
-                    ];
-                }
-            }
+            $page = admin_get_root()->locate($section);
+            // The admin/settings.php endpoint cannot render categories or external admin pages.
+            return $page instanceof \admin_settingpage && $page->check_access();
         } catch (\Throwable $e) {
-            // Not cached, so the next view tries again. No settings rows rather than a broken block.
-            debugging('block_aiplugin_nav: could not read the admin tree: ' . $e->getMessage(), DEBUG_DEVELOPER);
-            return [];
+            return false;
         }
-        $cache->set($key, $map);
-        return $map;
     }
 
     // The "settings" / "manage" / "reports" arrays — built from get_master_plugin_registry(),
@@ -891,8 +863,6 @@ class block_aiplugin_nav_payload {
         $settings = [];
         $manage   = [];
         $reports  = [];
-
-        self::$adminsections = self::load_admin_sections($block, $masterregistry);
 
         foreach ($masterregistry as $component => $plugin) {
             if (!$block->is_plugin_installed($plugin['plugin_type'], $plugin['plugin_name'])) {
@@ -999,12 +969,12 @@ class block_aiplugin_nav_payload {
         'mod_workplacetask',
     ];
 
-    /** @var int Standard unlock price when a plugin carries no explicit credits_required. */
-    private const DEFAULT_CREDITS = 50;
+    /** @var int The approved USD equivalent for an LMS Labs credit. */
+    private const CREDITS_PER_USD = 10;
 
     /**
-     * @var array Offline fallback prices for plugins that are not on the standard price.
-     * Used only when neither the version-check service nor the registry supplies a price.
+     * @var array Offline fallback prices for plugins that are not on their standard price.
+     * Used only when neither the live feed nor generated registries supply a price.
      */
     private const FALLBACK_CREDITS = [
         'local_rtocompliance' => 20000,
@@ -1038,16 +1008,8 @@ class block_aiplugin_nav_payload {
     }
 
     /**
-     * Credit price for one plugin.
-     *
-     * An explicit credits_required in either registry wins. Otherwise the standard price
-     * applies — deliberately NOT zero. The old fallback was 0, so any plugin without an
-     * explicit price rendered a "Free" pill and a working Get button: 54 of the 67 plugins
-     * on offer, including paid products, could be taken for nothing. Missing pricing data
-     * must fail closed.
-     *
-     * Genuinely free plugins are listed explicitly in FREE_COMPONENTS so that being free is
-     * a decision on the record rather than the result of an absent value.
+     * Credit price for one plugin. Explicit malformed live values fail closed rather than
+     * allowing an older catalogue value to silently override them.
      *
      * @param string $component The frankenstyle component name.
      * @param array|null $masterentry Entry from get_master_plugin_registry(), if any.
@@ -1055,7 +1017,7 @@ class block_aiplugin_nav_payload {
      * @param array|null $livestatus This component's entry from the version-check service,
      *                               which is authoritative on price when it carries one.
      * @param array|null $livefeed This component's entry from the LMS Labs versions feed, if cached.
-     * @return int Credits required to unlock.
+     * @return int|null Credits required to unlock, or null when no valid price is known.
      */
     private static function plugin_credits(
         string $component,
@@ -1063,29 +1025,130 @@ class block_aiplugin_nav_payload {
         array $plugin,
         ?array $livestatus = null,
         ?array $livefeed = null
-    ): int {
+    ): ?int {
         // LMS Labs is the authority on price. Prices held in this file cannot be changed
         // without shipping a new plugin release to every client site, so a site running an
         // older build would keep charging an old price. When the LMS Labs versions feed
         // supplies a price, it wins; the values below are only the offline fallback.
-        $live = \block_aiplugin_nav\local\live_feed::credits($livefeed);
-        if ($live !== null) {
-            return $live;
-        }
-        foreach (['credits', 'credits_required', 'credit_cost'] as $key) {
-            if (isset($livestatus[$key]) && is_numeric($livestatus[$key])) {
-                return (int) $livestatus[$key];
+        if (is_array($livefeed)) {
+            foreach (['credits', 'creditsRequired', 'credits_required', 'credit_cost'] as $key) {
+                if (array_key_exists($key, $livefeed)) {
+                    return self::validated_credit_value($livefeed[$key]);
+                }
+            }
+            if (array_key_exists('acquisitionMode', $livefeed)) {
+                if ($livefeed['acquisitionMode'] === 'free') {
+                    return 0;
+                }
+                if ($livefeed['acquisitionMode'] !== 'credit-unlock') {
+                    return null;
+                }
             }
         }
 
-        $explicit = $masterentry['credits_required'] ?? ($plugin['credits_required'] ?? null);
-        if ($explicit !== null) {
-            return (int) $explicit;
+        if (is_array($livestatus)) {
+            foreach (['credits', 'creditsRequired', 'credits_required', 'credit_cost'] as $key) {
+                if (array_key_exists($key, $livestatus)) {
+                    return self::validated_credit_value($livestatus[$key]);
+                }
+            }
+        }
+
+        if (is_array($masterentry) && array_key_exists('credits_required', $masterentry)) {
+            return self::validated_credit_value($masterentry['credits_required']);
+        }
+        if (array_key_exists('credits_required', $plugin)) {
+            return self::validated_credit_value($plugin['credits_required']);
         }
         if (in_array($component, self::FREE_COMPONENTS, true)) {
             return 0;
         }
-        return self::FALLBACK_CREDITS[$component] ?? self::DEFAULT_CREDITS;
+        return self::FALLBACK_CREDITS[$component] ?? null;
+    }
+
+    /**
+     * Validate an integer credit amount without coercing booleans, decimals or malformed data.
+     *
+     * @param mixed $value Candidate credit amount.
+     * @return int|null
+     */
+    private static function validated_credit_value($value): ?int {
+        if (is_int($value)) {
+            return $value >= 0 ? $value : null;
+        }
+        if (is_float($value)) {
+            return is_finite($value) && $value >= 0 && floor($value) === $value ? (int) $value : null;
+        }
+        if (is_string($value) && preg_match('/^(?:0|[1-9][0-9]*)$/D', trim($value))) {
+            $number = filter_var(trim($value), FILTER_VALIDATE_INT);
+            return $number !== false && $number >= 0 ? $number : null;
+        }
+        return null;
+    }
+
+    /**
+     * Validate a USD amount from a manifest without converting invalid values to zero.
+     *
+     * @param mixed $value Candidate price.
+     * @return float|null
+     */
+    private static function validated_usd_value($value): ?float {
+        if (!is_int($value) && !is_float($value) && !(is_string($value) && is_numeric(trim($value)))) {
+            return null;
+        }
+        $amount = (float) $value;
+        return is_finite($amount) && $amount >= 0 ? round($amount, 2) : null;
+    }
+
+    /**
+     * Resolve the public acquisition metadata for the Plugins panel and spotlight.
+     *
+     * @param array|null $livefeed Current LMS Labs release manifest entry.
+     * @param int|null $credits Validated credit price.
+     * @return array
+     */
+    private static function acquisition_contract(?array $livefeed, ?int $credits): array {
+        $livefeed = is_array($livefeed) ? $livefeed : [];
+        $mode = $livefeed['acquisitionMode'] ?? null;
+        $price = array_key_exists('acquisitionPriceUsd', $livefeed)
+            ? self::validated_usd_value($livefeed['acquisitionPriceUsd']) : null;
+
+        if ($mode === null || $mode === '') {
+            $mode = $credits === 0 ? 'free' : ($credits !== null ? 'credit-unlock' : 'price-unavailable');
+        }
+        if ($mode === 'free') {
+            $credits = 0;
+            $price = 0.0;
+        } else if ($mode === 'credit-unlock') {
+            if ($credits === null || $credits <= 0) {
+                $mode = 'price-unavailable';
+                $price = null;
+            } else if (array_key_exists('acquisitionPriceUsd', $livefeed) && $price === null) {
+                $mode = 'price-unavailable';
+            } else {
+                $price = round($credits / self::CREDITS_PER_USD, 2);
+            }
+        } else if ($mode === 'usd-purchase') {
+            if ($price === null || $price <= 0) {
+                $mode = 'price-unavailable';
+                $price = null;
+            }
+        } else {
+            $mode = 'price-unavailable';
+            $price = null;
+        }
+
+        $marketplaceprice = array_key_exists('marketplacePriceUsd', $livefeed)
+            ? self::validated_usd_value($livefeed['marketplacePriceUsd']) : null;
+        $marketplacestatus = in_array($livefeed['marketplacePricingStatus'] ?? '', ['priced', 'owner-decision-required'], true)
+            ? $livefeed['marketplacePricingStatus'] : 'owner-decision-required';
+
+        return [
+            'mode' => $mode,
+            'priceUsd' => $price,
+            'marketplacePriceUsd' => $marketplaceprice,
+            'marketplacePricingStatus' => $marketplacestatus,
+        ];
     }
 
     /**

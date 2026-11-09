@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/aiplugin_nav/db" VERSION="20251218" COMMENT="XMLDB file for block_aiplugin_nav">
+<XMLDB PATH="blocks/aiplugin_nav/db" VERSION="2026110602" COMMENT="XMLDB file for block_aiplugin_nav">
   <TABLES>
     <TABLE NAME="block_aiplugin_nav_purge" COMMENT="Cache purge history and schedule settings">
       <FIELDS>
@@ -14,6 +14,111 @@
       <INDEXES>
         <INDEX NAME="purge_type_idx" UNIQUE="false" FIELDS="purge_type"/>
         <INDEX NAME="purged_at_idx" UNIQUE="false" FIELDS="purged_at"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_aiplugin_nav_qreview" COMMENT="Teacher review markers for Course Report questions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="reviewedby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="reviewedat" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="reviewstatus" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="none"/>
+        <FIELD NAME="fault" TYPE="char" LENGTH="40" NOTNULL="false"/>
+        <FIELD NAME="rationale" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="rewrite" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="teacheredit" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="suggestedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="suggestedat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_cm_question" UNIQUE="true" FIELDS="courseid, cmid, questionid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_aiplugin_nav_guardian" COMMENT="External guardian contacts for consent-based progress reports">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="language" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="en"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="email_idx" UNIQUE="false" FIELDS="email"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_aiplugin_nav_guardlink" COMMENT="Student, course, consent and report preferences for guardian links">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="guardianid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="studentid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="relationship" TYPE="char" LENGTH="40" NOTNULL="true"/>
+        <FIELD NAME="consentedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="consentedat" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="confirmedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="frequency" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="off"/>
+        <FIELD NAME="nextsend" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="weeklysummary" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="summaryhash" TYPE="char" LENGTH="64" NOTNULL="false"/>
+        <FIELD NAME="summaryupdatedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="summaryupdatedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="guardian_student_course" UNIQUE="true" FIELDS="guardianid, studentid, courseid"/>
+        <INDEX NAME="student_course_idx" UNIQUE="false" FIELDS="studentid, courseid"/>
+        <INDEX NAME="due_reports_idx" UNIQUE="false" FIELDS="status, frequency, nextsend"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_aiplugin_nav_gtoken" COMMENT="Hashed one-time confirmation, report and unsubscribe link tokens">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="linkid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="purpose" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true"/>
+        <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="revoked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="tokenhash_idx" UNIQUE="true" FIELDS="tokenhash"/>
+        <INDEX NAME="link_purpose_idx" UNIQUE="false" FIELDS="linkid, purpose"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_aiplugin_nav_gmail" COMMENT="Delivery log for guardian progress report and confirmation mail">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="guardianid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="linkid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="error" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="sentat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="guardian_time_idx" UNIQUE="false" FIELDS="guardianid, timecreated"/>
+        <INDEX NAME="link_time_idx" UNIQUE="false" FIELDS="linkid, timecreated"/>
       </INDEXES>
     </TABLE>
   </TABLES>

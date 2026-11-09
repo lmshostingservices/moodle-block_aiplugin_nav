@@ -38,6 +38,13 @@ if ($hassiteconfig) {
         0,
         PARAM_INT
     ));
+    $settings->add(new admin_setting_configtext(
+        'block_aiplugin_nav/question_min_attempts',
+        get_string('coursereport_minimum_attempts', 'block_aiplugin_nav'),
+        get_string('coursereport_minimum_attempts_desc', 'block_aiplugin_nav'),
+        10,
+        PARAM_INT
+    ));
     $settings->add(new admin_setting_configcheckbox(
         'block_aiplugin_nav/aitools_collapsed_default',
         get_string('aitools_collapsed_default', 'block_aiplugin_nav'),

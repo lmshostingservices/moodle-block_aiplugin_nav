@@ -776,6 +776,20 @@ class block_aiplugin_nav extends block_base {
         $html .= '<noscript><div class="ainav2-noscript">'
             . get_string('noscript_message', 'block_aiplugin_nav') . '</div></noscript>';
 
+        $courseid = (int)($this->page->course->id ?? 0);
+        if ($courseid > SITEID) {
+            $coursecontext = \context_course::instance($courseid);
+            if (has_capability('moodle/course:manageactivities', $coursecontext)) {
+                $reporturl = new \moodle_url('/blocks/aiplugin_nav/course_report.php', ['id' => $courseid]);
+                $html .= \html_writer::div(
+                    \html_writer::link($reporturl, get_string('coursereport', 'block_aiplugin_nav'), [
+                        'class' => 'btn btn-outline-primary mt-3',
+                    ]),
+                    'ainav2-course-report'
+                );
+            }
+        }
+
         // The block's four user preferences (favourites, saved layouts, help switch and
         // install receipt) are declared in lib.php via block_aiplugin_nav_user_preferences(),
         // which is what lets core_user/repository write them. The old

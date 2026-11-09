@@ -471,6 +471,70 @@ row;
     var FOUNDATION = 'AI Grader Central Config';
 
     /**
+     * Accept only a non-negative integer credit price.
+     *
+     * @param {*} value Candidate credit amount.
+     * @return {number|null}
+     */
+    function validatedCreditValue(value) {
+        if (typeof value === 'number') {
+            return Number.isSafeInteger(value) && value >= 0 ? value : null;
+        }
+        if (typeof value === 'string' && /^(?:0|[1-9][0-9]*)$/.test(value.trim())) {
+            var parsed = Number(value.trim());
+            return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+        }
+        return null;
+    }
+
+    /**
+     * Whether the row has a real, positive credit-unlock price.
+     *
+     * @param {Object} it Plugin row.
+     * @return {boolean}
+     */
+    function hasKnownPaidCreditPrice(it) {
+        return !!it && it.acquisitionMode === 'credit-unlock' &&
+            validatedCreditValue(it.credits) !== null && validatedCreditValue(it.credits) > 0;
+    }
+
+    /**
+     * Validate a USD amount supplied by the acquisition manifest.
+     *
+     * @param {*} value Candidate amount.
+     * @return {number|null}
+     */
+    function validatedUsdValue(value) {
+        if ((typeof value !== 'number' && typeof value !== 'string') || String(value).trim() === '') {
+            return null;
+        }
+        var amount = Number(value);
+        return Number.isFinite(amount) && amount >= 0 ? Math.round(amount * 100) / 100 : null;
+    }
+
+    /**
+     * Re-render the visible featured item after its live price or availability changes.
+     */
+    function renderFeatured() {
+        if (spotlight) {
+            Spotlight.refresh(spotlight);
+        }
+    }
+
+    /**
+     * Sync live release/pricing metadata and redraw the featured item.
+     *
+     * @param {Object} map Live manifest keyed by component.
+     */
+    function syncFeatured(map) {
+        if (!spotlight) {
+            return;
+        }
+        Spotlight.live(spotlight, map);
+        renderFeatured();
+    }
+
+    /**
      * Build the trailing pill/button markup for a plugin row.
      *
      * @param {Object} it Plugin payload object.
@@ -512,12 +576,33 @@ row;
                 '<button class="ainav2-rowact" type="button" data-goto="' + esc(it.gotourl) + '">' +
                 label + '</button>';
         }
-        var cost = it.credits || 0;
-        if (cost === 0) {
+        var mode = it.acquisitionMode || 'price-unavailable';
+        if (mode === 'price-unavailable' || (mode === 'credit-unlock' && !hasKnownPaidCreditPrice(it))) {
+            return '<span class="ainav2-cost">Price unavailable</span>' +
+                '<button class="ainav2-get ainav2-testing-disabled" type="button" disabled ' +
+                'title="A verified price is required before this plugin can be acquired">Unavailable</button>';
+        }
+        if (mode === 'usd-purchase') {
+            var usdPrice = validatedUsdValue(it.acquisitionPriceUsd);
+            if (usdPrice === null || usdPrice <= 0) {
+                return '<span class="ainav2-cost">Price unavailable</span>' +
+                    '<button class="ainav2-get ainav2-testing-disabled" type="button" disabled>Unavailable</button>';
+            }
+            var pricingUrl = it.docs || 'https://lms-labs.com/plugins';
+            return '<span class="ainav2-cost">$' + usdPrice.toFixed(2) + ' USD</span>' +
+                '<a class="ainav2-rowact" href="' + esc(pricingUrl) +
+                '" target="_blank" rel="noopener">View pricing</a>';
+        }
+        var cost = mode === 'free' ? 0 : validatedCreditValue(it.credits);
+        if (mode === 'free' && cost === 0) {
             return '<span class="ainav2-cost ainav2-free">Free</span>' +
                 '<button class="ainav2-get" type="button" data-cost="0" data-plug="' + esc(it.pluginid || '') +
                 '" data-comp="' + esc(it.component || '') +
                 '" data-plugname="' + esc(it.name) + '">Get</button>';
+        }
+        if (mode !== 'credit-unlock' || cost === null || cost <= 0) {
+            return '<span class="ainav2-cost">Price unavailable</span>' +
+                '<button class="ainav2-get ainav2-testing-disabled" type="button" disabled>Unavailable</button>';
         }
         return '<span class="ainav2-cost">' + fmtNum(cost) + '</span>' +
             '<button class="ainav2-get" type="button" data-cost="' + cost + '" data-plug="' + esc(it.pluginid || '') +
@@ -591,8 +676,18 @@ row;
         if (it.installed) {
             return '';
         }
-        var cost = it.credits || 0;
-        return cost === 0 ? 'Free' : fmtNum(cost) + ' credits to unlock';
+        if (it.acquisitionMode === 'free') {
+            return 'Free';
+        }
+        if (it.acquisitionMode === 'usd-purchase') {
+            var price = validatedUsdValue(it.acquisitionPriceUsd);
+            return price === null || price <= 0 ? 'Price unavailable' : '$' + price.toFixed(2) + ' USD';
+        }
+        if (it.acquisitionMode === 'credit-unlock' && hasKnownPaidCreditPrice(it)) {
+            var amount = validatedCreditValue(it.credits);
+            return fmtNum(amount) + ' credits to unlock ($' + (amount / 10).toFixed(2) + ' USD)';
+        }
+        return 'Price unavailable';
     }
 
     /* ------------------------------------------------------------------ *
@@ -996,8 +1091,7 @@ desc;
         return '<div class="ainav2-update-popover" id="ainav2-update-popover" role="region" ' +
             'aria-label="Plugin update details" hidden>' +
             '<div class="ainav2-update-pophead"><strong>Version changes</strong>' +
-            '<button class="ainav2-update-close" type="button" data-update-close="1" ' +
-            'aria-label="Close update details">×</button></div>' +
+            '<button class="ainav2-update-close" type="button" data-update-close="1" aria-label="Close update details">×</button></div>' +
             body + '</div>';
     }
 
@@ -1260,12 +1354,12 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
     var creditTimer = null;
     var creditFailures = 0;
     var creditEpoch = 0;
+    var creditLastRequestAt = 0;
 
-    /**
-     * Show a status message beside the credit balance.
-     *
-     * @param {string} message
-     */
+    function creditRefreshInterval() {
+        return Math.min(900000, 300000 * Math.pow(2, creditFailures));
+    }
+
     function creditStatus(message) {
         var node = document.getElementById('ainav2-creditstatus');
         if (node) {
@@ -1273,37 +1367,30 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
         }
     }
 
-    /**
-     * Schedule the next background balance refresh, backing off after failures.
-     */
     function scheduleCredits() {
         clearTimeout(creditTimer);
         if (!document.hidden && document.getElementById('ainav2-creditrefresh')) {
+            var interval = creditRefreshInterval();
+            var elapsed = creditLastRequestAt ? Date.now() - creditLastRequestAt : 0;
             creditTimer = setTimeout(function() {
                 loadCredits(false);
-            }, Math.min(300000, 60000 * Math.pow(2, creditFailures)));
+            }, Math.max(1000, interval - elapsed));
         }
     }
 
-    /**
-     * Fetch the credit balance.
-     *
-     * @param {boolean} force Bypass the server's 30 second balance cache. Only the
-     *     Refresh credits button does this.
-     */
     function loadCredits(force) {
         if (!DATA.cancredits || creditBusy || document.hidden) {
             return;
         }
+        if (!force && creditLastRequestAt && Date.now() - creditLastRequestAt < creditRefreshInterval()) {
+            scheduleCredits();
+            return;
+        }
         clearTimeout(creditTimer);
         creditBusy = true;
+        creditLastRequestAt = Date.now();
         var epoch = creditEpoch;
         creditStatus(creditKnown ? 'Refreshing — showing last known balance…' : 'Loading balance…');
-        /**
-         * Record the outcome of a balance fetch and schedule the next one.
-         *
-         * @param {boolean} ok
-         */
         function finish(ok) {
             creditBusy = false;
             creditFailures = ok ? 0 : Math.min(creditFailures + 1, 3);
@@ -1345,9 +1432,6 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
         }]);
     }
 
-    /**
-     * Start loading the balance and keep it fresh while the block is on screen.
-     */
     function startCredits() {
         if (creditCleanup) {
             creditCleanup();
@@ -1355,12 +1439,6 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
         creditKnown = false;
         var debounce = null;
         var lastReturn = 0;
-        /**
-         * Refresh the balance when the user returns to the page.
-         *
-         * Not forced: the server answers from its 30 second cache, so switching tabs does not
-         * call LMS Labs every time. Only the Refresh credits button forces a live fetch.
-         */
         function refresh() {
             clearTimeout(debounce);
             if (document.hidden) {
@@ -1370,22 +1448,16 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
             debounce = setTimeout(function() {
                 if (Date.now() - lastReturn >= 1500) {
                     lastReturn = Date.now();
+                    // Returning to the page may refresh an expired balance, but must not
+                    // bypass the normal cache or turn focus events into upstream requests.
                     loadCredits(false);
                 }
             }, 250);
         }
         var button = document.getElementById('ainav2-creditrefresh');
-        /**
-         * The Refresh credits button: always fetch live.
-         */
         function manual() {
             loadCredits(true);
         }
-        /**
-         * Pause on a back/forward-cache hide, clean up on a real unload.
-         *
-         * @param {PageTransitionEvent} event
-         */
         function hide(event) {
             if (event.persisted) {
                 clearTimeout(debounce);
@@ -2866,16 +2938,6 @@ n = 0;
     }
 
     /**
-     * The version-check proxy URL.
-     *
-     * @param {boolean} live Ask for a live check instead of the server's recent copy.
-     * @return {string}
-     */
-    function proxyUrl(live) {
-        return live ? DATA.proxyurl + (DATA.proxyurl.indexOf('?') === -1 ? '?' : '&') + 'refresh=1' : DATA.proxyurl;
-    }
-
-    /**
      * Ask the update server which installed plugins have a newer release.
      *
      * @param {boolean} manual True when the admin pressed Check for updates.
@@ -2896,9 +2958,7 @@ n = 0;
         if (current) {
             paint();
         }
-        // The automatic check on page load may be answered from the server's recent copy of
-        // the feed. "Check for updates" asks for a live check.
-        $.ajax({url: proxyUrl(manual), type: 'GET', dataType: 'json', timeout: 20000})
+        $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
             .fail(function() {
                 // A failed check is not the same as "everything is current". Say so rather
                 // than leaving a zero on screen that looks like good news.
@@ -2936,7 +2996,7 @@ n = 0;
                     return;
                 }
                 var plugins = dropUnreleased(DATA.plugins || [], map);
-                Spotlight.live(spotlight, map);
+                syncFeatured(map);
                 var n = markUpdates(plugins, map);
                 DATA.counts = DATA.counts || {};
                 DATA.counts.updates = n;
@@ -2971,8 +3031,7 @@ n = 0;
             cb(null);
             return;
         }
-        // Installs always use a live copy, so the download URL and hash are current.
-        $.ajax({url: proxyUrl(true), type: 'GET', dataType: 'json', timeout: 20000})
+        $.ajax({url: DATA.proxyurl, type: 'GET', dataType: 'json', timeout: 20000})
             .done(function(data) {
                 var p = data && data.plugins && data.plugins[component];
                 if (p && p.downloadUrl) {

@@ -2,36 +2,92 @@
 
 All notable changes to this plugin will be documented in this file.
 
-## [2.5.80] - 2026-11-09
+## [2.5.91] - 2026-11-09
+- Correct Course Report completion totals and progress states for learners with multiple completed activities.
+- Standardise the guardian, student, and report pages with Moodle's normal page layout.
+
+## [2.5.90] - 2026-11-07
+- Add the Course Builder report view and link planned outcomes to the actual activity content in each course.
+- Keep overdue classification and counts separate from not-started learners.
+
+## [2.5.88] - 2026-11-07
+- Add a visual class-progress grid with accessible progress bars and distinct complete, overdue, in-progress, and not-started states.
+- Treat started but incomplete learners as overdue after the Moodle course end date; learners with no progress remain not started.
+- Show the overdue count separately in the Course Report overview.
+
+## [2.5.87] - 2026-11-07
+- Label Course Report's completion percentage separately from assessment results, and show each learner's latest completed Knowledge Check score.
+- Add a site-admin minimum-answer setting for question verdict tests; the release default remains 10.
+- Use the configured minimum consistently for both Knowledge Check and Moodle quiz verdicts.
+
+## [2.5.86] - 2026-11-06
+
+### Fixed
+- Do not generate or include a parent summary when a course has no measurable progress.
+
+## [2.5.85] - 2026-11-06
+
+### Fixed
+- Postpone a guardian's full digest rather than send a partial email when any active subscription cannot produce progress.
+
+## [2.5.84] - 2026-11-06
+
+### Added
+- Let teachers generate, review, edit, and approve privacy-minimised parent summaries for a specific progress snapshot.
+- Combine all active course subscriptions for a guardian into one weekly email, with separate secure report and unsubscribe links.
+
+### Privacy
+- Send only a course title and completion percentage to the parent-summary endpoint; never send learner or guardian identifiers, marks, or answers.
+- Include approved summaries only while their progress fingerprint still matches.
+
+## [2.5.83] - 2026-11-06
+
+### Compatibility
+- Declare Moodle 5.3 in the supported-version range for the Phase F acceptance matrix.
+
+## [2.5.82] - 2026-11-06
+
+### Added
+- Run guardian-report scheduling hourly and deliver at 07:00 in the Moodle site timezone.
+- Support weekly, fortnightly, monthly, and off frequencies; reports remain off until consent and guardian confirmation.
+
+## [2.5.81] - 2026-11-06
+
+### Added
+- Expand Course Report with Moodle quiz statistics, activity diagnostics, class progress, student-only reports, and consent-bound guardian progress reporting.
+- Add teacher-triggered AI question review with accept, edit, dismiss, and Knowledge Check wording editor actions.
+- Add expiring hashed confirmation/report/unsubscribe links, weekly report task, and delivery-status log. No email bodies or raw tokens are stored.
+- Keep question-level data out of student and guardian reports.
 
 ### Changed
-- Refresh Quick Links and Spotlight from the approved public LMS Labs catalogue.
-- Preserve approved prices and exclude hidden, testing and private products.
+- Add per-item correct/wrong counters to AI Learning Activities attempts for teacher-only diagnostics; free-text responses are not retained by the counter.
+- Enable Moodle view completion for generated lesson modules only where their module declares view-completion support.
 
-## [2.5.79] - 2026-11-08
+## [2.5.80] - 2026-11-06
+
+### Added
+- Add storage for Course Report question review decisions and guardian consent/report lifecycle records.
+
+## [2.5.79] - 2026-11-06
+
+### Added
+- Add a teacher-only Course Report Questions view with Knowledge Check response, first-try, weekly trend, discrimination, option distribution, linked outcome/lesson and remedial-check metrics.
+- Persist teacher review markers for Knowledge Check questions. Moodle quiz question statistics and AI rewrite review remain to be integrated and are not claimed as complete.
+
+## [2.5.78] - 2026-11-05
+
+### Added
+- Register read-only Course Report providers for AI Safety Hazards and AI Anatomy.
+- Return attempts, completion status, gradebook score/pass mark, elapsed time, last activity, linked Course Builder outcome IDs, and each activity's native report URL.
+
+## [2.5.77] - 2026-11-01
 
 ### Changed
-- Refresh Quick Links and Spotlight from the approved public LMS Labs catalogue.
-- Preserve approved prices and exclude hidden, testing and private products.
-
-## [2.5.78] - 2026-11-03
-
-### Changed
-- Refresh Quick Links and Spotlight from the approved public LMS Labs catalogue.
-- Preserve approved prices and exclude hidden, testing and private products.
-
-## [2.5.77] - 2026-11-03
-
-### Performance
-- Remove an unused Google Fonts import (Inter) from `styles.css`. Moodle adds every plugin's stylesheet to the theme's CSS, so it was an external, render-blocking request on every page of the site, including pages without the block.
-- Store the credit balance in a Moodle application cache instead of plugin config. Each `set_config()` cleared Moodle's site-wide config cache, so every balance refresh made every user's next request reload configuration from the database. The upgrade removes the old `balance_*` config rows.
-- Refreshing the balance when a teacher or admin returns to the tab now uses the 30-second server cache. Only the Refresh credits button forces a live fetch.
-- The Settings panel no longer builds the full admin settings tree on every page view. Which settings pages exist is cached until plugins change (and for at most an hour); each admin's access is still checked on every view.
-- The automatic update check (`check_versions.php`) releases the session lock before contacting LMS Labs, so the admin's next page is not held up, and answers from a stored copy of the versions feed under 15 minutes old. Check for updates and installs still fetch live.
-
-### Build
-- AMD files are regenerated with Moodle core grunt (byte-identical under Moodle 4.5 and 5.2). The 2.5.76 `amd/build` files were not core grunt output, so `spotlight.min.js` also changes although its source does not.
-- Fix the nine ESLint errors in the credits code of `amd/src/ui.js` (missing JSDoc, one over-long line).
+- Reduce credit-balance traffic with a five-minute normal cache and refresh interval.
+- Focus and return events now reuse the normal cache; the explicit Refresh credits
+  button still requests a fresh balance.
+- Seed the credential-scoped cache from a successful unlock response so the longer
+  cache cannot show the pre-unlock balance or trigger an unnecessary API request.
 
 ## [2.5.76] - 2026-11-01
 

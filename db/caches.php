@@ -32,18 +32,4 @@ $definitions = [
         'staticacceleration' => true,
         'staticaccelerationsize' => 2,
     ],
-    // Credit balances, keyed by a hash of the site ID and API key. See external\get_credits.
-    'credits' => [
-        'mode' => cache_store::MODE_APPLICATION,
-        'simplekeys' => true,
-    ],
-    // The admin settings sections the Settings panel links to, and the capabilities each needs,
-    // keyed by the installed-plugin versions hash. See block_aiplugin_nav_payload.
-    'adminsections' => [
-        'mode' => cache_store::MODE_APPLICATION,
-        'simplekeys' => true,
-        // Bounds staleness when a plugin adds or removes a settings page based on its own
-        // configuration rather than its version.
-        'ttl' => 3600,
-    ],
 ];

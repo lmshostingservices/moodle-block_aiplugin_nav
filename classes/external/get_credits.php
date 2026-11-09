@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External service to fetch credits balance with an identity-scoped short cache.
+ * External service to fetch credits balance with an identity-scoped five-minute cache.
  *
  * @package    block_aiplugin_nav
  * @copyright  2025 Essay Grader AI
@@ -35,7 +35,7 @@ use external_single_structure;
 
 /**
  * External service to fetch credit balance from lms-labs.com.
- * Validated results are cached for 30 seconds per credential pair.
+ * Validated results are cached for five minutes per credential pair.
  */
 class get_credits extends external_api {
     /**
@@ -50,7 +50,7 @@ class get_credits extends external_api {
     }
 
     /**
-     * Fetch credit balance, optionally bypassing the normal short cache.
+     * Fetch credit balance, optionally bypassing the normal five-minute cache.
      *
      * @return array Credits info.
      */
@@ -108,16 +108,11 @@ class get_credits extends external_api {
         }
 
         // Resolve identity before cache lookup. Never use the legacy global balance.
-        // The balance lives in a MUC application cache, not in plugin config: every
-        // set_config() purges Moodle's site-wide config cache, which made every user's next
-        // request reload configuration from the database each time a balance was stored.
-        $cache = \cache::make('block_aiplugin_nav', 'credits');
         $cachekey = 'balance_' . hash('sha256', json_encode([$siteid, $apikey]));
-        $cached = $cache->get($cachekey);
-        $cached = is_array($cached) ? $cached : null;
+        $cached = json_decode(get_config('block_aiplugin_nav', $cachekey) ?: '', true);
         $age = time() - (int)($cached['at'] ?? 0);
-        // Two seconds coalesces focus/visibility and concurrent manual refreshes.
-        if ($cached && $age >= 0 && $age < ($force ? 2 : 30)) {
+        // Two seconds coalesces repeated manual refreshes; normal reads use the five-minute cache.
+        if ($cached && $age >= 0 && $age < ($force ? 2 : 300)) {
             $balance = self::normalise($cached['data'] ?? []);
             if ($balance !== null) {
                 return $balance + ['cached' => true, 'success' => true];
@@ -166,7 +161,7 @@ class get_credits extends external_api {
         }
 
         // Cache only validated successful responses, scoped to the credential pair.
-        $cache->set($cachekey, ['at' => time(), 'data' => $data]);
+        set_config($cachekey, json_encode(['at' => time(), 'data' => $data]), 'block_aiplugin_nav');
 
         return $data + ['cached' => false, 'success' => true];
     }

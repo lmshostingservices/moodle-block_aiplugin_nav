@@ -141,19 +141,139 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026092900, 'aiplugin_nav');
     }
 
-    if ($oldversion < 2026110300) {
-        // V2.5.77: credit balances moved from plugin config to the credits MUC cache.
-        // Remove the per-credential balance_* rows the old code stored. No schema changes.
-        $names = $DB->get_fieldset_select(
-            'config_plugins',
-            'name',
-            'plugin = :plugin AND ' . $DB->sql_like('name', ':prefix'),
-            ['plugin' => 'block_aiplugin_nav', 'prefix' => $DB->sql_like_escape('balance_') . '%']
-        );
-        foreach ($names as $name) {
-            unset_config($name, 'block_aiplugin_nav');
+    if ($oldversion < 2026110600) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('block_aiplugin_nav_qreview');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE));
+            $table->addField(new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+            $table->addField(new xmldb_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+            $table->addField(new xmldb_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+            $table->addField(new xmldb_field('reviewedby', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+            $table->addField(new xmldb_field('reviewedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addIndex(new xmldb_index('course_cm_question', XMLDB_INDEX_UNIQUE, ['courseid', 'cmid', 'questionid']));
+            $dbman->create_table($table);
         }
-        upgrade_block_savepoint(true, 2026110300, 'aiplugin_nav');
+        upgrade_block_savepoint(true, 2026110600, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026110601) {
+        $dbman = $DB->get_manager();
+        $review = new xmldb_table('block_aiplugin_nav_qreview');
+        $reviewfields = [
+            new xmldb_field('reviewstatus', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'none', 'reviewedat'),
+            new xmldb_field('fault', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'reviewstatus'),
+            new xmldb_field('rationale', XMLDB_TYPE_TEXT, null, null, null, null, null, 'fault'),
+            new xmldb_field('rewrite', XMLDB_TYPE_TEXT, null, null, null, null, null, 'rationale'),
+            new xmldb_field('teacheredit', XMLDB_TYPE_TEXT, null, null, null, null, null, 'rewrite'),
+            new xmldb_field('suggestedby', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'teacheredit'),
+            new xmldb_field('suggestedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'suggestedby'),
+        ];
+        if ($dbman->table_exists($review)) {
+            foreach ($reviewfields as $field) {
+                if (!$dbman->field_exists($review, $field)) {
+                    $dbman->add_field($review, $field);
+                }
+            }
+        }
+
+        $guardian = new xmldb_table('block_aiplugin_nav_guardian');
+        $guardian->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE));
+        $guardian->addField(new xmldb_field('firstname', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL));
+        $guardian->addField(new xmldb_field('lastname', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL));
+        $guardian->addField(new xmldb_field('email', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL));
+        $guardian->addField(new xmldb_field('language', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'en'));
+        $guardian->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $guardian->addField(new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $guardian->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+        $guardian->addIndex(new xmldb_index('email_idx', XMLDB_INDEX_NOTUNIQUE, ['email']));
+        if (!$dbman->table_exists($guardian)) {
+            $dbman->create_table($guardian);
+        }
+
+        $link = new xmldb_table('block_aiplugin_nav_guardlink');
+        $link->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE));
+        $link->addField(new xmldb_field('guardianid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('studentid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('relationship', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('consentedby', XMLDB_TYPE_INTEGER, '10', null, null));
+        $link->addField(new xmldb_field('consentedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('confirmedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+        $link->addField(new xmldb_field('frequency', XMLDB_TYPE_CHAR, '12', null, XMLDB_NOTNULL, null, 'off'));
+        $link->addField(new xmldb_field('nextsend', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+        $link->addField(new xmldb_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'pending'));
+        $link->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addField(new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $link->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+        $link->addIndex(new xmldb_index('guardian_student_course', XMLDB_INDEX_UNIQUE, ['guardianid', 'studentid', 'courseid']));
+        $link->addIndex(new xmldb_index('student_course_idx', XMLDB_INDEX_NOTUNIQUE, ['studentid', 'courseid']));
+        $link->addIndex(new xmldb_index('due_reports_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'frequency', 'nextsend']));
+        if (!$dbman->table_exists($link)) {
+            $dbman->create_table($link);
+        }
+
+        $token = new xmldb_table('block_aiplugin_nav_gtoken');
+        $token->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE));
+        $token->addField(new xmldb_field('linkid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $token->addField(new xmldb_field('purpose', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL));
+        $token->addField(new xmldb_field('tokenhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL));
+        $token->addField(new xmldb_field('expires', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $token->addField(new xmldb_field('revoked', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0'));
+        $token->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $token->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+        $token->addIndex(new xmldb_index('tokenhash_idx', XMLDB_INDEX_UNIQUE, ['tokenhash']));
+        $token->addIndex(new xmldb_index('link_purpose_idx', XMLDB_INDEX_NOTUNIQUE, ['linkid', 'purpose']));
+        if (!$dbman->table_exists($token)) {
+            $dbman->create_table($token);
+        }
+
+        $mail = new xmldb_table('block_aiplugin_nav_gmail');
+        $mail->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE));
+        $mail->addField(new xmldb_field('guardianid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $mail->addField(new xmldb_field('linkid', XMLDB_TYPE_INTEGER, '10', null, null));
+        $mail->addField(new xmldb_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL));
+        $mail->addField(new xmldb_field('error', XMLDB_TYPE_TEXT, null, null, null));
+        $mail->addField(new xmldb_field('sentat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+        $mail->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $mail->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+        $mail->addIndex(new xmldb_index('guardian_time_idx', XMLDB_INDEX_NOTUNIQUE, ['guardianid', 'timecreated']));
+        $mail->addIndex(new xmldb_index('link_time_idx', XMLDB_INDEX_NOTUNIQUE, ['linkid', 'timecreated']));
+        if (!$dbman->table_exists($mail)) {
+            $dbman->create_table($mail);
+        }
+
+        upgrade_block_savepoint(true, 2026110601, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026110602) {
+        $dbman = $DB->get_manager();
+        $review = new xmldb_table('block_aiplugin_nav_qreview');
+        $rationale = new xmldb_field('rationale', XMLDB_TYPE_TEXT, null, null, null, null, null, 'fault');
+        if ($dbman->table_exists($review) && !$dbman->field_exists($review, $rationale)) {
+            $dbman->add_field($review, $rationale);
+        }
+        upgrade_block_savepoint(true, 2026110602, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026110605) {
+        $dbman = $DB->get_manager();
+        $guardlink = new xmldb_table('block_aiplugin_nav_guardlink');
+        $fields = [
+            new xmldb_field('weeklysummary', XMLDB_TYPE_TEXT, null, null, null),
+            new xmldb_field('summaryhash', XMLDB_TYPE_CHAR, '64', null, null),
+            new xmldb_field('summaryupdatedby', XMLDB_TYPE_INTEGER, '10', null, null),
+            new xmldb_field('summaryupdatedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'),
+        ];
+        if ($dbman->table_exists($guardlink)) {
+            foreach ($fields as $field) {
+                if (!$dbman->field_exists($guardlink, $field)) {
+                    $dbman->add_field($guardlink, $field);
+                }
+            }
+        }
+        upgrade_block_savepoint(true, 2026110605, 'aiplugin_nav');
     }
 
     return true;
