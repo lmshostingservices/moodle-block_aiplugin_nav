@@ -2242,6 +2242,34 @@
       "hidden": false
     },
     {
+      "component": "local_aicoursebuilder",
+      "name": "AI Course Builder",
+      "subtitle": "",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#334155",
+      "accent2": "#64748b",
+      "description": "Turn curriculum text or supported PDF and DOCX files into a reviewed Moodle course plan. Teachers approve the plan before the builder creates courses and sends selected activities through each plugin's own generation and storage workflow. Free to install; selected tools use their own credit prices.",
+      "features": [
+        "AI Course Builder",
+        "Local Plugin",
+        "Install: /local/aicoursebuilder/",
+        "Moodle™ 4.5 LTS, 5.0, 5.1, 5.2 and 5.3 (tested on 4.5, 5.2 and 5.3)"
+      ],
+      "stat": {
+        "value": "",
+        "label": ""
+      },
+      "docs": "https://lms-labs.com/docs/ai-course-builder",
+      "usage": "",
+      "includes": "",
+      "image": "https://lms-labs.com/spotlight/local_aicoursebuilder.jpg",
+      "spotlightEligible": true,
+      "order": 81,
+      "status": "ready",
+      "hidden": false
+    },
+    {
       "component": "mod_aivirtualclassroom",
       "name": "AI Virtual Classroom",
       "subtitle": "",
@@ -2265,7 +2293,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_aivirtualclassroom.jpg",
       "spotlightEligible": true,
-      "order": 81,
+      "order": 82,
       "status": "ready",
       "hidden": false
     }
