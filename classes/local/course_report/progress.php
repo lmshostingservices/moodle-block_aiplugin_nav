@@ -90,6 +90,19 @@ final class progress {
             ['courseid' => $courseid] + $moduleparams
         );
         $modinfo = get_fast_modinfo($courseid);
+        // Sections AI Course Builder made for lessons count as lessons even after the teacher
+        // renames them; other sections are lessons when named "Lesson N".
+        $builtsections = [];
+        $dbman = $DB->get_manager();
+        if ($dbman->table_exists('local_aicoursebuilder_lesson') && $dbman->table_exists('local_aicoursebuilder_unit')) {
+            $builtsections = array_flip(array_map('intval', $DB->get_fieldset_sql(
+                "SELECT l.sectionid
+                   FROM {local_aicoursebuilder_lesson} l
+                   JOIN {local_aicoursebuilder_unit} u ON u.id = l.unitid
+                  WHERE u.courseid = ? AND l.sectionid IS NOT NULL",
+                [$courseid]
+            )));
+        }
         $lessons = [];
         $cmids = [];
         foreach ($activities as $activity) {
@@ -98,7 +111,8 @@ final class progress {
                 continue;
             }
             $sectionname = trim((string)$activity->sectionname);
-            if (!preg_match('/^Lesson\s+\d+\b/i', $sectionname)) {
+            if (!preg_match('/^Lesson\s+\d+\b/i', $sectionname)
+                    && !isset($builtsections[(int)$cmdata->section])) {
                 continue;
             }
             if (!isset($lessons[(int)$activity->sectionnumber])) {

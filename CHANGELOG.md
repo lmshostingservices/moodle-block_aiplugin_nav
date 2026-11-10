@@ -2,6 +2,9 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.94] - 2026-11-10
+- Course Report and parent reports keep a lesson built by AI Course Builder after the teacher renames its section. Before this, only sections named "Lesson N" counted.
+
 ## [2.5.93] - 2026-11-09
 
 ### Changed
