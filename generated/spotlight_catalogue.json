@@ -1745,12 +1745,12 @@
       "type": "Activity",
       "accent": "#334155",
       "accent2": "#64748b",
-      "description": "Designs, issues, snapshots, renders, and publicly verifies certificates with a drag-and-drop editor, embedded fonts, QR codes, and immutable issue records.",
+      "description": "Design and issue Moodle certificates, create multi-page layouts, and bulk-download the exact documents already issued. Generate branded backgrounds and seals, print mixed-script names correctly, and verify certificates publicly with QR codes.",
       "features": [
         "Certificate Pro",
         "Activity Module",
         "Install: /mod/certificatepro/",
-        "Moodle™ 4.4 - 5.1"
+        "Moodle™ 4.5 - 5.3"
       ],
       "stat": {
         "value": "",

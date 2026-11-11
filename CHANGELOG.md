@@ -2,6 +2,12 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.95] - 2026-11-11
+
+### Changed
+- Refresh Quick Links and Spotlight from the approved public LMS Labs catalogue.
+- Preserve approved prices and exclude hidden, testing and private products.
+
 ## [2.5.94] - 2026-11-10
 - Course Report and parent reports keep a lesson built by AI Course Builder after the teacher renames its section. Before this, only sections named "Lesson N" counted.
 
