@@ -2296,6 +2296,34 @@
       "order": 82,
       "status": "ready",
       "hidden": false
+    },
+    {
+      "component": "local_clientportal",
+      "name": "Client Portal",
+      "subtitle": "",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#334155",
+      "accent2": "#64748b",
+      "description": "Give every corporate client its own branded Moodle™ portal. Their managers log in and see their own people's progress, grades and certificates, and nothing else. You stop answering “how are my people going?” emails.",
+      "features": [
+        "Client Portal",
+        "local",
+        "Install: /local/clientportal/",
+        "Moodle™ 4.5–5.3 (requires 2024100700; supported [405, 503])."
+      ],
+      "stat": {
+        "value": "",
+        "label": ""
+      },
+      "docs": "https://lms-labs.com/docs/client-portal",
+      "usage": "",
+      "includes": "",
+      "image": "https://lms-labs.com/spotlight/local_clientportal.jpg",
+      "spotlightEligible": true,
+      "order": 83,
+      "status": "ready",
+      "hidden": false
     }
   ]
 }
