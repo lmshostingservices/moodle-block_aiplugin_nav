@@ -2,6 +2,10 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.99] - 2026-11-13
+### Changed
+- Release that brings together 2.5.97 and 2.5.98: Client Portal and its Clients report in Quick links, plus the refreshed LMS Labs catalogue.
+
 ## [2.5.98] - 2026-11-13
 
 ### Changed
