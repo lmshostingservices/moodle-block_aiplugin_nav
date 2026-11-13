@@ -923,7 +923,9 @@ class block_aiplugin_nav_payload {
                 ];
             }
 
-            if (!empty($plugin['report_url'])) {
+            // A report page that this installed version does not have yet is left out, so the link never 404s.
+            $reportfile = $CFG->dirroot . strtok((string) ($plugin['report_url'] ?? ''), '?');
+            if (!empty($plugin['report_url']) && is_file($reportfile)) {
                 $reports[] = [
                     'name'  => $plugin['report_name'] ?? $plugin['name'],
                     'cat'   => $cat,

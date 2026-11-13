@@ -73,6 +73,22 @@ final class settings_destinations {
                 }
             }
         }
+        // Client Portal: older catalogue rows lack the plugin type and name, so Quick links never saw it as
+        // installed, and point the report at the clients list. Fill the gaps; never replace newer authored values.
+        if (isset($registry['local_clientportal'])) {
+            $row = &$registry['local_clientportal'];
+            $row += [
+                'plugin_type' => 'local',
+                'plugin_name' => 'clientportal',
+                'settings_url' => '/admin/settings.php?section=local_clientportal',
+                'page_url' => '/local/clientportal/admin/clients.php',
+            ];
+            if (($row['report_url'] ?? '') === '/local/clientportal/admin/clients.php') {
+                $row['report_url'] = '/local/clientportal/admin/report.php';
+                $row['report_name'] = 'Client Portal — Clients report';
+            }
+            unset($row);
+        }
         return $registry;
     }
 }

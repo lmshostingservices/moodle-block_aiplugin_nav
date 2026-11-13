@@ -2,6 +2,14 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.5.97] - 2026-11-13
+
+### Added
+- Client Portal in Quick links. Its Clients report (courses, trainers, learners and LMS Labs credits used per client, ready to invoice) is listed under Reports when Client Portal 2.0.1 or later is installed.
+
+### Fixed
+- A report link is listed only when the installed version of that plugin has the report page, so it never leads to a missing page.
+
 ## [2.5.96] - 2026-11-12
 
 ### Changed
