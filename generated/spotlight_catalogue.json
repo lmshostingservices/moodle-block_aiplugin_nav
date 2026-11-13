@@ -1542,34 +1542,6 @@
       "hidden": false
     },
     {
-      "component": "local_custompage",
-      "name": "Custom Pages",
-      "subtitle": "",
-      "category": "branding",
-      "type": "Admin tool",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Allows Moodle admins to create custom HTML pages accessible from the site navigation. Pages are managed through a report-builder-style interface and support full HTML content with sortable ordering.",
-      "features": [
-        "Custom HTML pages",
-        "Site navigation links",
-        "Page management interface",
-        "Sortable page order"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/custom-pages",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/local_custompage.jpg",
-      "spotlightEligible": true,
-      "order": 56,
-      "status": "ready",
-      "hidden": false
-    },
-    {
       "component": "local_studentemail",
       "name": "Student Email Manager",
       "subtitle": "",
@@ -1593,7 +1565,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_studentemail.jpg",
       "spotlightEligible": true,
-      "order": 57,
+      "order": 56,
       "status": "ready",
       "hidden": false
     },
@@ -1621,7 +1593,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/auth_studentemail.jpg",
       "spotlightEligible": true,
-      "order": 58,
+      "order": 57,
       "status": "ready",
       "hidden": false
     },
@@ -1649,35 +1621,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/block_rtocompliance.jpg",
       "spotlightEligible": true,
-      "order": 59,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "local_rplkit",
-      "name": "RPL Kit",
-      "subtitle": "",
-      "category": "rto",
-      "type": "Admin tool",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Generates ASQA-mapped Recognition of Prior Learning (RPL) assessment kits for any unit of competency from training.gov.au. Produces three evidence outputs in one click: (1) Theory evidence — Moodle essay questions with model answers and marking guides mapped to Knowledge Evidence, ready to import into a quiz and mark with AI Grader under assessor oversight. (2) Practical forms-based evidence — SmartForm JSON observation/third-party checklist mapped to Performance Criteria, ready to paste into SmartForm. (3) Practical skill demonstration — Moodle assignment with Assignment Benchmarks advanced-grading criteria (skills → sub-skills → scores) mapped to Performance Criteria and Performance Evidence. Each output carries explicit ASQA rules-of-evidence mapping (valid, sufficient, authentic, current). Works standalone or integrates with AI RTO Compliance for shared RTO/qualification data. Alpha: outputs #1 and #2 complete; output #3 (Assignment Benchmarks) being connected.",
-      "features": [
-        "Unit requirement mapping",
-        "Theory question resources",
-        "Evidence checklists",
-        "Qualification data integration"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/rpl-kit",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/local_rplkit.jpg",
-      "spotlightEligible": true,
-      "order": 60,
+      "order": 58,
       "status": "ready",
       "hidden": false
     },
@@ -1705,7 +1649,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_campion.jpg",
       "spotlightEligible": true,
-      "order": 61,
+      "order": 59,
       "status": "ready",
       "hidden": false
     },
@@ -1733,7 +1677,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_student_export.jpg",
       "spotlightEligible": true,
-      "order": 62,
+      "order": 60,
       "status": "ready",
       "hidden": false
     },
@@ -1761,7 +1705,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_certificatepro.jpg",
       "spotlightEligible": true,
-      "order": 63,
+      "order": 61,
       "status": "ready",
       "hidden": false
     },
@@ -1789,7 +1733,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/availability_workshopattendance.jpg",
       "spotlightEligible": true,
-      "order": 64,
+      "order": 62,
       "status": "ready",
       "hidden": false
     },
@@ -1817,7 +1761,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_labeldiagram.jpg",
       "spotlightEligible": true,
-      "order": 65,
+      "order": 63,
       "status": "ready",
       "hidden": false
     },
@@ -1829,12 +1773,12 @@
       "type": "Admin tool",
       "accent": "#334155",
       "accent2": "#64748b",
-      "description": "Competency tracking and the integrated My Training learner view. Release validation is in progress.",
+      "description": "Manage staff training by department and position, track competency completion and expiry, and show each learner their own training progress.",
       "features": [
         "AI Training Matrix",
         "Local Plugin",
         "Install: /local/trainingmatrix/",
-        "Moodle™ 4.4–5.0"
+        "Moodle™ 4.5–5.3"
       ],
       "stat": {
         "value": "",
@@ -1845,147 +1789,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_trainingmatrix.jpg",
       "spotlightEligible": true,
-      "order": 66,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "local_trainingpathways",
-      "name": "Training Pathways",
-      "subtitle": "",
-      "category": "training",
-      "type": "Admin tool",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Define and assign training programs with verified learning evidence. Release validation is in progress.",
-      "features": [
-        "Training Pathways",
-        "Local Plugin",
-        "Install: /local/trainingpathways/",
-        "Moodle™ 4.4–5.0"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/training-pathways",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/local_trainingpathways.jpg",
-      "spotlightEligible": true,
-      "order": 67,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "block_trainingmatrix",
-      "name": "My Training Progress Block",
-      "subtitle": "",
-      "category": "training",
-      "type": "Block",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Free learner companion block for My Training. Release validation is in progress.",
-      "features": [
-        "My Training Progress Block",
-        "Block Plugin",
-        "Install: /blocks/trainingmatrix/",
-        "Moodle™ 4.4–5.0"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/my-training-progress",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/block_trainingmatrix.jpg",
-      "spotlightEligible": true,
-      "order": 68,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "block_trainingmatrix_teacher",
-      "name": "Staff Training Dashboard Block",
-      "subtitle": "",
-      "category": "training",
-      "type": "Block",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Free manager companion block for training compliance. Release validation is in progress.",
-      "features": [
-        "Staff Training Dashboard Block",
-        "Block Plugin",
-        "Install: /blocks/trainingmatrix_teacher/",
-        "Moodle™ 4.4–5.0"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/staff-training-dashboard",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/block_trainingmatrix_teacher.jpg",
-      "spotlightEligible": true,
-      "order": 69,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "block_trainingpathways",
-      "name": "Training Pathways Block",
-      "subtitle": "",
-      "category": "training",
-      "type": "Block",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Free learner companion block for assigned pathways. Release validation is in progress.",
-      "features": [
-        "Training Pathways Block",
-        "Block Plugin",
-        "Install: /blocks/trainingpathways/",
-        "Moodle™ 4.4–5.0"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/training-pathways-block",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/block_trainingpathways.jpg",
-      "spotlightEligible": true,
-      "order": 70,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "mod_aisafetyhazards",
-      "name": "AI Safety Hazards",
-      "subtitle": "",
-      "category": "content",
-      "type": "Activity",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Create interactive workplace hazard scenes: identify three hazards, distinguish optional distractors and choose elimination, risk-reduction and PPE controls.",
-      "features": [
-        "AI Safety Hazards",
-        "mod",
-        "Install: /mod/aisafetyhazards/",
-        "Moodle 4.4–5.3 (declared by the supplied release)"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/ai-safety-hazards",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/mod_aisafetyhazards.jpg",
-      "spotlightEligible": true,
-      "order": 71,
+      "order": 64,
       "status": "ready",
       "hidden": false
     },
@@ -2013,7 +1817,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_visuallearning.jpg",
       "spotlightEligible": true,
-      "order": 72,
+      "order": 65,
       "status": "ready",
       "hidden": false
     },
@@ -2041,7 +1845,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/assignsubmission_videoevidence.jpg",
       "spotlightEligible": true,
-      "order": 73,
+      "order": 66,
       "status": "ready",
       "hidden": false
     },
@@ -2069,7 +1873,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_aispeakwrite.jpg",
       "spotlightEligible": true,
-      "order": 74,
+      "order": 67,
       "status": "ready",
       "hidden": false
     },
@@ -2097,7 +1901,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_fastgrade.jpg",
       "spotlightEligible": true,
-      "order": 75,
+      "order": 68,
       "status": "ready",
       "hidden": false
     },
@@ -2125,7 +1929,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_evidencechecklist.jpg",
       "spotlightEligible": true,
-      "order": 76,
+      "order": 69,
       "status": "ready",
       "hidden": false
     },
@@ -2153,7 +1957,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_emailstudents.jpg",
       "spotlightEligible": true,
-      "order": 77,
+      "order": 70,
       "status": "ready",
       "hidden": false
     },
@@ -2181,7 +1985,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/tool_speedup.jpg",
       "spotlightEligible": true,
-      "order": 78,
+      "order": 71,
       "status": "ready",
       "hidden": false
     },
@@ -2209,7 +2013,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/theme_lmslabs.jpg",
       "spotlightEligible": true,
-      "order": 79,
+      "order": 72,
       "status": "ready",
       "hidden": false
     },
@@ -2237,35 +2041,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_aiscience.jpg",
       "spotlightEligible": true,
-      "order": 80,
-      "status": "ready",
-      "hidden": false
-    },
-    {
-      "component": "local_aicoursebuilder",
-      "name": "AI Course Builder",
-      "subtitle": "",
-      "category": "training",
-      "type": "Admin tool",
-      "accent": "#334155",
-      "accent2": "#64748b",
-      "description": "Turn curriculum text or supported PDF and DOCX files into a reviewed Moodle course plan. Teachers approve the plan before the builder creates courses and sends selected activities through each plugin's own generation and storage workflow. Free to install; selected tools use their own credit prices.",
-      "features": [
-        "AI Course Builder",
-        "Local Plugin",
-        "Install: /local/aicoursebuilder/",
-        "Moodle™ 4.5 LTS, 5.0, 5.1, 5.2 and 5.3 (tested on 4.5, 5.2 and 5.3)"
-      ],
-      "stat": {
-        "value": "",
-        "label": ""
-      },
-      "docs": "https://lms-labs.com/docs/ai-course-builder",
-      "usage": "",
-      "includes": "",
-      "image": "https://lms-labs.com/spotlight/local_aicoursebuilder.jpg",
-      "spotlightEligible": true,
-      "order": 81,
+      "order": 73,
       "status": "ready",
       "hidden": false
     },
@@ -2293,7 +2069,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/mod_aivirtualclassroom.jpg",
       "spotlightEligible": true,
-      "order": 82,
+      "order": 74,
       "status": "ready",
       "hidden": false
     },
@@ -2310,7 +2086,7 @@
         "Client Portal",
         "local",
         "Install: /local/clientportal/",
-        "Moodle™ 4.5–5.3 (requires 2024100700; supported [405, 503])."
+        "Moodle™ 4.4–5.3 (requires 2024042200; supported [404, 503])."
       ],
       "stat": {
         "value": "",
@@ -2321,7 +2097,7 @@
       "includes": "",
       "image": "https://lms-labs.com/spotlight/local_clientportal.jpg",
       "spotlightEligible": true,
-      "order": 83,
+      "order": 75,
       "status": "ready",
       "hidden": false
     }
