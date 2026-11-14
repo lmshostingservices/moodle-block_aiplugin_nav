@@ -362,6 +362,9 @@ $string['spotlight_default_desc'] = 'How the plugin spotlight starts for users w
     'n the block footer. Each user can change it for themselves at any time.';
 $string['spotlight_docs'] = 'Read the docs';
 $string['spotlight_docslabel'] = 'Docs';
+$string['spotlight_enabled'] = 'Show the plugin spotlight';
+$string['spotlight_enabled_desc'] = 'Show the plugin spotlight to site administrators, managers and teachers. ' .
+    'Untick to switch it off for everyone on this site. Students never see the spotlight.';
 $string['spotlight_featured'] = 'Featured';
 $string['spotlight_get'] = 'Get plugin';
 $string['spotlight_includes'] = 'Includes';
@@ -394,6 +397,8 @@ $string['spotlight_settings_desc'] = 'The plugin spotlight is the rotating showc
     'Only site administrators see it.';
 $string['spotlight_settings_header'] = 'Plugin spotlight';
 $string['spotlight_show'] = 'Show';
+$string['spotlight_sitesettings'] = 'Spotlight settings';
+$string['spotlight_sitesettings_title'] = 'Site administrators only: switch the plugin spotlight off for the whole site';
 $string['spotlight_state_collapsed'] = 'Collapsed to a slim bar';
 $string['spotlight_state_off'] = 'Off';
 $string['spotlight_state_open'] = 'Open';

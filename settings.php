@@ -70,6 +70,13 @@ if ($hassiteconfig) {
         get_string('spotlight_settings_desc', 'block_aiplugin_nav')
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'block_aiplugin_nav/spotlight_enabled',
+        get_string('spotlight_enabled', 'block_aiplugin_nav'),
+        get_string('spotlight_enabled_desc', 'block_aiplugin_nav'),
+        1
+    ));
+
     $settings->add(new admin_setting_configselect(
         'block_aiplugin_nav/spotlight_default',
         get_string('spotlight_default', 'block_aiplugin_nav'),

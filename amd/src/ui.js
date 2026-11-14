@@ -200,6 +200,50 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     }
 
     /**
+     * Save the spotlight state through the block's own service, so open, collapsed or off is
+     * kept for the next login on every supported Moodle version. Falls back to the core
+     * preference route if the service call fails.
+     *
+     * @param {string} name
+     * @param {string} value
+     */
+    function setSpotlightPref(name, value) {
+        if (name !== 'block_aiplugin_nav_spotlight') {
+            setPref(name, value);
+            return;
+        }
+        try {
+            Ajax.call([{
+                methodname: 'block_aiplugin_nav_set_spotlight_state',
+                args: {state: String(value)}
+            }])[0].catch(function() {
+                setPref(name, value);
+            });
+        } catch (e) {
+            setPref(name, value);
+        }
+    }
+
+    /**
+     * Site admins only: add a "Spotlight settings" link to the footer, beside the spotlight
+     * switch. It opens the site-wide setting that switches the spotlight off for everyone, and
+     * is shown even when the spotlight is already switched off for the site.
+     */
+    function addSpotlightSettingsLink() {
+        var cfg = DATA.spotlightsettings;
+        var footer = document.getElementById('ainav2-fleft');
+        if (!DATA.isadmin || !cfg || !cfg.url || !footer) {
+            return;
+        }
+        var link = document.createElement('a');
+        link.className = 'ainav2-spsettings';
+        link.href = cfg.url;
+        link.textContent = cfg.label;
+        link.title = cfg.title || cfg.label;
+        footer.appendChild(link);
+    }
+
+    /**
      * Save the current favourites set as a user preference.
      */
     function saveFaves() {
@@ -4070,11 +4114,12 @@ n = 0;
                 mount: document.getElementById('ainav2-spot'),
                 footer: document.getElementById('ainav2-fleft'),
                 data: DATA.spotlight,
-                setPref: setPref,
+                setPref: setSpotlightPref,
                 openPlugin: openPluginRow,
                 toast: showToast
             });
         }
+        addSpotlightSettingsLink();
 
         if (DATA.cancredits) {
             startCredits();

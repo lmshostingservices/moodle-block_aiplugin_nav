@@ -297,6 +297,10 @@ class block_aiplugin_nav_payload {
             || $block->user_has_role_shortname($USER->id, 'editingteacher')
             || $block->user_has_role_shortname($USER->id, 'teacher')
             || $block->user_has_role_shortname($USER->id, 'lmshsadmin');
+        // The plugin spotlight is for site admins, managers and teachers only. Students never
+        // receive its data, and the site administrator can switch it off for everyone.
+        $canspotlight = \block_aiplugin_nav\local\spotlight::enabled() && ($cancredits
+            || $block->user_has_role_shortname($USER->id, 'manager'));
 
         $completeregistry = $block->get_complete_plugin_registry();
         $masterregistry    = $block->get_master_plugin_registry();
@@ -339,7 +343,14 @@ class block_aiplugin_nav_payload {
             'custom'     => self::build_custom_links($block),
             'customreports' => self::build_custom_reports($block),
             'products'   => self::build_products(),
-            'spotlight'  => self::build_spotlight($plugins, $block->page->get_renderer('core')),
+            'spotlight'  => $canspotlight ? self::build_spotlight($plugins, $block->page->get_renderer('core')) : null,
+            // Site admins get a link to the site-wide spotlight setting beside the footer switch,
+            // including when the spotlight is switched off for the site.
+            'spotlightsettings' => $isadmin ? [
+                'url'   => \block_aiplugin_nav\local\spotlight::settings_url(),
+                'label' => get_string('spotlight_sitesettings', 'block_aiplugin_nav'),
+                'title' => get_string('spotlight_sitesettings_title', 'block_aiplugin_nav'),
+            ] : null,
             'help'       => self::build_help(),
             'proxyurl'   => $CFG->wwwroot . '/blocks/aiplugin_nav/check_versions.php',
             'supporturl' => self::build_support_url($block),
@@ -1407,7 +1418,7 @@ class block_aiplugin_nav_payload {
             ],
             [
                 'name'   => 'Free Video Tutorials',
-                'url'    => 'https://www.youtube.com/playlist?list=PLVNiB3lxOvhM',
+                'url'    => 'https://www.youtube.com/@LMSHostingServices/playlists',
                 'kind'   => 'Tutorials',
                 'desc'   => 'Learn how to use our plugins. Short walkthrough videos covering setup and everyday use.',
                 'price'  => 'Free',

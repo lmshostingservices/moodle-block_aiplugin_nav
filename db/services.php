@@ -129,4 +129,12 @@ $functions = [
         'loginrequired' => true,
         'capabilities'  => 'moodle/site:config',
     ],
+    'block_aiplugin_nav_set_spotlight_state' => [
+        'classname'     => 'block_aiplugin_nav\external\set_spotlight_state',
+        'methodname'    => 'execute',
+        'description'   => 'Save the current user\'s plugin spotlight state (open, collapsed or off)',
+        'type'          => 'write',
+        'ajax'          => true,
+        'loginrequired' => true,
+    ],
 ];

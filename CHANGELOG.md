@@ -2,6 +2,20 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.6.1] - 2026-11-14
+
+### Changed
+- Free Video Tutorials now opens the LMS Hosting Services YouTube playlists page.
+- The plugin spotlight is shown only to site administrators, managers and teachers. Students never receive it.
+
+### Added
+- Site setting "Show the plugin spotlight" (Plugin spotlight section) lets the site administrator switch the spotlight off for everyone.
+- A "Spotlight settings" link in the block footer, beside the spotlight switch, opens that setting. Only site administrators see it.
+
+### Fixed
+- Switching the spotlight off (or collapsing it) is now saved through the block's own service, so it stays that way at the next login on every supported Moodle version.
+- The saved state is applied before the spotlight is drawn, so it no longer flashes open for a user who switched it off.
+
 ## [2.5.99] - 2026-11-13
 ### Changed
 - Release that brings together 2.5.97 and 2.5.98: Client Portal and its Clients report in Quick links, plus the refreshed LMS Labs catalogue.

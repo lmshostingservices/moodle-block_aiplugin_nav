@@ -191,6 +191,45 @@ class spotlight {
         ];
     }
 
+    /** @var string Where the site administrator turns the spotlight on or off for the whole site. */
+    public const SETTINGS_SECTION = 'blocksettingaiplugin_nav';
+
+    /**
+     * Whether the site administrator has left the spotlight switched on for the site.
+     *
+     * The setting is new in 2.5.99; a site that has not saved it yet keeps the spotlight on.
+     *
+     * @return bool
+     */
+    public static function enabled(): bool {
+        $value = get_config('block_aiplugin_nav', 'spotlight_enabled');
+        return $value === false || $value === null || (string) $value !== '0';
+    }
+
+    /**
+     * The admin settings page for the spotlight, anchored on the site-wide switch.
+     *
+     * @return string
+     */
+    public static function settings_url(): string {
+        $url = new \moodle_url('/admin/settings.php', ['section' => self::SETTINGS_SECTION]);
+        return $url->out(false) . '#admin-spotlight_enabled';
+    }
+
+    /**
+     * Save the current user's spotlight state.
+     *
+     * @param string $state One of self::STATES.
+     * @return string The state saved.
+     */
+    public static function save_user_state(string $state): string {
+        if (!in_array($state, self::STATES, true)) {
+            throw new \invalid_parameter_exception('Unknown spotlight state: ' . $state);
+        }
+        set_user_preference(self::PREF, $state);
+        return $state;
+    }
+
     /**
      * The state the spotlight starts in for the current user.
      *

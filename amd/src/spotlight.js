@@ -987,6 +987,9 @@ export const init = opts => {
     sp.el.wrap.id = 'ainav2-sp';
     sp.el.wrap.style.setProperty('--sp-dur', (DURATION / 1000) + 's');
     sp.el.wrap.innerHTML = frameHtml(sp);
+    // Apply the saved state before the spotlight is on the page, so a user who switched it off
+    // or collapsed it never sees it flash open on the next login.
+    sp.el.wrap.setAttribute('data-sp-state', sp.st.state);
     opts.mount.appendChild(sp.el.wrap);
     cacheElements(sp);
     addFooterSwitch(sp);
