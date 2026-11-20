@@ -29,7 +29,7 @@
  * @return bool True on success.
  */
 function xmldb_block_aiplugin_nav_upgrade($oldversion) {
-    global $DB;
+    global $CFG, $DB;
 
     if ($oldversion < 2026081100) {
         // BASELINE-10DIGIT (v2.4.50): Collapsed savepoint for sites upgrading
@@ -274,6 +274,26 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
             }
         }
         upgrade_block_savepoint(true, 2026110605, 'aiplugin_nav');
+    }
+
+    if ($oldversion < 2026112000) {
+        // Repair: some sites passed the 2026110601 step without the guardian
+        // report tables, so the weekly guardian report task failed on every run.
+        // Recreate any missing guardian table from the current install.xml.
+        $dbman = $DB->get_manager();
+        $xmlfile = $CFG->dirroot . '/blocks/aiplugin_nav/db/install.xml';
+        $tables = [
+            'block_aiplugin_nav_guardian',
+            'block_aiplugin_nav_guardlink',
+            'block_aiplugin_nav_gtoken',
+            'block_aiplugin_nav_gmail',
+        ];
+        foreach ($tables as $tablename) {
+            if (!$dbman->table_exists($tablename)) {
+                $dbman->install_one_table_from_xmldb_file($xmlfile, $tablename);
+            }
+        }
+        upgrade_block_savepoint(true, 2026112000, 'aiplugin_nav');
     }
 
     return true;

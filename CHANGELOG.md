@@ -2,6 +2,11 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.6.3] - 2026-11-20
+
+### Fixed
+- Weekly guardian reports no longer fail on sites where the guardian report tables are missing. The upgrade recreates any missing guardian table, and the scheduled task now skips with a clear message instead of erroring if a table is still absent.
+
 ## [2.6.2] - 2026-11-17
 
 ### Changed

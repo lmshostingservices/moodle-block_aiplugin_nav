@@ -25,9 +25,33 @@ final class weekly_parent_reports_task extends \core\task\scheduled_task {
         return get_string('task_weekly_parent_reports', 'block_aiplugin_nav');
     }
 
+    /**
+     * Guardian report tables that do not exist on this site.
+     *
+     * @return string[]
+     */
+    public static function missing_tables(): array {
+        global $DB;
+        $dbman = $DB->get_manager();
+        $missing = [];
+        foreach (['block_aiplugin_nav_guardian', 'block_aiplugin_nav_guardlink',
+                'block_aiplugin_nav_gtoken', 'block_aiplugin_nav_gmail'] as $table) {
+            if (!$dbman->table_exists($table)) {
+                $missing[] = $table;
+            }
+        }
+        return $missing;
+    }
+
     /** @return void */
     public function execute(): void {
         global $DB;
+        $missing = self::missing_tables();
+        if ($missing) {
+            mtrace('Guardian reports skipped: missing table(s) ' . implode(', ', $missing)
+                . '. Run the Moodle upgrade to repair them.');
+            return;
+        }
         $now = time();
         $dueLinks = $DB->get_records_select(
             'block_aiplugin_nav_guardlink',
