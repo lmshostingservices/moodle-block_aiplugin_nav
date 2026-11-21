@@ -296,5 +296,11 @@ function xmldb_block_aiplugin_nav_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026112000, 'aiplugin_nav');
     }
 
+    if ($oldversion < 2026112101) {
+        // 2.7.1: the Plugin Finder's playlist links are built in; drop the 2.7.0 setting.
+        unset_config('finder_playlists', 'block_aiplugin_nav');
+        upgrade_block_savepoint(true, 2026112101, 'aiplugin_nav');
+    }
+
     return true;
 }

@@ -302,7 +302,6 @@ class plugin_finder {
     public static function cards(array $rows, \renderer_base $output): array {
         $entries = self::entries();
         $index = finder_index::plugins();
-        $playlists = self::playlist_overrides();
         $pluginman = \core_plugin_manager::instance();
         $cards = [];
         foreach ($rows as $i => $row) {
@@ -322,10 +321,7 @@ class plugin_finder {
             $name = (string) ($entry['name'] ?? $component);
             $title = (string) ($index[$component]['playlist'] ?? '');
             $playlistids = finder_index::playlist_ids();
-            if (isset($playlists[$component])) {
-                $video = $playlists[$component];
-                $videokind = 'playlist';
-            } else if ($title !== '' && isset($playlistids[$title])) {
+            if ($title !== '' && isset($playlistids[$title])) {
                 $video = 'https://www.youtube.com/playlist?list=' . $playlistids[$title];
                 $videokind = 'playlist';
             } else if ($title !== '') {
@@ -432,30 +428,6 @@ class plugin_finder {
             }
         }
         return array_slice($out, 0, 8);
-    }
-
-    /**
-     * Admin-entered playlist links: one "component = URL" (or "component | URL") per line.
-     *
-     * @return array Component => URL.
-     */
-    public static function playlist_overrides(): array {
-        $raw = (string) get_config('block_aiplugin_nav', 'finder_playlists');
-        $out = [];
-        foreach (preg_split('/\R/', $raw) as $line) {
-            if (!preg_match('/^\s*([a-z][a-z0-9_]*)\s*[=|,]\s*(\S+)\s*$/', $line, $m)) {
-                continue;
-            }
-            $url = $m[2];
-            if (preg_match('#^https://(www\.|m\.)?youtube\.com/[A-Za-z0-9@._~/%?=&-]+$#', $url) ||
-                    preg_match('#^https://youtu\.be/[A-Za-z0-9._~/%?=&-]+$#', $url)) {
-                $out[$m[1]] = $url;
-            } else if (preg_match('/^(PL|UU|OL)[A-Za-z0-9_-]{10,}$/', $url)) {
-                // A bare playlist ID.
-                $out[$m[1]] = 'https://www.youtube.com/playlist?list=' . $url;
-            }
-        }
-        return $out;
     }
 
     /**

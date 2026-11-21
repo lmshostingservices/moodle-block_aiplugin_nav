@@ -705,8 +705,6 @@ $string['finder_none'] = 'Nothing matched that yet. Try describing the task anot
 $string['finder_noimage'] = 'Screenshot coming soon';
 $string['finder_open'] = 'Open';
 $string['finder_placeholder'] = 'e.g. I need to grade 120 essays faster and give every student useful feedback';
-$string['finder_playlists'] = 'YouTube playlist links';
-$string['finder_playlists_desc'] = 'Optional. One per line: <code>component = playlist URL</code> (or just the playlist ID), for example <code>quiz_aigrader = https://www.youtube.com/playlist?list=PL…</code>. Leave it empty to use the built-in links to each plugin\'s playlist on the LMS Hosting Services channel; a line here overrides the built-in link for that plugin.';
 $string['finder_results_for'] = 'Plugins for “{$a}”';
 $string['finder_screenshot'] = 'Screenshot';
 $string['finder_searching'] = 'Finding the best plugins…';

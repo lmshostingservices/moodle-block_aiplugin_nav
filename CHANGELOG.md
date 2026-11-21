@@ -2,6 +2,11 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.7.1] - 2026-11-21
+
+### Removed
+- The "YouTube playlist links" setting. Every plugin's playlist link is built in, so there is nothing for admins to enter.
+
 ## [2.7.0] - 2026-11-21
 
 ### Added
@@ -11,7 +16,7 @@ All notable changes to this plugin will be documented in this file.
 - Two-pass results: instant Smart match (local, no network, understands teacher wording such as "mark", "cheating" or "falling behind"), then AI picks with a one-line reason each when the site has a Moodle AI provider for text generation (Moodle 4.5+). The AI may only recommend approved catalogue plugins. No LMS Labs credits are used.
 - Watch videos links straight to each plugin's playlist on the LMS Hosting Services YouTube channel (32 plugin playlists built in, verified 21 November 2026).
 - New web service block_aiplugin_nav_find_plugins.
-- New settings in the "Plugin Finder" section: show the finder, AI picks (auto/off), and YouTube playlist links per plugin (component = playlist URL or ID).
+- New settings in the "Plugin Finder" section: show the finder, and AI picks (auto/off).
 - Students never see the finder.
 
 ## [2.6.3] - 2026-11-20

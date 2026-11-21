@@ -111,12 +111,4 @@ if ($hassiteconfig) {
             'off' => get_string('finder_ai_offsetting', 'block_aiplugin_nav'),
         ]
     ));
-
-    $settings->add(new admin_setting_configtextarea(
-        'block_aiplugin_nav/finder_playlists',
-        get_string('finder_playlists', 'block_aiplugin_nav'),
-        get_string('finder_playlists_desc', 'block_aiplugin_nav'),
-        '',
-        PARAM_TEXT
-    ));
 }
