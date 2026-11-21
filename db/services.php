@@ -137,4 +137,12 @@ $functions = [
         'ajax'          => true,
         'loginrequired' => true,
     ],
+    'block_aiplugin_nav_find_plugins' => [
+        'classname'     => 'block_aiplugin_nav\external\find_plugins',
+        'methodname'    => 'execute',
+        'description'   => 'Plugin Finder: recommend LMS Labs plugins for a need described in plain words',
+        'type'          => 'read',
+        'ajax'          => true,
+        'loginrequired' => true,
+    ],
 ];

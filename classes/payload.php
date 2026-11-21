@@ -344,6 +344,8 @@ class block_aiplugin_nav_payload {
             'customreports' => self::build_custom_reports($block),
             'products'   => self::build_products(),
             'spotlight'  => $canspotlight ? self::build_spotlight($plugins, $block->page->get_renderer('core')) : null,
+            // The Plugin Finder: same audience as the spotlight, with its own site switch.
+            'finder'     => self::build_finder($canspotlight || $cancredits),
             // Site admins get a link to the site-wide spotlight setting beside the footer switch,
             // including when the spotlight is switched off for the site.
             'spotlightsettings' => $isadmin ? [
@@ -368,6 +370,59 @@ class block_aiplugin_nav_payload {
                 'installed' => $installedcount,
                 'updates'   => $updatecount,
             ],
+        ];
+    }
+
+    /**
+     * The Plugin Finder's client configuration, or null when this user does not get it.
+     *
+     * Results are fetched on demand through block_aiplugin_nav_find_plugins, so the dashboard
+     * payload only carries the strings, quick-start topics and examples.
+     *
+     * @param bool $audience Whether this user is an admin, manager or teacher.
+     * @return array|null
+     */
+    private static function build_finder(bool $audience): ?array {
+        if (!$audience || (string) get_config('block_aiplugin_nav', 'finder_enabled') === '0'
+                || !\block_aiplugin_nav\external\find_plugins::allowed()) {
+            return null;
+        }
+        $keys = ['ai_failed', 'ai_off', 'ai_policy', 'ai_policy_accept', 'ai_unavailable', 'ask_admin',
+            'ask_copied', 'best', 'button_sub', 'button_title', 'close', 'count', 'count_one', 'docs', 'enlarge',
+            'error', 'examples', 'features', 'find', 'for_admin', 'get', 'good', 'heading', 'install', 'installed',
+            'installed_activity', 'installed_other', 'kicker', 'lead', 'less', 'listening', 'mic', 'mic_denied',
+            'mic_error', 'mic_stop', 'mode_ai', 'mode_match', 'more', 'new', 'none', 'noimage', 'open',
+            'placeholder', 'results_for', 'screenshot', 'searching', 'strong', 'thinking', 'title', 'topics', 'usage', 'videos',
+            'videos_search', 'why', 'youtube_channel'];
+        $strings = [];
+        foreach ($keys as $key) {
+            $strings[$key] = get_string('finder_' . $key, 'block_aiplugin_nav');
+        }
+        $strings['ask_text'] = get_string('finder_ask_text', 'block_aiplugin_nav',
+            (object) ['name' => '{name}', 'need' => '{need}', 'docs' => '{docs}']);
+
+        $topics = [];
+        foreach (\block_aiplugin_nav\local\finder_index::topics() as $topic) {
+            $topics[] = [
+                'key' => $topic['key'],
+                'label' => get_string('finder_topic_' . $topic['key'], 'block_aiplugin_nav'),
+            ];
+        }
+        $examples = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $examples[] = get_string('finder_ex' . $i, 'block_aiplugin_nav');
+        }
+
+        global $USER;
+        $ai = \block_aiplugin_nav\local\plugin_finder::ai_status((int) $USER->id);
+        return [
+            'strings' => $strings,
+            'topics' => $topics,
+            'examples' => $examples,
+            'channel' => \block_aiplugin_nav\local\finder_index::CHANNEL . '/playlists',
+            // Whether to try AI picks after the instant results: 'ok' or 'policy' only.
+            'ai' => $ai,
+            'lang' => str_replace('_', '-', current_language()),
         ];
     }
 
@@ -1466,6 +1521,7 @@ class block_aiplugin_nav_payload {
             'block'      => [2, 3],
             'credits'    => [2, 4],
             'search'     => [1, 2],
+            'finder'     => [2, 3],
             'plugins'    => [2, 3],
             'settings'   => [1, 2],
             'manage'     => [1, 2],

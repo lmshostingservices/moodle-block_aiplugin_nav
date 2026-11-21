@@ -1,1 +1,1 @@
-https://api.github.com/repos/lmshostingservices/moodle-block_aiplugin_nav/releases/assets/770120155
+https://api.github.com/repos/lmshostingservices/moodle-block_aiplugin_nav/releases/assets/775439645

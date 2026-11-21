@@ -88,4 +88,35 @@ if ($hassiteconfig) {
             'off' => get_string('spotlight_state_off', 'block_aiplugin_nav'),
         ]
     ));
+    $settings->add(new admin_setting_heading(
+        'block_aiplugin_nav/finder_header',
+        get_string('finder_settings_header', 'block_aiplugin_nav'),
+        get_string('finder_settings_desc', 'block_aiplugin_nav')
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'block_aiplugin_nav/finder_enabled',
+        get_string('finder_enabled', 'block_aiplugin_nav'),
+        get_string('finder_enabled_desc', 'block_aiplugin_nav'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configselect(
+        'block_aiplugin_nav/finder_ai',
+        get_string('finder_ai', 'block_aiplugin_nav'),
+        get_string('finder_ai_desc', 'block_aiplugin_nav'),
+        'auto',
+        [
+            'auto' => get_string('finder_ai_auto', 'block_aiplugin_nav'),
+            'off' => get_string('finder_ai_offsetting', 'block_aiplugin_nav'),
+        ]
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'block_aiplugin_nav/finder_playlists',
+        get_string('finder_playlists', 'block_aiplugin_nav'),
+        get_string('finder_playlists_desc', 'block_aiplugin_nav'),
+        '',
+        PARAM_TEXT
+    ));
 }

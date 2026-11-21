@@ -5480,3 +5480,1168 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ================================================================== *
+ * Plugin Finder (2.7.0)
+ * The header's third area is split: "Search everything" on the left
+ * and the "Ask AI — Find the right plugin" button on the right. The
+ * button opens a full-screen finder inside the block root, so every
+ * colour token (light, dark, theme primary) still applies.
+ * ================================================================== */
+.ainav2 .ainav2-headtools {
+    display: flex;
+    gap: 10px;
+    min-width: 0;
+}
+.ainav2 .ainav2-headtools > .ainav2-searchwrap {
+    flex: 1 1 50%;
+    min-width: 0;
+}
+.ainav2 .ainav2-fxslot {
+    flex: 1 1 50%;
+    min-width: 0;
+    display: flex;
+}
+.ainav2 .ainav2-fxbtn {
+    --fxg1: var(--accent);
+    --fxg2: color-mix(in srgb, var(--accent) 50%, #7c3aed);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 58px;
+    padding: 8px 12px 8px 9px;
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+    text-align: left;
+    color: #fff;
+    background: linear-gradient(135deg, var(--fxg1), var(--fxg2));
+    box-shadow: 0 1px 2px rgba(18, 22, 27, .12), 0 8px 20px -10px color-mix(in srgb, var(--fxg2) 70%, transparent);
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+.ainav2 .ainav2-fxbtn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .22) 48%, transparent 66%);
+    transform: translateX(-110%);
+    animation: ainav2-fxshine 5.5s ease-in-out 1.2s infinite;
+}
+@keyframes ainav2-fxshine {
+    0%,
+    70% {
+        transform: translateX(-110%);
+    }
+    100% {
+        transform: translateX(110%);
+    }
+}
+.ainav2 .ainav2-fxbtn,
+.ainav2 .ainav2-fxbtn:hover,
+.ainav2 .ainav2-fxbtn:focus,
+.ainav2 .ainav2-fxbtn:active {
+    color: #fff;
+}
+.ainav2 .ainav2-fxbtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(18, 22, 27, .14), 0 12px 26px -10px color-mix(in srgb, var(--fxg2) 80%, transparent);
+}
+.ainav2 .ainav2-fxbtn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--fxg2) 45%, transparent);
+    outline-offset: 2px;
+}
+.ainav2 .ainav2-fxbtn-orb {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .18);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28);
+}
+.ainav2 .ainav2-fxbtn-ic {
+    width: 20px;
+    height: 20px;
+}
+.ainav2 .ainav2-fxbtn-txt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.2;
+}
+.ainav2 .ainav2-fxbtn-txt strong {
+    font-family: Archivo, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+.ainav2 .ainav2-fxbtn-txt span {
+    font-size: 13px;
+    line-height: 1.25;
+    opacity: .92;
+}
+.ainav2 .ainav2-fxbtn-go {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    opacity: .85;
+    transition: transform .16s ease;
+}
+.ainav2 .ainav2-fxbtn:hover .ainav2-fxbtn-go {
+    transform: translateX(3px);
+}
+
+@media (max-width: 1560px) {
+    .ainav2 .ainav2-fxbtn-go {
+        display: none;
+    }
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-searchwrap,
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-fxbtn {
+        min-height: 46px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder > .ainav2-searchwrap,
+    .ainav2 .ainav2-fxslot {
+        flex: none;
+    }
+    .ainav2 .ainav2-fxbtn-orb {
+        width: 30px;
+        height: 30px;
+    }
+}
+@media (max-width: 860px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        flex-direction: row;
+    }
+}
+@media (max-width: 520px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        flex-direction: column;
+    }
+}
+
+/* ---------- Finder overlay ---------- */
+html.ainav2-fx-lock,
+html.ainav2-fx-lock body {
+    overflow: hidden;
+}
+.ainav2 .ainav2-fx {
+    position: fixed;
+    inset: 0;
+    /* Above the theme navbar (1030) and the block's own modal (1040), below Moodle modals. */
+    z-index: 1045;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: 24px;
+    background: color-mix(in srgb, var(--ink) 52%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity .2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+}
+.ainav2 .ainav2-fx[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx.ainav2-fx-in {
+    opacity: 1;
+}
+.ainav2 .ainav2-fx-sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1180px;
+    max-height: 100%;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .45);
+    overflow: hidden;
+    transform: translateY(14px) scale(.985);
+    transition: transform .26s cubic-bezier(.2, .8, .2, 1);
+}
+.ainav2 .ainav2-fx.ainav2-fx-in .ainav2-fx-sheet {
+    transform: none;
+}
+
+/* Top bar. */
+.ainav2 .ainav2-fx-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--line-soft);
+    background:
+        radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 55%),
+        radial-gradient(90% 140% at 100% 0%, color-mix(in srgb, #7c3aed 12%, transparent), transparent 60%),
+        var(--surface);
+}
+.ainav2 .ainav2-fx-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+.ainav2 .ainav2-fx-orb {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #7c3aed));
+    box-shadow: 0 10px 24px -12px color-mix(in srgb, #7c3aed 80%, transparent);
+}
+.ainav2 .ainav2-fx-orb .ainav2-fx-ic {
+    width: 24px;
+    height: 24px;
+}
+.ainav2 .ainav2-fx-kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+}
+.ainav2 .ainav2-fx-brand h2 {
+    margin: 2px 0 0;
+    font-family: Archivo, sans-serif;
+    font-size: clamp(21px, 2.6vw, 28px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    color: var(--ink);
+}
+.ainav2 .ainav2-fx-topact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+.ainav2 .ainav2-fx-chan {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+.ainav2 .ainav2-fx-chan:hover {
+    color: #c4302b;
+    border-color: color-mix(in srgb, #ff0000 35%, var(--line));
+}
+.ainav2 .ainav2-fx-chan .ainav2-fx-ic {
+    color: #ff0000;
+}
+.ainav2 .ainav2-fx-x {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--ink-2);
+}
+.ainav2 .ainav2-fx-x:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.ainav2 .ainav2-fx-ic {
+    width: 18px;
+    height: 18px;
+    flex: none;
+}
+
+.ainav2 .ainav2-fx-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-behavior: auto;
+}
+
+/* Ask area. */
+.ainav2 .ainav2-fx-ask {
+    padding: 24px 22px 20px;
+    border-bottom: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+}
+.ainav2 .ainav2-fx-lead {
+    margin: 0 0 14px;
+    max-width: 760px;
+    font-size: 16px;
+    color: var(--ink-2);
+}
+.ainav2 .ainav2-fx-form {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+.ainav2 .ainav2-fx-field {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--e2);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.ainav2 .ainav2-fx-field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft), var(--e2);
+}
+.ainav2 .ainav2-fx textarea {
+    flex: 1;
+    min-height: 58px;
+    max-height: 180px;
+    padding: 16px 62px 14px 18px;
+    border: 0;
+    background: none;
+    resize: none;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1.45;
+    color: var(--ink);
+}
+.ainav2 .ainav2-fx textarea::placeholder {
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-fx textarea:focus {
+    outline: none;
+}
+.ainav2 .ainav2-fx-mic {
+    position: absolute;
+    right: 9px;
+    top: 9px;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.ainav2 .ainav2-fx-mic:hover {
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.ainav2 .ainav2-fx-mic:focus-visible {
+    outline: 3px solid var(--accent-soft);
+}
+.ainav2 .ainav2-fx-mic.ainav2-fx-on,
+.ainav2 .ainav2-fx-mic.ainav2-fx-on:hover {
+    color: #fff;
+    border-color: #e11d48;
+    background: #e11d48;
+    animation: ainav2-fxpulse 1.4s ease-out infinite;
+}
+@keyframes ainav2-fxpulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(225, 29, 72, .45);
+    }
+    100% {
+        box-shadow: 0 0 0 14px rgba(225, 29, 72, 0);
+    }
+}
+.ainav2 .ainav2-fx-go {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 22px;
+    min-height: 58px;
+    border: 0;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: Archivo, sans-serif;
+    font-size: 16.5px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #7c3aed));
+    box-shadow: 0 10px 24px -12px color-mix(in srgb, #7c3aed 80%, transparent);
+    transition: transform .15s ease, filter .15s ease;
+}
+.ainav2 .ainav2-fx-go,
+.ainav2 .ainav2-fx-go:hover,
+.ainav2 .ainav2-fx-go:focus {
+    color: #fff;
+}
+.ainav2 .ainav2-fx-go:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+}
+.ainav2 .ainav2-fx-go:disabled {
+    opacity: .7;
+    cursor: progress;
+}
+.ainav2 .ainav2-fx-go:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    outline-offset: 2px;
+}
+
+.ainav2 .ainav2-fx-listen {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #e11d48;
+}
+.ainav2 .ainav2-fx-listen[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx-listen.ainav2-fx-err {
+    color: var(--warn);
+}
+.ainav2 .ainav2-fx-listen.ainav2-fx-err .ainav2-fx-wave {
+    display: none;
+}
+.ainav2 .ainav2-fx-wave {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 18px;
+}
+.ainav2 .ainav2-fx-wave i {
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+    background: currentColor;
+    animation: ainav2-fxwave 1s ease-in-out infinite;
+}
+.ainav2 .ainav2-fx-wave i:nth-child(2) {
+    animation-delay: .12s;
+}
+.ainav2 .ainav2-fx-wave i:nth-child(3) {
+    animation-delay: .24s;
+}
+.ainav2 .ainav2-fx-wave i:nth-child(4) {
+    animation-delay: .36s;
+}
+.ainav2 .ainav2-fx-wave i:nth-child(5) {
+    animation-delay: .48s;
+}
+@keyframes ainav2-fxwave {
+    0%,
+    100% {
+        transform: scaleY(.3);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+
+.ainav2 .ainav2-fx-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+}
+.ainav2 .ainav2-fx-rowlab {
+    flex: none;
+    width: 130px;
+    padding-top: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-fx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+}
+.ainav2 .ainav2-fx-ex,
+.ainav2 .ainav2-fx-topic {
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--ink-2);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.ainav2 .ainav2-fx-ex {
+    font-style: italic;
+}
+.ainav2 .ainav2-fx-ex::before {
+    content: "“";
+}
+.ainav2 .ainav2-fx-ex::after {
+    content: "”";
+}
+.ainav2 .ainav2-fx-ex:hover,
+.ainav2 .ainav2-fx-topic:hover {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+}
+.ainav2 .ainav2-fx-topic[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+}
+.ainav2.ainav2-dark .ainav2-fx-topic[aria-pressed="true"] {
+    color: #0b0e11;
+}
+.ainav2 .ainav2-fx-ex:focus-visible,
+.ainav2 .ainav2-fx-topic:focus-visible {
+    outline: 3px solid var(--accent-soft);
+    outline-offset: 1px;
+}
+
+/* Results. */
+.ainav2 .ainav2-fx-results {
+    padding: 22px 22px 32px;
+}
+.ainav2 .ainav2-fx-results[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx-rhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 14px;
+}
+.ainav2 .ainav2-fx-rtitle {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+.ainav2 .ainav2-fx-rtitle h3 {
+    margin: 0;
+    font-family: Archivo, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.015em;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+.ainav2 .ainav2-fx-count {
+    flex: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-fx-mode {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.ainav2 .ainav2-fx-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink-2);
+}
+.ainav2 .ainav2-fx-badge .ainav2-fx-ic {
+    width: 15px;
+    height: 15px;
+}
+.ainav2 .ainav2-fx-badge.ainav2-fx-ai {
+    border-color: transparent;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #7c3aed));
+}
+.ainav2 .ainav2-fx-badge.ainav2-fx-busy i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-top-color: var(--accent);
+    animation: ainav2-fxspin .8s linear infinite;
+}
+.ainav2 .ainav2-fx-badge.ainav2-fx-aibusy {
+    color: var(--accent-ink);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+    background: var(--accent-soft);
+}
+@keyframes ainav2-fxspin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.ainav2 .ainav2-fx-summary {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--ink);
+    border: 1px solid color-mix(in srgb, #7c3aed 25%, var(--line));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--surface)),
+        color-mix(in srgb, #7c3aed 7%, var(--surface)));
+}
+.ainav2 .ainav2-fx-summary[hidden],
+.ainav2 .ainav2-fx-notice[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx-summary .ainav2-fx-ic {
+    margin-top: 2px;
+    color: #7c3aed;
+}
+.ainav2 .ainav2-fx-notice {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border: 1px dashed var(--line);
+}
+.ainav2 .ainav2-fx-linkbtn {
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 700;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.ainav2 .ainav2-fx-cards {
+    display: grid;
+    gap: 18px;
+}
+.ainav2 .ainav2-fx-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(260px, 40%) 1fr;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--e2);
+    overflow: hidden;
+}
+.ainav2 .ainav2-fx-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    z-index: 2;
+    background: linear-gradient(90deg, var(--fa), var(--fb));
+}
+.ainav2 .ainav2-fx-card.ainav2-fx-top1 {
+    border-color: color-mix(in srgb, var(--fa) 45%, var(--line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fa) 14%, transparent), var(--e3);
+}
+.ainav2 .ainav2-fx-cards.ainav2-fx-swap .ainav2-fx-card {
+    animation: ainav2-fxrise .42s cubic-bezier(.2, .8, .2, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes ainav2-fxrise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.ainav2 .ainav2-fx-shot {
+    position: relative;
+    min-height: 240px;
+    background:
+        radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--fa) 22%, transparent), transparent 60%),
+        radial-gradient(120% 100% at 100% 100%, color-mix(in srgb, var(--fb) 22%, transparent), transparent 60%),
+        var(--surface-2);
+    border-right: 1px solid var(--line-soft);
+}
+.ainav2 .ainav2-fx-shotbtn {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    padding: 18px;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+.ainav2 .ainav2-fx-shotbtn img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 10px;
+    filter: drop-shadow(0 14px 22px rgba(18, 22, 27, .18));
+    transition: transform .3s ease;
+}
+.ainav2 .ainav2-fx-shotbtn:hover img {
+    transform: scale(1.02);
+}
+.ainav2 .ainav2-fx-shotbtn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--fa) 45%, transparent);
+    outline-offset: -6px;
+}
+.ainav2 .ainav2-fx-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(18, 22, 27, .72);
+    color: #fff;
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+.ainav2 .ainav2-fx-shotbtn:hover .ainav2-fx-zoom,
+.ainav2 .ainav2-fx-shotbtn:focus-visible .ainav2-fx-zoom {
+    opacity: 1;
+}
+.ainav2 .ainav2-fx-noshot {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-fx-noshot span {
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 24px;
+    font-family: Archivo, sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--fa), var(--fb));
+    box-shadow: 0 16px 30px -16px var(--fa);
+}
+.ainav2 .ainav2-fx-noshot small {
+    font-size: 13px;
+}
+.ainav2 .ainav2-fx-fit {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    box-shadow: var(--e2);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+.ainav2 .ainav2-fx-top1 .ainav2-fx-fit {
+    color: #fff;
+    background: linear-gradient(135deg, var(--fa), var(--fb));
+}
+.ainav2 .ainav2-fx-fit .ainav2-fx-ic {
+    width: 14px;
+    height: 14px;
+}
+
+.ainav2 .ainav2-fx-main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 22px 24px 20px;
+}
+.ainav2 .ainav2-fx-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.ainav2 .ainav2-fx-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+}
+.ainav2 .ainav2-fx-pill.ainav2-fx-type {
+    color: color-mix(in srgb, var(--fa) 75%, var(--ink));
+    background: color-mix(in srgb, var(--fa) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--fa) 25%, var(--line));
+}
+.ainav2 .ainav2-fx-pill.ainav2-fx-inst {
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-color: color-mix(in srgb, var(--ok) 30%, var(--line));
+}
+.ainav2 .ainav2-fx-pill .ainav2-fx-ic {
+    width: 13px;
+    height: 13px;
+}
+.ainav2 .ainav2-fx-name {
+    margin: 0;
+    font-family: Archivo, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    color: var(--ink);
+}
+.ainav2 .ainav2-fx-why {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 0;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--fa) 8%, var(--surface));
+    border-left: 3px solid var(--fa);
+}
+.ainav2 .ainav2-fx-why .ainav2-fx-ic {
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    color: var(--fa);
+}
+.ainav2 .ainav2-fx-why.ainav2-fx-whyai .ainav2-fx-ic {
+    color: #7c3aed;
+}
+.ainav2 .ainav2-fx-pitch {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+.ainav2 .ainav2-fx-fhead {
+    margin-top: 2px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-fx-feat {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 6px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.ainav2 .ainav2-fx-feat li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 15px;
+    color: var(--ink);
+}
+.ainav2 .ainav2-fx-feat .ainav2-fx-ic {
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    padding: 2px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--fa);
+    stroke-width: 3;
+}
+.ainav2 .ainav2-fx-more {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.ainav2 .ainav2-fx-full {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-2);
+    white-space: pre-line;
+}
+.ainav2 .ainav2-fx-full[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx-usage {
+    font-size: 13.5px;
+    color: var(--credit);
+}
+.ainav2 .ainav2-fx-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+.ainav2 .ainav2-fx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.ainav2 .ainav2-fx-btn:hover {
+    border-color: color-mix(in srgb, var(--fa) 55%, var(--line));
+    background: color-mix(in srgb, var(--fa) 7%, var(--surface));
+    transform: translateY(-1px);
+}
+.ainav2 .ainav2-fx-btn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--fa) 35%, transparent);
+    outline-offset: 1px;
+}
+.ainav2 .ainav2-fx-btn.ainav2-fx-primary,
+.ainav2 .ainav2-fx-btn.ainav2-fx-primary:hover,
+.ainav2 .ainav2-fx-btn.ainav2-fx-primary:focus {
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--fa), var(--fb));
+}
+.ainav2 .ainav2-fx-btn.ainav2-fx-primary:hover {
+    filter: brightness(1.06);
+}
+.ainav2 .ainav2-fx-btn.ainav2-fx-yt .ainav2-fx-ic {
+    color: #ff0000;
+}
+.ainav2 .ainav2-fx-note {
+    margin: 2px 0 0;
+    font-size: 13.5px;
+    color: var(--ok);
+}
+.ainav2 .ainav2-fx-empty {
+    padding: 34px 20px;
+    border-radius: 14px;
+    border: 1px dashed var(--line);
+    text-align: center;
+    font-size: 16px;
+    color: var(--ink-2);
+    background: var(--surface-2);
+}
+
+/* Loading skeletons. */
+.ainav2 .ainav2-fx-skel .ainav2-fx-shot,
+.ainav2 .ainav2-fx-skel b {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: ainav2-fxskel 1.2s ease-in-out infinite;
+}
+.ainav2 .ainav2-fx-skel::before {
+    display: none;
+}
+.ainav2 .ainav2-fx-skel b {
+    display: block;
+    height: 14px;
+    border-radius: 6px;
+}
+.ainav2 .ainav2-fx-skel b:nth-child(1) {
+    width: 30%;
+}
+.ainav2 .ainav2-fx-skel b:nth-child(2) {
+    width: 60%;
+    height: 24px;
+}
+.ainav2 .ainav2-fx-skel b:nth-child(3) {
+    width: 92%;
+}
+.ainav2 .ainav2-fx-skel b:nth-child(4) {
+    width: 75%;
+}
+@keyframes ainav2-fxskel {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+/* Screenshot lightbox. */
+.ainav2 .ainav2-fx-lb {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: rgba(8, 10, 13, .86);
+    cursor: zoom-out;
+}
+.ainav2 .ainav2-fx-lb[hidden] {
+    display: none;
+}
+.ainav2 .ainav2-fx-lb img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+    cursor: default;
+}
+.ainav2 .ainav2-fx-lbx {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    cursor: pointer;
+}
+.ainav2 .ainav2-fx-lbx:hover,
+.ainav2 .ainav2-fx-lbx:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, .26);
+}
+
+/* Finder: narrower screens. */
+@media (max-width: 900px) {
+    .ainav2 .ainav2-fx-card {
+        grid-template-columns: 1fr;
+    }
+    .ainav2 .ainav2-fx-shot {
+        min-height: 0;
+        aspect-ratio: 16 / 9;
+        border-right: 0;
+        border-bottom: 1px solid var(--line-soft);
+    }
+    .ainav2 .ainav2-fx-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .ainav2 .ainav2-fx-rowlab {
+        width: auto;
+        padding-top: 0;
+    }
+}
+@media (max-width: 640px) {
+    .ainav2 .ainav2-fx {
+        padding: 0;
+    }
+    .ainav2 .ainav2-fx-sheet {
+        border-radius: 0;
+        border: 0;
+    }
+    .ainav2 .ainav2-fx-top,
+    .ainav2 .ainav2-fx-ask,
+    .ainav2 .ainav2-fx-results {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .ainav2 .ainav2-fx-chan span,
+    .ainav2 .ainav2-fx-kicker {
+        display: none;
+    }
+    .ainav2 .ainav2-fx-orb {
+        width: 38px;
+        height: 38px;
+    }
+    .ainav2 .ainav2-fx-form {
+        flex-direction: column;
+    }
+    .ainav2 .ainav2-fx-go {
+        justify-content: center;
+        min-height: 52px;
+    }
+    .ainav2 .ainav2-fx-main {
+        padding: 18px 16px;
+    }
+    .ainav2 .ainav2-fx-name {
+        font-size: 21px;
+    }
+    .ainav2 .ainav2-fx-acts .ainav2-fx-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ainav2 .ainav2-fxbtn::before,
+    .ainav2 .ainav2-fx-mic.ainav2-fx-on,
+    .ainav2 .ainav2-fx-wave i,
+    .ainav2 .ainav2-fx-skel .ainav2-fx-shot,
+    .ainav2 .ainav2-fx-skel b,
+    .ainav2 .ainav2-fx-cards.ainav2-fx-swap .ainav2-fx-card {
+        animation: none;
+    }
+    .ainav2 .ainav2-fx,
+    .ainav2 .ainav2-fx-sheet,
+    .ainav2 .ainav2-fxbtn,
+    .ainav2 .ainav2-fx-btn,
+    .ainav2 .ainav2-fx-shotbtn img {
+        transition: none;
+        transform: none;
+    }
+}

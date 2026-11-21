@@ -254,6 +254,78 @@ class spotlight {
     }
 
     /**
+     * Every approved, publicly listed catalogue entry, keyed by component.
+     *
+     * The same approval rules as the spotlight itself: the live LMS Labs feed when it is
+     * available (only spotlight-eligible, ready, not hidden entries), otherwise the bundled
+     * snapshot. Used by the Plugin Finder so it can never recommend an unapproved product.
+     *
+     * @return array Component => catalogue entry.
+     */
+    public static function approved_entries(): array {
+        $feed = live_feed::spotlight();
+        $entries = $feed === null ? self::catalogue() : $feed;
+        $out = [];
+        foreach ($entries as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+            $component = (string) ($entry['component'] ?? '');
+            if ($component === '' || clean_param($component, PARAM_COMPONENT) !== $component ||
+                    in_array($component, \block_aiplugin_nav_payload::UNAPPROVED_COMPONENTS, true) ||
+                    !in_array((string) ($entry['category'] ?? ''), self::CATEGORIES, true)) {
+                continue;
+            }
+            if ($feed !== null && (($entry['spotlightEligible'] ?? false) !== true ||
+                    ($entry['status'] ?? '') !== 'ready' || ($entry['hidden'] ?? true) !== false)) {
+                continue;
+            }
+            $out[$component] = $entry;
+        }
+        return $out;
+    }
+
+    /**
+     * The preview image for a catalogue entry, using the same rules as the spotlight.
+     *
+     * @param array $entry The catalogue entry.
+     * @param \renderer_base $output Renderer used to resolve bundled images.
+     * @return string Image URL, or '' for text-only plugins and entries without one.
+     */
+    public static function image_for(array $entry, \renderer_base $output): string {
+        $component = (string) ($entry['component'] ?? '');
+        if ($component === '' || in_array($component, self::TEXT_ONLY_COMPONENTS, true)) {
+            return '';
+        }
+        if (is_readable(__DIR__ . '/../../pix/spotlight/' . $component . '.jpg')) {
+            return $output->image_url('spotlight/' . $component, 'block_aiplugin_nav')->out(false);
+        }
+        return live_feed::image_url($entry['image'] ?? '');
+    }
+
+    /**
+     * The documentation link for a catalogue entry, or '' when it is not on lms-labs.com/docs.
+     *
+     * @param array $entry The catalogue entry.
+     * @return string
+     */
+    public static function docs_for(array $entry): string {
+        $docs = (string) ($entry['docs'] ?? '');
+        return strpos($docs, self::DOCS_PREFIX) === 0 ? $docs : '';
+    }
+
+    /**
+     * Translated label for one spotlight category.
+     *
+     * @param string $category Category key.
+     * @return string
+     */
+    public static function category_label(string $category): string {
+        return in_array($category, self::CATEGORIES, true)
+            ? get_string('spotlight_cat_' . $category, 'block_aiplugin_nav') : '';
+    }
+
+    /**
      * Read the bundled editorial snapshot.
      *
      * @return array The snapshot's plugin entries, in display order. Empty when unreadable.

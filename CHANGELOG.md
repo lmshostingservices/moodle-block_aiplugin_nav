@@ -2,6 +2,18 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.7.0] - 2026-11-21
+
+### Added
+- Plugin Finder. The header's search area is now split in two: "Search everything" on the left and a new "Ask AI — Find the right plugin" button on the right.
+- The button opens a full-screen finder where teachers, managers and admins describe what they need in their own words, or tap the microphone and say it (browsers with speech recognition: Chrome, Edge, Safari). Example requests and ten "browse by need" tags help them start.
+- Results are cards: screenshot (click to enlarge), why it fits, a short plain-English summary, every feature, AI-credit usage, and buttons for Install (admins; opens the plugin's own install/unlock row), Ask my admin (teachers; copies a ready-made request), Docs and Watch videos (the plugin's playlist on the LMS Hosting Services YouTube channel).
+- Two-pass results: instant Smart match (local, no network, understands teacher wording such as "mark", "cheating" or "falling behind"), then AI picks with a one-line reason each when the site has a Moodle AI provider for text generation (Moodle 4.5+). The AI may only recommend approved catalogue plugins. No LMS Labs credits are used.
+- Watch videos links straight to each plugin's playlist on the LMS Hosting Services YouTube channel (32 plugin playlists built in, verified 21 November 2026).
+- New web service block_aiplugin_nav_find_plugins.
+- New settings in the "Plugin Finder" section: show the finder, AI picks (auto/off), and YouTube playlist links per plugin (component = playlist URL or ID).
+- Students never see the finder.
+
 ## [2.6.3] - 2026-11-20
 
 ### Fixed

@@ -13,6 +13,11 @@ updating the LMS Labs plugin suite from one place.
 - Uses the active Moodle theme colour and supports narrow dashboard regions.
 - Plugin spotlight for site administrators: a rotating showcase of LMS Labs plugins
   that each user can collapse or switch off, with a site-wide default in the block settings.
+- Plugin Finder ("Ask AI — Find the right plugin"): teachers, managers and admins type or
+  speak what they need ("I need to grade essays") and get matching plugins as cards with
+  features, screenshot, install or ask-my-admin, docs and the plugin's YouTube playlist.
+  Instant Smart match results come first; when the site has a Moodle AI provider (4.5+),
+  AI picks follow with a reason for each. The finder never uses LMS Labs credits.
 
 Quick Links itself is free and consumes no AI credits. AI credits are shared by
 the AI-powered plugins connected to the same LMS Labs Site ID.

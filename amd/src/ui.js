@@ -19,7 +19,7 @@
  * Renders the entire client-side experience described in the v2.5.0 build
  * contract into #ainav2-root, from the JSON payload PHP embeds in
  * #ainav2-data: the four nav cards, Moodle shortcuts, credit traffic light,
- * global search, status strip, software cards and footer on the home view,
+ * global search, Plugin Finder button, status strip, software cards and footer on the home view,
  * plus the four drill-in panels (Plugins / Settings / Manage / Reports) with
  * category chips, status/type filters, sort, saved layouts, favourites,
  * hover help and the row tooltip, icon-picker builder modal, purge schedule
@@ -33,8 +33,9 @@
  * @copyright  2025 Essay Grader AI
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repository', 'block_aiplugin_nav/spotlight'],
-        function($, Ajax, Notification, Str, UserRepository, Spotlight) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repository', 'block_aiplugin_nav/spotlight',
+        'block_aiplugin_nav/finder'],
+        function($, Ajax, Notification, Str, UserRepository, Spotlight, Finder) {
 
     'use strict';
 
@@ -780,6 +781,8 @@ row;
             html += '    <div class="ainav2-meterlab" id="ainav2-cmsg"></div>';
             html += '  </div>';
         }
+        // The third header area is split in two: search everything, and the Plugin Finder.
+        html += '  <div class="ainav2-headtools' + (DATA.finder ? ' ainav2-hasfinder' : '') + '">';
         html += '  <div class="ainav2-searchwrap" data-help="search">';
         html += '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="1' +
             '1" r="7"/>' +
@@ -787,6 +790,10 @@ row;
         html += '    <input id="ainav2-q" type="search" placeholder="Search everything…" autocomplete="off" ' +
             'aria-label="Search settings, manage, reports and plugins">';
         html += '    <button class="ainav2-clearq" id="ainav2-clearq" type="button" hidden aria-label="Clear search">×</button>';
+        html += '  </div>';
+        if (DATA.finder) {
+            html += '  <div class="ainav2-fxslot" id="ainav2-fxslot"></div>';
+        }
         html += '  </div>';
         html += '</div>';
 
@@ -4120,6 +4127,18 @@ n = 0;
             });
         }
         addSpotlightSettingsLink();
+
+        if (DATA.finder) {
+            Finder.init({
+                mount: document.getElementById('ainav2-fxslot'),
+                root: els.root,
+                data: DATA.finder,
+                isadmin: isAdmin(),
+                plugins: DATA.plugins || [],
+                openPlugin: openPluginRow,
+                toast: showToast
+            });
+        }
 
         if (DATA.cancredits) {
             startCredits();
