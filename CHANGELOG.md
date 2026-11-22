@@ -2,11 +2,20 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.7.5] - 2026-11-22
+
+### Changed
+- "Search everything" is now a full card: a gradient-edged card with a title, a larger search field ("What do you want to do?") and one-click popular searches (Courses, Grades, Reports, AI tools).
+- The Video tutorials tile shows a "Playlists for each plugin" label under the channel numbers.
+
+### Fixed
+- The YouTube numbers now come live from https://lms-labs.com/api/youtube/stats, which went live today.
+
 ## [2.7.4] - 2026-11-22
 
 ### Changed
 - Free video tutorials moved from "Our software" to the top of the block, between "Search everything" and "Ask AI", as a square tile with a YouTube-style play button and the channel's numbers (free videos, subscribers and views) and a "Playlists for each plugin" label. It opens the LMS Hosting Services YouTube playlists in a new tab.
-- "Search everything" redesigned: a compact 58 px card with a tinted search icon, clearer text and a "/" shortcut hint. Press / anywhere on the dashboard (outside a text field) to jump to it. On wide screens the search, video and Ask AI cards match the height of the logo and credits cards, and the tools column is wider so the search text is no longer cut off. On medium screens the tools get their own full-width row, so "Top up" no longer wraps.
+- "Search everything" redesigned as a full card: a gradient-edged card with a title, a larger search field and one-click popular searches (Courses, Grades, Reports, AI tools). Press / anywhere on the dashboard (outside a text field) to jump to it. On wide screens the search, video and Ask AI cards match the height of the logo and credits cards, and the tools column is wider so the search text is no longer cut off. On medium screens the tools get their own full-width row, so "Top up" no longer wraps.
 
 ### Added
 - YouTube channel numbers on the Video tutorials tile. The hourly "Refresh LMS Labs plugin feeds" task reads them from https://lms-labs.com/api/youtube/stats (`{"success": true, "channel": {"subscriberCount": …, "viewCount": …, "videoCount": …}}`, YouTube's own statistics object, or `subscribers`/`views`/`videos`). Until that feed answers, the tile shows the snapshot shipped with this release (188 videos, 4,080 subscribers, 890,978 views on 22 November 2026). Hover the tile for exact numbers.

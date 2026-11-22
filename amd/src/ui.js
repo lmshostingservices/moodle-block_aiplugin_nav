@@ -784,13 +784,24 @@ row;
         }
         // The third header area: search everything, free video tutorials, and the Plugin Finder.
         html += '  <div class="ainav2-headtools' + (DATA.finder ? ' ainav2-hasfinder' : '') + '">';
-        html += '  <div class="ainav2-searchwrap" data-help="search">';
-        html += '    <span class="ainav2-sico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-            'stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg></span>';
-        html += '    <input id="ainav2-q" type="search" placeholder="Search everything…" autocomplete="off" ' +
+        // Search card: title, the search field and one-click popular searches.
+        html += '  <div class="ainav2-scard" data-help="search">';
+        html += '    <div class="ainav2-scard-top"><span class="ainav2-scard-ic" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
+            '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg></span>' +
+            '<span class="ainav2-scard-tt"><strong>Search everything</strong>' +
+            '<span>Settings, courses, reports and plugins</span></span>' +
+            '<kbd class="ainav2-skbd" title="Press / to search">/</kbd></div>';
+        html += '    <div class="ainav2-searchwrap">';
+        html += '      <input id="ainav2-q" type="search" placeholder="What do you want to do?" autocomplete="off" ' +
             'aria-label="Search settings, manage, reports and plugins" aria-keyshortcuts="/">';
-        html += '    <kbd class="ainav2-skbd" title="Press / to search">/</kbd>';
-        html += '    <button class="ainav2-clearq" id="ainav2-clearq" type="button" hidden aria-label="Clear search">×</button>';
+        html += '      <button class="ainav2-clearq" id="ainav2-clearq" type="button" hidden aria-label="Clear search">×</button>';
+        html += '    </div>';
+        html += '    <div class="ainav2-schips" role="group" aria-label="Popular searches">' +
+            '<button type="button" data-q="course">Courses</button>' +
+            '<button type="button" data-q="grade">Grades</button>' +
+            '<button type="button" data-q="report">Reports</button>' +
+            '<button type="button" data-q="ai">AI tools</button></div>';
         html += '  </div>';
         // Free video tutorials: always one click away, between search and the Plugin Finder.
         if (DATA.tutorials && /^https:\/\//.test(DATA.tutorials.url)) {
@@ -3838,6 +3849,19 @@ n = 0;
         els.q.addEventListener('input', function() {
             search(els.q.value);
         });
+        // Popular searches: one click fills the search field and shows the results.
+        var chips = els.root.querySelector('.ainav2-schips');
+        if (chips) {
+            chips.addEventListener('click', function(e) {
+                var chip = e.target.closest('button[data-q]');
+                if (!chip) {
+                    return;
+                }
+                els.q.value = chip.getAttribute('data-q');
+                search(els.q.value);
+                els.q.focus();
+            });
+        }
         // Press "/" anywhere on the page (outside a text field) to jump to the block's search.
         document.addEventListener('keydown', function(e) {
             var t = e.target;
