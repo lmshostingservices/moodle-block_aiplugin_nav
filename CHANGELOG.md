@@ -2,6 +2,24 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.7.4] - 2026-11-22
+
+### Changed
+- Free video tutorials moved from "Our software" to the top of the block, between "Search everything" and "Ask AI", as a square tile with a YouTube-style play button and the channel's numbers (free videos, subscribers and views) and a "Playlists for each plugin" label. It opens the LMS Hosting Services YouTube playlists in a new tab.
+- "Search everything" redesigned: a compact 58 px card with a tinted search icon, clearer text and a "/" shortcut hint. Press / anywhere on the dashboard (outside a text field) to jump to it. On wide screens the search, video and Ask AI cards match the height of the logo and credits cards, and the tools column is wider so the search text is no longer cut off. On medium screens the tools get their own full-width row, so "Top up" no longer wraps.
+
+### Added
+- YouTube channel numbers on the Video tutorials tile. The hourly "Refresh LMS Labs plugin feeds" task reads them from https://lms-labs.com/api/youtube/stats (`{"success": true, "channel": {"subscriberCount": …, "viewCount": …, "videoCount": …}}`, YouTube's own statistics object, or `subscribers`/`views`/`videos`). Until that feed answers, the tile shows the snapshot shipped with this release (188 videos, 4,080 subscribers, 890,978 views on 22 November 2026). Hover the tile for exact numbers.
+- "Show our software" switch in the bottom bar, beside "Show help tips". Switch it off to hide the "Our software" cards; the choice is remembered for each user.
+
+### Fixed
+- The "Show help tips" switch in the footer sat higher than the other footer items on themes that add a margin to labels.
+
+## [2.7.3] - 2026-11-22
+
+### Fixed
+- Training Video Studio price in "Our software" corrected to $5 USD per finished minute.
+
 ## [2.7.2] - 2026-11-22
 
 ### Added

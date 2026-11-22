@@ -45,6 +45,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core_user/repos
     var PREF_LAYOUT = 'block_aiplugin_nav_layout';
     /** @var {string} User preference name for the help-tips switch. */
     var PREF_HELP = 'block_aiplugin_nav_help';
+    var PREF_FAMILY = 'block_aiplugin_nav_family';
     var PREF_SPEND = 'block_aiplugin_nav_spend';
 
     /* ------------------------------------------------------------------ *
@@ -781,16 +782,27 @@ row;
             html += '    <div class="ainav2-meterlab" id="ainav2-cmsg"></div>';
             html += '  </div>';
         }
-        // The third header area is split in two: search everything, and the Plugin Finder.
+        // The third header area: search everything, free video tutorials, and the Plugin Finder.
         html += '  <div class="ainav2-headtools' + (DATA.finder ? ' ainav2-hasfinder' : '') + '">';
         html += '  <div class="ainav2-searchwrap" data-help="search">';
-        html += '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="1' +
-            '1" r="7"/>' +
-            '<path d="m20 20-3.2-3.2"/></svg>';
+        html += '    <span class="ainav2-sico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+            'stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg></span>';
         html += '    <input id="ainav2-q" type="search" placeholder="Search everything…" autocomplete="off" ' +
-            'aria-label="Search settings, manage, reports and plugins">';
+            'aria-label="Search settings, manage, reports and plugins" aria-keyshortcuts="/">';
+        html += '    <kbd class="ainav2-skbd" title="Press / to search">/</kbd>';
         html += '    <button class="ainav2-clearq" id="ainav2-clearq" type="button" hidden aria-label="Clear search">×</button>';
         html += '  </div>';
+        // Free video tutorials: always one click away, between search and the Plugin Finder.
+        if (DATA.tutorials && /^https:\/\//.test(DATA.tutorials.url)) {
+            html += '  <a class="ainav2-ytbtn" href="' + esc(DATA.tutorials.url) + '" target="_blank" rel="noopener noreferrer" ' +
+                'title="' + esc(DATA.tutorials.title) + '" data-help="tutorials">' +
+                '<span class="ainav2-ytbtn-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 7.2v9.6l7.6-4.8z" ' +
+                'fill="#fff"/></svg></span>' +
+                '<span class="ainav2-ytbtn-txt"><strong>' + esc(DATA.tutorials.videos) + '</strong>' +
+                '<span class="ainav2-ytbtn-stat">' + esc(DATA.tutorials.subscribers) + '</span>' +
+                '<span class="ainav2-ytbtn-stat">' + esc(DATA.tutorials.views) + '</span></span>' +
+                '<span class="ainav2-ytbtn-pl">' + esc(DATA.tutorials.playlists) + '</span></a>';
+        }
         if (DATA.finder) {
             html += '  <div class="ainav2-fxslot" id="ainav2-fxslot"></div>';
         }
@@ -838,7 +850,9 @@ row;
             '<span><span class="ainav2-dotok"></span>Connected to LMS Labs</span>' +
             '<label class="ainav2-helptoggle"><input type="checkbox" id="ainav2-helpon"><span class="ainav2-sw"></span>S' +
                 'how help t' +
-                'ips</label></div>';
+                'ips</label>' +
+            '<label class="ainav2-helptoggle"><input type="checkbox" id="ainav2-famon"><span class="ainav2-sw"></span>' +
+                'Show our software</label></div>';
         html += '  <div class="ainav2-fcentre"></div>';
         html += '  <div class="ainav2-flinks">';
         html += '    <a href="https://marketplace.moodle.com/user/31" target="_blank" rel="noopener">Moodle Marketplace</a>';
@@ -876,6 +890,16 @@ row;
         els.mfoot = document.getElementById('ainav2-mfoot');
         els.mclose = document.getElementById('ainav2-mclose');
         els.helpon = document.getElementById('ainav2-helpon');
+        els.famon = document.getElementById('ainav2-famon');
+        if (els.famon) {
+            // "Show our software": the choice is saved per user and applies at the next login too.
+            els.famon.addEventListener('change', function() {
+                DATA.prefs = DATA.prefs || {};
+                DATA.prefs.family = els.famon.checked ? '0' : '1';
+                setPref(PREF_FAMILY, DATA.prefs.family);
+                applyFamily();
+            });
+        }
 
         els.rowtip = document.createElement('div');
         els.rowtip.className = 'ainav2-rowtip';
@@ -1340,6 +1364,20 @@ out = '<div class="ainav2-famhead" data-help="family" tabindex="0">Our software<
             out += '</a>';
         }
         els.family.innerHTML = out;
+        applyFamily();
+    }
+
+    /**
+     * Show or hide "Our software" from the user's saved choice, and keep the footer switch in step.
+     */
+    function applyFamily() {
+        var hidden = String((DATA.prefs || {}).family || '0') === '1';
+        if (els.family) {
+            els.family.hidden = hidden;
+        }
+        if (els.famon) {
+            els.famon.checked = !hidden;
+        }
     }
 
     /**
@@ -3799,6 +3837,16 @@ n = 0;
 
         els.q.addEventListener('input', function() {
             search(els.q.value);
+        });
+        // Press "/" anywhere on the page (outside a text field) to jump to the block's search.
+        document.addEventListener('keydown', function(e) {
+            var t = e.target;
+            if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || !els.q || !els.q.offsetParent ||
+                    (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) {
+                return;
+            }
+            e.preventDefault();
+            els.q.focus();
         });
         els.q.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {

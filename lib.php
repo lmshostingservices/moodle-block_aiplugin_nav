@@ -61,6 +61,13 @@ function block_aiplugin_nav_user_preferences(): array {
             'default'            => (int) get_config('block_aiplugin_nav', 'helptips_default'),
             'permissioncallback' => [core_user::class, 'is_current_user'],
         ],
+        // Flag "1" or "0" — whether the "Our software" section is collapsed.
+        'block_aiplugin_nav_family' => [
+            'type'               => PARAM_INT,
+            'null'               => NULL_NOT_ALLOWED,
+            'default'            => 0,
+            'permissioncallback' => [core_user::class, 'is_current_user'],
+        ],
         // JSON array of recent installs and what each cost, for the install receipt.
         'block_aiplugin_nav_spend' => [
             'type'               => PARAM_RAW, // Pipeline-ignore: PARAM_RAW — JSON array, json_decode()'d on read.

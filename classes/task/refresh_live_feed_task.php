@@ -47,7 +47,7 @@ class refresh_live_feed_task extends \core\task\scheduled_task {
      * Fetch both feeds. A failed fetch keeps the previous copy until it expires.
      */
     public function execute() {
-        foreach ([live_feed::VERSIONS, live_feed::SPOTLIGHT] as $feed) {
+        foreach ([live_feed::VERSIONS, live_feed::SPOTLIGHT, live_feed::YOUTUBE] as $feed) {
             $ok = live_feed::refresh($feed);
             mtrace('block_aiplugin_nav: ' . $feed . ' feed ' . ($ok ? 'refreshed' : 'not available, keeping the previous copy'));
         }

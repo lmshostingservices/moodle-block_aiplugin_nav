@@ -25,13 +25,16 @@
 namespace block_aiplugin_nav\local;
 
 /**
- * Fetches and caches the two LMS Labs feeds the block reads.
+ * Fetches and caches the LMS Labs feeds the block reads.
  *
  * - versions: /api/plugins/versions. Per component: the latest release, numeric version,
  *   download, readiness status and unlock price. Uploading a new release to LMS Labs is
  *   enough for the block to show it.
  * - spotlight: /api/plugins/spotlight. The editorial catalogue: which plugins are promoted
  *   (spotlightEligible), in what order, with their copy, features and preview image.
+ * - youtube: /api/youtube/stats. Subscribers, views and video count of the LMS Labs YouTube
+ *   channel, shown on the "Video tutorials" tile. Until it is available the tile shows the
+ *   snapshot bundled with the release.
  *
  * Nothing here runs while a page is being built. The feeds are fetched by the hourly
  * refresh task, and the versions feed is also stored whenever an admin's browser runs the
@@ -50,6 +53,15 @@ class live_feed {
     /** @var string Spotlight feed name. */
     public const SPOTLIGHT = 'spotlight';
 
+    /** @var string YouTube channel statistics feed name. */
+    public const YOUTUBE = 'youtube';
+
+    /**
+     * @var array Channel statistics bundled with this release, used until the live feed has been fetched.
+     * Taken from the YouTube Data API for @LMSHostingServices on 22 November 2026.
+     */
+    public const YOUTUBE_SNAPSHOT = ['subscribers' => 4080, 'views' => 890978, 'videos' => 188];
+
     /** @var array Feed name => endpoints, tried in order. */
     private const ENDPOINTS = [
         self::VERSIONS => [
@@ -59,6 +71,10 @@ class live_feed {
         self::SPOTLIGHT => [
             'https://lms-labs.com/api/plugins/spotlight',
             'https://ai-grader-site-nct185.replit.app/api/plugins/spotlight',
+        ],
+        self::YOUTUBE => [
+            'https://lms-labs.com/api/youtube/stats',
+            'https://ai-grader-site-nct185.replit.app/api/youtube/stats',
         ],
     ];
 
@@ -87,6 +103,21 @@ class live_feed {
     }
 
     /**
+     * YouTube channel statistics: subscribers, views and videos.
+     *
+     * The live feed when a fresh copy is cached, otherwise the snapshot bundled with this release.
+     *
+     * @return array ['subscribers' => int, 'views' => int, 'videos' => int, 'live' => bool]
+     */
+    public static function youtube(): array {
+        $live = self::read(self::YOUTUBE);
+        if ($live) {
+            return $live + ['live' => true];
+        }
+        return self::YOUTUBE_SNAPSHOT + ['live' => false];
+    }
+
+    /**
      * When a feed was last fetched successfully.
      *
      * @param string $feed self::VERSIONS or self::SPOTLIGHT.
@@ -100,7 +131,7 @@ class live_feed {
     /**
      * Fetch a feed from LMS Labs and cache it.
      *
-     * @param string $feed self::VERSIONS or self::SPOTLIGHT.
+     * @param string $feed self::VERSIONS, self::SPOTLIGHT or self::YOUTUBE.
      * @return bool True when a valid feed was fetched and stored.
      */
     public static function refresh(string $feed): bool {
@@ -137,6 +168,9 @@ class live_feed {
      * @return bool True when the response was valid and is now cached.
      */
     public static function store(string $feed, array $decoded): bool {
+        if ($feed === self::YOUTUBE) {
+            return self::store_youtube($decoded);
+        }
         if (empty($decoded['success']) || !isset($decoded['plugins']) || !is_array($decoded['plugins'])) {
             return false;
         }
@@ -155,6 +189,36 @@ class live_feed {
             return false;
         }
         self::cache()->set($feed, ['fetched' => time(), 'plugins' => $plugins]);
+        return true;
+    }
+
+    /**
+     * Validate and cache the YouTube statistics feed.
+     *
+     * Accepts {"success": true, "channel": {...}} where the channel object uses either our names
+     * (subscribers, views, videos) or YouTube's own statistics names (subscriberCount, viewCount,
+     * videoCount), so LMS Labs can pass the YouTube API's statistics object straight through.
+     *
+     * @param array $decoded The decoded JSON response.
+     * @return bool True when the response was valid and is now cached.
+     */
+    private static function store_youtube(array $decoded): bool {
+        $channel = $decoded['channel'] ?? ($decoded['statistics'] ?? null);
+        if (empty($decoded['success']) || !is_array($channel)) {
+            return false;
+        }
+        $stats = [];
+        foreach (['subscribers' => 'subscriberCount', 'views' => 'viewCount', 'videos' => 'videoCount'] as $ours => $theirs) {
+            $value = $channel[$ours] ?? ($channel[$theirs] ?? null);
+            if (!is_numeric($value) || $value < 0) {
+                return false;
+            }
+            $stats[$ours] = (int) $value;
+        }
+        if ($stats['videos'] < 1) {
+            return false;
+        }
+        self::cache()->set(self::YOUTUBE, ['fetched' => time(), 'plugins' => $stats]);
         return true;
     }
 

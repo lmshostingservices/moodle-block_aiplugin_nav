@@ -885,40 +885,84 @@
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 58px;
-    padding: 0 12px;
+    gap: 10px;
+    height: 58px;
+    padding: 0 10px 0 9px;
     border-radius: 9px;
-    background: var(--surface);
-    border: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--line);
     box-shadow: var(--e1);
+    transition: border-color .16s ease, box-shadow .16s ease;
+}
+.ainav2 .ainav2-searchwrap:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
 }
 .ainav2 .ainav2-searchwrap:focus-within {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--accent-soft), var(--e1);
 }
-.ainav2 .ainav2-searchwrap > svg {
-    position: absolute;
-    left: 14px;
-    width: 14px;
-    height: 14px;
-    color: var(--ink-3);
-    pointer-events: none;
+.ainav2 .ainav2-sico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    transition: background .16s ease, color .16s ease;
+}
+.ainav2 .ainav2-sico svg {
+    width: 18px;
+    height: 18px;
+}
+.ainav2 .ainav2-searchwrap:focus-within .ainav2-sico {
+    background: var(--accent);
+    color: #fff;
 }
 .ainav2 #ainav2-q {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     height: 100%;
     font: inherit;
-    font-size: 15px;
-    padding: 8px 26px 8px 24px;
+    font-size: 15.5px;
+    font-weight: 500;
+    padding: 0 22px 0 0;
     border: 0;
     background: none;
     color: var(--ink);
 }
 .ainav2 #ainav2-q::placeholder {
-    color: var(--ink-3);
+    color: var(--ink-2);
+    font-weight: 500;
 }
 .ainav2 #ainav2-q:focus {
     outline: none;
+}
+.ainav2 #ainav2-q::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+.ainav2 .ainav2-skbd {
+    flex: none;
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    background: var(--surface);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-3);
+    box-shadow: none;
+}
+.ainav2 #ainav2-q:focus ~ .ainav2-skbd,
+.ainav2 #ainav2-q:not(:placeholder-shown) ~ .ainav2-skbd {
+    display: none;
 }
 .ainav2 .ainav2-clearq {
     position: absolute;
@@ -946,9 +990,11 @@
         gap: 10px;
     }
     .ainav2 .ainav2-brandrow,
-    .ainav2 .ainav2-creditbox,
-    .ainav2 .ainav2-searchwrap {
+    .ainav2 .ainav2-creditbox {
         min-height: 52px;
+    }
+    .ainav2 .ainav2-searchwrap {
+        height: 52px;
     }
 }
 
@@ -2876,6 +2922,10 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
+    position: relative;
+    /* Themes give every <label> a bottom margin, which lifted this switch above the footer line. */
+    margin: 0;
+    line-height: 1.3;
     cursor: pointer;
     user-select: none;
     font-size: 13.5px;
@@ -6651,5 +6701,347 @@ html.ainav2-fx-lock body {
     .ainav2 .ainav2-fx-shotbtn img {
         transition: none;
         transform: none;
+    }
+}
+
+/* Free video tutorials tile, between search and the Plugin Finder (2.7.4). */
+.ainav2 .ainav2-ytbtn {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 96px;
+    min-height: 58px;
+    padding: 6px 6px 5px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    box-shadow: var(--e1);
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.15;
+    text-decoration: none;
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.ainav2 .ainav2-ytbtn:hover,
+.ainav2 .ainav2-ytbtn:focus {
+    color: var(--ink);
+    text-decoration: none;
+    border-color: color-mix(in srgb, #ff0000 40%, var(--line));
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px -10px rgba(255, 0, 0, .45);
+}
+.ainav2 .ainav2-ytbtn:focus-visible {
+    outline: 3px solid color-mix(in srgb, #ff0000 30%, transparent);
+    outline-offset: 2px;
+}
+.ainav2 .ainav2-ytbtn-ic svg {
+    display: block;
+    width: 28px;
+    height: 20px;
+}
+.ainav2 .ainav2-ytbtn-txt {
+    display: flex;
+    flex-direction: column;
+}
+.ainav2 .ainav2-ytbtn-txt strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+.ainav2 .ainav2-ytbtn-txt span {
+    font-size: 11.5px;
+    color: var(--ink-3);
+}
+.ainav2 .ainav2-headtools.ainav2-hasfinder > .ainav2-searchwrap {
+    flex-basis: 40%;
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        width: auto;
+        min-height: 46px;
+        flex-direction: row;
+        gap: 10px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn-txt {
+        flex-direction: row;
+        gap: 6px;
+    }
+}
+@media (max-width: 860px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        width: 96px;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn-txt {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+/* Header tools keep a single, compact row height and sit centred in the header (2.7.4). */
+.ainav2 .ainav2-headtools {
+    align-self: center;
+    align-items: center;
+}
+.ainav2 .ainav2-headtools .ainav2-fxbtn {
+    min-height: 58px;
+    height: 58px;
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        align-items: stretch;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-searchwrap,
+    .ainav2 .ainav2-headtools .ainav2-fxbtn {
+        height: 48px;
+        min-height: 48px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-sico {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+.ainav2 .ainav2-family[hidden] {
+    display: none;
+}
+
+/* Header: the tools column needs more room than the brand card, and gets its own row on medium screens (2.7.4). */
+.ainav2 .ainav2-bhead {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1.55fr);
+}
+.ainav2 .ainav2-headtools.ainav2-hasfinder > .ainav2-searchwrap {
+    flex: 1 1 auto;
+    min-width: 190px;
+}
+.ainav2 .ainav2-headtools .ainav2-fxslot,
+.ainav2 .ainav2-headtools .ainav2-ytbtn {
+    flex: none;
+}
+.ainav2 .ainav2-headtools .ainav2-fxbtn,
+.ainav2 .ainav2-topup {
+    white-space: nowrap;
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-bhead {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .ainav2 .ainav2-bhead > .ainav2-headtools {
+        grid-column: 1 / -1;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+@media (max-width: 860px) {
+    .ainav2 .ainav2-bhead {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Wide header: every card in the top bar is the same height (2.7.4). */
+@media (min-width: 1181px) {
+    .ainav2 .ainav2-headtools,
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        align-self: stretch;
+        align-items: stretch;
+    }
+    .ainav2 .ainav2-headtools .ainav2-searchwrap,
+    .ainav2 .ainav2-headtools .ainav2-fxslot,
+    .ainav2 .ainav2-headtools .ainav2-fxbtn,
+    .ainav2 .ainav2-headtools .ainav2-ytbtn {
+        height: auto;
+        min-height: 0;
+    }
+    .ainav2 .ainav2-headtools .ainav2-fxslot {
+        display: flex;
+    }
+    .ainav2 .ainav2-headtools .ainav2-fxslot > .ainav2-fxbtn {
+        flex: 1 1 auto;
+    }
+    .ainav2 .ainav2-headtools .ainav2-ytbtn {
+        justify-content: center;
+    }
+}
+
+/* Free video tutorials: a square tile styled like a video thumbnail (2.7.4). */
+.ainav2 .ainav2-headtools .ainav2-ytbtn {
+    position: relative;
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    aspect-ratio: 1 / 1;
+    width: auto;
+    padding: 10px 8px;
+    overflow: hidden;
+    border: 1px solid #f3c7cc;
+    border-radius: 12px;
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(255, 0, 51, .10), rgba(255, 0, 51, 0) 60%),
+        linear-gradient(180deg, #fff, #fff6f7);
+    color: var(--ink);
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, .05);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn:hover,
+.ainav2 .ainav2-headtools .ainav2-ytbtn:focus-visible {
+    transform: translateY(-2px);
+    border-color: #ff8a9a;
+    box-shadow: 0 8px 20px -8px rgba(225, 0, 45, .45);
+    color: var(--ink);
+    text-decoration: none;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn:focus-visible {
+    outline: 2px solid #ff0033;
+    outline-offset: 2px;
+}
+.ainav2 .ainav2-ytbtn-play {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #ff2a4f, #e0002b);
+    box-shadow: 0 4px 10px -3px rgba(224, 0, 43, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
+    transition: transform .15s ease;
+}
+.ainav2 .ainav2-ytbtn-play svg {
+    width: 22px;
+    height: 22px;
+}
+.ainav2 .ainav2-ytbtn:hover .ainav2-ytbtn-play {
+    transform: scale(1.08);
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.15;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-txt strong {
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-txt span {
+    font-size: 11px;
+    color: var(--ink-3);
+    white-space: nowrap;
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder {
+        align-items: stretch;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        flex-direction: column;
+        gap: 6px;
+        width: 104px;
+        height: 104px;
+        min-height: 0;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn-txt {
+        flex-direction: column;
+        gap: 1px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-searchwrap,
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-fxslot,
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-fxbtn {
+        height: auto;
+        min-height: 0;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-fxslot {
+        display: flex;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-fxslot > .ainav2-fxbtn {
+        flex: 1 1 auto;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ainav2 .ainav2-headtools .ainav2-ytbtn,
+    .ainav2 .ainav2-ytbtn-play {
+        transition: none;
+    }
+    .ainav2 .ainav2-headtools .ainav2-ytbtn:hover {
+        transform: none;
+    }
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        padding: 18px 6px 6px;
+    }
+    }
+
+/* Video tutorials tile with live YouTube channel numbers (2.7.4). */
+.ainav2 .ainav2-headtools .ainav2-ytbtn {
+    gap: 7px;
+    padding: 10px 6px;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-txt strong {
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-txt .ainav2-ytbtn-stat {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        width: 112px;
+        height: 112px;
+        padding: 8px 4px;
+        gap: 5px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn-play {
+        width: 38px;
+        height: 26px;
+        border-radius: 8px;
+    }
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn-play svg {
+        width: 18px;
+        height: 18px;
+    }
+    .ainav2 .ainav2-headtools .ainav2-ytbtn-txt strong {
+        font-size: 12px;
+        margin-bottom: 1px;
+    }
+    .ainav2 .ainav2-headtools .ainav2-ytbtn-txt .ainav2-ytbtn-stat {
+        font-size: 10.5px;
+    }
+}
+
+/* "Playlists for each plugin" line on the Video tutorials tile (2.7.4). */
+.ainav2 .ainav2-headtools .ainav2-ytbtn {
+    gap: 5px;
+}
+.ainav2 .ainav2-ytbtn-pl {
+    display: block;
+    max-width: 100%;
+    margin-top: 1px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(224, 0, 43, .08);
+    color: #c8102e;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+.ainav2 .ainav2-headtools .ainav2-ytbtn-play {
+    flex: none;
+}
+@media (max-width: 1180px) {
+    .ainav2 .ainav2-headtools.ainav2-hasfinder .ainav2-ytbtn {
+        width: 132px;
+        height: 132px;
+        gap: 4px;
     }
 }

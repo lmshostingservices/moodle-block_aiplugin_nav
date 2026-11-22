@@ -59,6 +59,7 @@ class provider implements
         'block_aiplugin_nav_faves',
         'block_aiplugin_nav_layout',
         'block_aiplugin_nav_help',
+        'block_aiplugin_nav_family',
         'block_aiplugin_nav_spend',
         'block_aiplugin_nav_dismissed',
         'block_aiplugin_nav_spotlight',
@@ -164,6 +165,10 @@ class provider implements
         $collection->add_user_preference(
             'block_aiplugin_nav_help',
             'privacy:metadata:preference:block_aiplugin_nav_help'
+        );
+        $collection->add_user_preference(
+            'block_aiplugin_nav_family',
+            'privacy:metadata:preference:block_aiplugin_nav_family'
         );
         $collection->add_user_preference(
             'block_aiplugin_nav_spend',

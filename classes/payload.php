@@ -343,6 +343,8 @@ class block_aiplugin_nav_payload {
             'custom'     => self::build_custom_links($block),
             'customreports' => self::build_custom_reports($block),
             'products'   => self::build_products(),
+            // Free video tutorials sit in the header, between search and the Plugin Finder.
+            'tutorials'  => self::build_tutorials(),
             'spotlight'  => $canspotlight ? self::build_spotlight($plugins, $block->page->get_renderer('core')) : null,
             // The Plugin Finder: same audience as the spotlight, with its own site switch.
             'finder'     => self::build_finder($canspotlight || $cancredits),
@@ -364,6 +366,7 @@ class block_aiplugin_nav_payload {
                 'faves'  => json_decode(get_user_preferences('block_aiplugin_nav_faves', '[]'), true) ?: [],
                 'layout' => json_decode(get_user_preferences('block_aiplugin_nav_layout', '{}'), true) ?: new stdClass(),
                 'help'   => get_user_preferences('block_aiplugin_nav_help', self::help_default()),
+                'family' => (string) (int) get_user_preferences('block_aiplugin_nav_family', 0),
                 'spend'  => json_decode(get_user_preferences('block_aiplugin_nav_spend', '[]'), true) ?: [],
             ],
             'counts'     => [
@@ -1392,6 +1395,61 @@ class block_aiplugin_nav_payload {
         return get_config('block_aiplugin_nav', 'helptips_default') ? '1' : '0';
     }
 
+
+    /**
+     * The "Video tutorials" header tile, with the YouTube channel's statistics.
+     *
+     * @return array
+     */
+    private static function build_tutorials(): array {
+        $stats = \block_aiplugin_nav\local\live_feed::youtube();
+        $a = (object) [
+            'videos'      => self::compact_number($stats['videos']),
+            'subscribers' => self::compact_number($stats['subscribers']),
+            'views'       => self::compact_number($stats['views']),
+        ];
+        $exact = (object) [
+            'videos'      => format_float($stats['videos'], 0, true),
+            'subscribers' => format_float($stats['subscribers'], 0, true),
+            'views'       => format_float($stats['views'], 0, true),
+        ];
+        return [
+            'url'         => 'https://www.youtube.com/@LMSHostingServices/playlists',
+            'videos'      => get_string('tutorials_videos', 'block_aiplugin_nav', $a->videos),
+            'subscribers' => get_string('tutorials_subscribers', 'block_aiplugin_nav', $a->subscribers),
+            'views'       => get_string('tutorials_views', 'block_aiplugin_nav', $a->views),
+            'playlists'   => get_string('tutorials_playlists', 'block_aiplugin_nav'),
+            'title'       => get_string('tutorials_title', 'block_aiplugin_nav', $exact),
+        ];
+    }
+
+    /**
+     * A short count for a small tile: 950, 4.1K, 891K, 1.2M.
+     *
+     * @param int $n
+     * @return string
+     */
+    public static function compact_number(int $n): string {
+        if ($n < 1000) {
+            return (string) $n;
+        }
+        foreach ([1000000000 => 'B', 1000000 => 'M', 1000 => 'K'] as $size => $suffix) {
+            if ($n >= $size) {
+                $value = $n / $size;
+                $decimals = $value < 10 ? 1 : 0;
+                $text = format_float($value, $decimals, true);
+                // 999.6K reads better as 1M.
+                if ($suffix === 'K' && round($value, $decimals) >= 1000) {
+                    return '1M';
+                }
+                if ($suffix === 'M' && round($value, $decimals) >= 1000) {
+                    return '1B';
+                }
+                return preg_replace('/[.,]0$/', '', $text) . $suffix;
+            }
+        }
+        return (string) $n;
+    }
     /**
      * Build the LMS Labs product links shown on the home view.
      *
@@ -1477,7 +1535,7 @@ class block_aiplugin_nav_payload {
                 'kind'   => 'Video',
                 'desc'   => 'Turns a unit of competency, policy or procedure into a finished, narrated training video. '
                     . 'No filming, editing or voice talent.',
-                'price'  => '$8.75 USD per finished minute · Drafts free',
+                'price'  => '$5 USD per finished minute · Drafts free',
                 'colour' => '#E11D48',
                 // Generic film-and-play mark.
                 'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
@@ -1533,19 +1591,6 @@ class block_aiplugin_nav_payload {
                     . '</svg>',
             ],
             [
-                'name'   => 'Free Video Tutorials',
-                'url'    => 'https://www.youtube.com/@LMSHostingServices/playlists',
-                'kind'   => 'Tutorials',
-                'desc'   => 'Learn how to use our plugins. Short walkthrough videos covering setup and everyday use.',
-                'price'  => 'Free',
-                'colour' => '#DC2626',
-                // Generic play mark rather than a third-party wordmark.
-                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
-                    . '<rect width="32" height="32" rx="8" fill="#DC2626"/>'
-                    . '<path d="M13 11.2l8 4.8-8 4.8V11.2z" fill="white"/>'
-                    . '</svg>',
-            ],
-            [
                 'name'   => 'Membership Portal',
                 'url'    => 'https://www.lmshostingservices.com/membership-portal',
                 'kind'   => 'Members',
@@ -1583,6 +1628,7 @@ class block_aiplugin_nav_payload {
             'credits'    => [2, 4],
             'search'     => [1, 2],
             'finder'     => [2, 3],
+            'tutorials'  => [1, 2],
             'plugins'    => [2, 3],
             'settings'   => [1, 2],
             'manage'     => [1, 2],
