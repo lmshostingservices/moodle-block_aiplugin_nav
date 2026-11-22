@@ -1472,6 +1472,67 @@ class block_aiplugin_nav_payload {
                     . '</svg>',
             ],
             [
+                'name'   => 'Training Video Studio',
+                'url'    => 'https://training-video-studio.com',
+                'kind'   => 'Video',
+                'desc'   => 'Turns a unit of competency, policy or procedure into a finished, narrated training video. '
+                    . 'No filming, editing or voice talent.',
+                'price'  => '$8.75 USD per finished minute · Drafts free',
+                'colour' => '#E11D48',
+                // Generic film-and-play mark.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#E11D48"/>'
+                    . '<rect x="7" y="9" width="18" height="14" rx="3" stroke="white" stroke-width="2"/>'
+                    . '<path d="M14 13l5 3-5 3v-6z" fill="white"/>'
+                    . '</svg>',
+            ],
+            [
+                'name'   => 'Text 2 Scorm',
+                'url'    => 'https://text2scorm.com',
+                'kind'   => 'SCORM',
+                'desc'   => 'Paste any text and get a narrated, interactive SCORM lesson with pictures and check questions, '
+                    . 'ready for Moodle™.',
+                'price'  => 'Try it free · All 8 formats',
+                'colour' => '#4338CA',
+                // Generic text-to-lesson mark.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#4338CA"/>'
+                    . '<path d="M8 10h9M8 14h7M8 18h9" stroke="white" stroke-width="2" stroke-linecap="round"/>'
+                    . '<path d="M19 17l6 4-6 4v-8z" fill="#FBBF24"/>'
+                    . '</svg>',
+            ],
+            [
+                'name'   => 'Silica Training',
+                'url'    => 'https://silicatraining.app',
+                'kind'   => 'WHS',
+                'desc'   => 'Silica safety learning for workers and supervisors, with every slide, attempt and practical '
+                    . 'in one record for your RTO.',
+                'price'  => '$50 + GST per learner, per unit',
+                'colour' => '#D97706',
+                // Generic hard-hat mark.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#D97706"/>'
+                    . '<path d="M8 20a8 8 0 0 1 16 0" fill="white"/>'
+                    . '<rect x="6.5" y="20" width="19" height="3" rx="1.5" fill="white"/>'
+                    . '<path d="M16 12v-2" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>'
+                    . '</svg>',
+            ],
+            [
+                'name'   => 'Virtual Meeting',
+                'url'    => 'https://virtual-meeting.app',
+                'kind'   => 'Meetings',
+                'desc'   => 'Browser video meetings with live translated captions, boards, polls, Q&A and AI summaries. '
+                    . 'Nothing to install.',
+                'price'  => '$0.05 USD per attendee-hour · 6 free hours',
+                'colour' => '#4F46E5',
+                // Generic video-call mark.
+                'logo'   => '<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                    . '<rect width="32" height="32" rx="8" fill="#4F46E5"/>'
+                    . '<rect x="6" y="11" width="14" height="10" rx="2.5" fill="white"/>'
+                    . '<path d="M21 14.5l5-3v9l-5-3v-3z" fill="white"/>'
+                    . '</svg>',
+            ],
+            [
                 'name'   => 'Free Video Tutorials',
                 'url'    => 'https://www.youtube.com/@LMSHostingServices/playlists',
                 'kind'   => 'Tutorials',

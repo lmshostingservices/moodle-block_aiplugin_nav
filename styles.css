@@ -5633,6 +5633,14 @@
 }
 
 /* ---------- Finder overlay ---------- */
+/* While the finder is open, the block's toast ("Request copied") shows above it. */
+html.ainav2-fx-lock .ainav2 .ainav2-toast {
+    position: fixed;
+    bottom: 34px;
+    z-index: 1047;
+    font-size: 15px;
+    padding: 12px 18px;
+}
 html.ainav2-fx-lock,
 html.ainav2-fx-lock body {
     overflow: hidden;

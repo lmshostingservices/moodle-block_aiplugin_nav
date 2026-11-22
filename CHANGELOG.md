@@ -2,7 +2,15 @@
 
 All notable changes to this plugin will be documented in this file.
 
+## [2.7.2] - 2026-11-22
+
+### Added
+- Four web apps in "Our software": Training Video Studio, Text 2 Scorm, Silica Training and Virtual Meeting, each with a short description, price and link.
+
 ## [2.7.1] - 2026-11-21
+
+### Fixed
+- The "Request copied" message after "Ask my admin" was hidden behind the Plugin Finder. It now shows above it.
 
 ### Removed
 - The "YouTube playlist links" setting. Every plugin's playlist link is built in, so there is nothing for admins to enter.
