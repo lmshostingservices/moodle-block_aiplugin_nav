@@ -37,7 +37,7 @@
       "type": "Course format",
       "accent": "#8b5cf6",
       "accent2": "#3b82f6",
-      "description": "Visual Moodle course format with configurable banners, section and activity cards, branded course-player navigation, estimated timings, accessible completion details, guided tours, and an optional context-aware AI Tutor with capability-gated reporting.",
+      "description": "Visual Moodle course format built on the Moodle Design System, with configurable banners, section and activity cards, branded course-player navigation, estimated timings, accessible completion details, guided tours, and an optional context-aware AI Tutor with capability-gated reporting. Responsible AI features support the EU AI Act, and the tutor and images can run on LMS Labs credits, Moodle AI or your own key.",
       "features": [
         "Section and activity cards",
         "Branded course navigation",
@@ -2322,6 +2322,62 @@
       "image": "https://lms-labs.com/spotlight/local_clientportal.jpg",
       "spotlightEligible": true,
       "order": 83,
+      "status": "ready",
+      "hidden": false
+    },
+    {
+      "component": "mod_coursekit",
+      "name": "Course Kit",
+      "subtitle": "",
+      "category": "content",
+      "type": "Activity",
+      "accent": "#334155",
+      "accent2": "#64748b",
+      "description": "Create Moodle course lesson drafts as accessible HTML from a teacher's prompt.",
+      "features": [
+        "Course Kit",
+        "mod",
+        "Install: /mod/coursekit/",
+        "Moodle™ 4.5 to 5.3."
+      ],
+      "stat": {
+        "value": "",
+        "label": ""
+      },
+      "docs": "https://lms-labs.com/docs/course-kit",
+      "usage": "",
+      "includes": "",
+      "image": "https://lms-labs.com/spotlight/mod_coursekit.jpg",
+      "spotlightEligible": true,
+      "order": 84,
+      "status": "ready",
+      "hidden": false
+    },
+    {
+      "component": "local_sellcourses",
+      "name": "Sell Courses for Moodle™",
+      "subtitle": "",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#334155",
+      "accent2": "#64748b",
+      "description": "Sell face-to-face and blended training from Moodle™ with shared seats, one checkout, card or invoice payment, quotes, waitlists, tax invoices and optional Xero sync.",
+      "features": [
+        "Sell Courses for Moodle™",
+        "local",
+        "Install: /local/sellcourses/",
+        "Moodle™ 4.5 LTS to 5.3 (requires 2024100700; supported [405, 503])."
+      ],
+      "stat": {
+        "value": "",
+        "label": ""
+      },
+      "docs": "https://lms-labs.com/docs/sell-courses",
+      "usage": "",
+      "includes": "",
+      "image": "https://lms-labs.com/spotlight/local_sellcourses.jpg",
+      "spotlightEligible": true,
+      "order": 85,
       "status": "ready",
       "hidden": false
     }
