@@ -2380,6 +2380,34 @@
       "order": 85,
       "status": "ready",
       "hidden": false
+    },
+    {
+      "component": "enrol_sellcourses",
+      "name": "Sell Courses enrolment",
+      "subtitle": "",
+      "category": "training",
+      "type": "Admin tool",
+      "accent": "#334155",
+      "accent2": "#64748b",
+      "description": "The enrolment method for Sell Courses. Enrols named attendees in the Moodle courses they booked and updates enrolments when a seat is cancelled or moved.",
+      "features": [
+        "Sell Courses enrolment",
+        "enrol",
+        "Install: /enrol/sellcourses/",
+        "Moodle™ 4.5 LTS to 5.3 (requires 2024100700; supported [405, 503])."
+      ],
+      "stat": {
+        "value": "",
+        "label": ""
+      },
+      "docs": "https://lms-labs.com/docs/sell-courses",
+      "usage": "",
+      "includes": "",
+      "image": "https://lms-labs.com/spotlight/enrol_sellcourses.jpg",
+      "spotlightEligible": true,
+      "order": 86,
+      "status": "ready",
+      "hidden": false
     }
   ]
 }
